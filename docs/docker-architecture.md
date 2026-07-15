@@ -83,3 +83,25 @@ LOG_DIR=/volume1/docker/einstein/logs/service
 
 MEM_LIMIT=512m
 CPU_SHARES=256
+
+<!-- BEGIN SPRINT_2_VALIDATION -->
+## Validation du socle
+
+Le service `compose/smoke-test/` a validé l’architecture Docker sur le DS918+ :
+
+- image versionnée ;
+- Docker Compose ;
+- exécution non-root ;
+- racine en lecture seule ;
+- volume persistant ;
+- healthcheck ;
+- limite mémoire ;
+- pondération CPU compatible DSM ;
+- journalisation avec rotation ;
+- port publié uniquement sur `127.0.0.1` ;
+- redémarrage ;
+- sauvegarde avec manifeste et SHA-256.
+
+La clôture complète est documentée dans
+[Sprint 2 — Socle Docker reproductible](sprints/sprint-2-socle-docker.md).
+<!-- END SPRINT_2_VALIDATION -->
