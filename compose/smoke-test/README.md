@@ -12,7 +12,7 @@ Ce service valide le socle Docker d'Einstein.
 - système de fichiers du conteneur en lecture seule ;
 - suppression des capacités Linux ;
 - healthcheck HTTP ;
-- limites CPU et mémoire ;
+- limite mémoire et pondération CPU ;
 - rotation des journaux.
 
 ## Accès

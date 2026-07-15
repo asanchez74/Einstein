@@ -19,7 +19,7 @@ services:
       - "${LOG_DIR:?Définir LOG_DIR dans le fichier .env}:/logs"
 
     mem_limit: ${MEM_LIMIT:-512m}
-    cpus: ${CPU_LIMIT:-1.0}
+    cpu_shares: ${CPU_SHARES:-256}
 
     security_opt:
       - no-new-privileges:true

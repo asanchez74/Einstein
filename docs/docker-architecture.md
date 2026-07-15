@@ -82,4 +82,4 @@ DATA_DIR=/volume1/docker/einstein/data/service
 LOG_DIR=/volume1/docker/einstein/logs/service
 
 MEM_LIMIT=512m
-CPU_LIMIT=1.0
+CPU_SHARES=256

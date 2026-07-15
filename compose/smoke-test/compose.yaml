@@ -30,7 +30,7 @@ services:
       - "${DATA_DIR:?Définir DATA_DIR dans .env}:/data"
 
     mem_limit: 64m
-    cpus: 0.25
+    cpu_shares: 256
 
     security_opt:
       - no-new-privileges:true
