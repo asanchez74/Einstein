@@ -1,0 +1,66 @@
+name: einstein-smoke-test
+
+services:
+  web:
+    image: busybox:1.37.0
+
+    container_name: einstein-smoke-test
+
+    command:
+      - /bin/sh
+      - -c
+      - |
+        date > /data/started-at.txt
+        exec httpd -f -p 8080 -h /www
+
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 10s
+
+    user: "1026:100"
+
+    environment:
+      TZ: Europe/Zurich
+
+    ports:
+      - "127.0.0.1:${HOST_PORT:-18080}:8080"
+
+    volumes:
+      - "./www:/www:ro"
+      - "${DATA_DIR:?Définir DATA_DIR dans .env}:/data"
+
+    mem_limit: 64m
+    cpus: 0.25
+
+    security_opt:
+      - no-new-privileges:true
+
+    cap_drop:
+      - ALL
+
+    read_only: true
+
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -q -O - http://127.0.0.1:8080/ | grep -q "Einstein smoke test"
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+    logging:
+      driver: local
+      options:
+        max-size: 10m
+        max-file: "3"
+
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
