@@ -122,3 +122,44 @@ d'autres applications du NAS.
 cd ~/Development/Einstein
 ./scripts/docker-doctor.sh
 ```
+
+## Scripts standardisés
+
+Les stacks Einstein sont administrées depuis la racine du dépôt :
+
+```bash
+./scripts/stack-up.sh <service>
+./scripts/stack-down.sh <service>
+./scripts/stack-status.sh <service>
+./scripts/stack-logs.sh <service>
+./scripts/backup-stack.sh <service>
+```
+
+Exemple :
+
+```bash
+./scripts/stack-status.sh smoke-test
+./scripts/stack-logs.sh smoke-test --tail 50
+```
+
+Sans option supplémentaire, `stack-logs.sh` affiche les 200 dernières lignes
+puis suit les nouveaux journaux.
+
+Le script de sauvegarde :
+
+1. vérifie le service et son fichier `.env` ;
+2. arrête temporairement les conteneurs actifs ;
+3. archive le répertoire défini par `DATA_DIR` ;
+4. calcule une empreinte SHA-256 ;
+5. crée un manifeste avec le commit Git ;
+6. redémarre la stack si elle fonctionnait avant la sauvegarde.
+
+Les archives sont placées dans :
+
+```text
+/volume1/docker/einstein/backups/<service>/
+```
+
+La variable `DATA_DIR` couvre le stockage principal du service. Tout service
+possédant plusieurs emplacements persistants doit documenter et étendre sa
+procédure de sauvegarde.
