@@ -1,0 +1,6 @@
+.env
+**/.env
+site/
+.DS_Store
+*.pem
+*.key

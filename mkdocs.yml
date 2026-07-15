@@ -9,8 +9,12 @@ theme:
 nav:
   - Accueil: index.md
   - Infrastructure: infrastructure.md
+  - Architecture Docker: docker-architecture.md
+  - Exploitation Docker: docker-operations.md
   - Réseau:
       - OpenVPN: network-openvpn.md
   - Roadmap: roadmap.md
   - Décisions d'architecture:
       - ADR-0001: adr/0001-architecture.md
+      - ADR-0002: adr/0002-separation-code-donnees.md
+      - ADR-0003: adr/0003-gestion-docker-compose.md

@@ -1,0 +1,58 @@
+name: ${COMPOSE_PROJECT_NAME:-einstein-service}
+
+services:
+  app:
+    image: ${IMAGE:?Définir IMAGE dans le fichier .env}
+
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+
+    environment:
+      TZ: ${TZ:-Europe/Zurich}
+
+    ports:
+      - "127.0.0.1:${HOST_PORT:-18080}:${CONTAINER_PORT:-8080}"
+
+    volumes:
+      - "${DATA_DIR:?Définir DATA_DIR dans le fichier .env}:/data"
+      - "${LOG_DIR:?Définir LOG_DIR dans le fichier .env}:/logs"
+
+    mem_limit: ${MEM_LIMIT:-512m}
+    cpus: ${CPU_LIMIT:-1.0}
+
+    security_opt:
+      - no-new-privileges:true
+
+    cap_drop:
+      - ALL
+
+    read_only: true
+
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+
+    # À adapter aux outils disponibles dans l'image.
+    #
+    # healthcheck:
+    #   test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/health"]
+    #   interval: 30s
+    #   timeout: 5s
+    #   retries: 3
+    #   start_period: 20s
+
+    # Le NAS utilise actuellement le pilote Synology "db".
+    # Un pilote rotatif sera choisi après validation sur le NAS.
+    #
+    # logging:
+    #   driver: local
+    #   options:
+    #     max-size: "10m"
+    #     max-file: "3"
+
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
