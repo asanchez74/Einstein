@@ -1,0 +1,14 @@
+site_name: Einstein
+site_description: Plateforme personnelle d'intelligence artificielle
+site_author: Antonio Sanchez
+
+theme:
+  name: material
+  language: fr
+
+nav:
+  - Accueil: index.md
+  - Infrastructure: infrastructure.md
+  - Roadmap: roadmap.md
+  - Décisions d'architecture:
+      - ADR-0001: adr/0001-architecture.md
