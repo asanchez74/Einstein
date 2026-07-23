@@ -125,6 +125,8 @@ cd ~/Development/Einstein
 
 ## Scripts standardisés
 
+`stack-up.sh` distingue les images externes des images construites localement. Il télécharge les images non constructibles avec `pull --ignore-buildable`, puis exécute `up --build` afin de reconstruire les services possédant un `Dockerfile`.
+
 Les stacks Einstein sont administrées depuis la racine du dépôt :
 
 ```bash

@@ -10,10 +10,10 @@ printf '\n=== VALIDATION ===\n'
 compose config >/dev/null
 
 printf '\n=== IMAGES ===\n'
-compose pull
+compose pull --ignore-buildable
 
 printf '\n=== DEMARRAGE ===\n'
-compose up -d --remove-orphans
+compose up -d --build --remove-orphans
 
 printf '\n=== ETAT ===\n'
 compose ps
