@@ -32,7 +32,7 @@ forme d'une API légère, modulaire, testée et déployable sur le Synology.
 - [x] construction de l'image sur le NAS ;
 - [x] healthcheck Docker validé ;
 - [x] accès local sur `127.0.0.1` validé ;
-- [ ] intégration au reverse proxy Synology ;
+- [x] intégration au reverse proxy Synology ;
 - [ ] documentation opérationnelle finalisée.
 
 ## Contraintes

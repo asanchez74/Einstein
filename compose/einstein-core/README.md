@@ -21,3 +21,12 @@ cd ~/Development/Einstein
 ```
 
 Le service écoute uniquement sur `127.0.0.1:18081`.
+
+## Accès sécurisé
+
+- API : `https://einstein.chantevigne.com`
+- Documentation OpenAPI : `https://einstein.chantevigne.com/docs`
+- Reverse proxy : Synology DSM vers `127.0.0.1:18081`
+- Accès autorisé uniquement depuis le réseau OpenVPN `10.8.0.0/24`
+- Accès hors VPN testé et refusé
+
