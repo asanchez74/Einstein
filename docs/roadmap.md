@@ -45,7 +45,7 @@ Ils ne seront ajoutés que lorsqu'un besoin applicatif réel le justifiera.
 
 ## Sprint 3 — Socle applicatif Einstein
 
-**Statut : prochain sprint**
+**Statut : en cours**
 
 Objectifs prévisionnels :
 

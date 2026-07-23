@@ -1,0 +1,10 @@
+.git
+.github
+.venv
+site
+__pycache__
+.pytest_cache
+*.py[cod]
+*.egg-info
+compose/*/.env
+.DS_Store

@@ -1,0 +1,63 @@
+name: einstein-core
+
+services:
+  api:
+    build:
+      context: ../..
+      dockerfile: compose/einstein-core/Dockerfile
+
+    image: einstein-core:0.1.0
+    container_name: einstein-core
+
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+
+    environment:
+      EINSTEIN_ENVIRONMENT: ${EINSTEIN_ENVIRONMENT:-production}
+      EINSTEIN_LOG_LEVEL: ${EINSTEIN_LOG_LEVEL:-INFO}
+
+    ports:
+      - "127.0.0.1:${HOST_PORT:-18081}:8000"
+
+    mem_limit: 256m
+    cpu_shares: 256
+
+    security_opt:
+      - no-new-privileges:true
+
+    cap_drop:
+      - ALL
+
+    read_only: true
+
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - >-
+          import urllib.request;
+          urllib.request.urlopen(
+          'http://127.0.0.1:8000/health/ready',
+          timeout=2)
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+    logging:
+      driver: local
+      options:
+        max-size: 10m
+        max-file: "3"
+
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
