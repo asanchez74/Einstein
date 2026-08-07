@@ -1,0 +1,64 @@
+name: pihole
+
+services:
+  pihole:
+    image: pihole/pihole:2026.07.2
+    container_name: pihole
+    hostname: pihole
+
+    environment:
+      TZ: Europe/Zurich
+
+      # Mot de passe Web fourni par Docker Secret
+      WEBPASSWORD_FILE: pihole_webpasswd
+
+      # Les clients VPN 10.8.0.0/24 doivent également être acceptés.
+      FTLCONF_dns_listeningMode: "ALL"
+
+      # On conserve les DNS actuels comme upstream lors du premier déploiement.
+      FTLCONF_dns_upstreams: "${UPSTREAM_DNS_1};${UPSTREAM_DNS_2}"
+
+      # Split DNS Einstein.
+      FTLCONF_misc_dnsmasq_lines: "address=/einstein.chantevigne.com/10.8.0.1"
+
+      # Pi-hole ne sera pas notre serveur NTP.
+      FTLCONF_ntp_ipv4_active: "false"
+      FTLCONF_ntp_ipv6_active: "false"
+
+    volumes:
+      - /volume1/docker/einstein/data/pihole:/etc/pihole
+
+    secrets:
+      - pihole_webpasswd
+
+    networks:
+      pihole_lan:
+        ipv4_address: "${PIHOLE_IP}"
+
+    mem_limit: 512m
+    cpu_shares: 256
+
+    restart: unless-stopped
+
+    logging:
+      driver: local
+      options:
+        max-size: 10m
+        max-file: "3"
+
+secrets:
+  pihole_webpasswd:
+    file: /volume1/docker/einstein/secrets/pihole_webpasswd.txt
+
+networks:
+  pihole_lan:
+    driver: macvlan
+
+    driver_opts:
+      parent: "${PIHOLE_PARENT}"
+      macvlan_mode: bridge
+
+    ipam:
+      config:
+        - subnet: "${LAN_SUBNET}"
+          gateway: "${LAN_GATEWAY}"
