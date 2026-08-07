@@ -22,6 +22,10 @@ services:
       FTLCONF_dns_hosts: |-
         10.8.0.1 einstein.chantevigne.com
 
+      # Einstein est un nom strictement privé :
+      # aucune requête non résolue localement n'est transmise aux DNS upstream.
+      FTLCONF_misc_dnsmasq_lines: "local=/einstein.chantevigne.com/"
+
       # Pi-hole ne fournit pas le service NTP.
       FTLCONF_ntp_ipv4_active: "false"
       FTLCONF_ntp_ipv6_active: "false"
