@@ -16,7 +16,7 @@ services:
       FTLCONF_dns_listeningMode: "ALL"
 
       # DNS upstream actuels.
-      FTLCONF_dns_upstreams: "${UPSTREAM_DNS_1};${UPSTREAM_DNS_2}"
+      FFTLCONF_dns_upstreams: "${UPSTREAM_DNS}"
 
       # DNS local Einstein.
       FTLCONF_dns_hosts: |-
