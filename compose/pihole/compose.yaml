@@ -20,7 +20,7 @@ services:
 
       # DNS local Einstein.
       FTLCONF_dns_hosts: |-
-        10.8.0.1 einstein.chantevigne.com
+        192.168.1.3 einstein.chantevigne.com
 
       # Einstein est un nom strictement privé :
       # aucune requête non résolue localement n'est transmise aux DNS upstream.
