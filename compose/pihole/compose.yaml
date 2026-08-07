@@ -9,19 +9,20 @@ services:
     environment:
       TZ: Europe/Zurich
 
-      # Mot de passe Web fourni par Docker Secret
+      # Mot de passe Web fourni par Docker Secret.
       WEBPASSWORD_FILE: pihole_webpasswd
 
-      # Les clients VPN 10.8.0.0/24 doivent également être acceptés.
+      # Pi-hole reçoit des requêtes depuis le LAN et le réseau OpenVPN.
       FTLCONF_dns_listeningMode: "ALL"
 
-      # On conserve les DNS actuels comme upstream lors du premier déploiement.
+      # DNS upstream actuels.
       FTLCONF_dns_upstreams: "${UPSTREAM_DNS_1};${UPSTREAM_DNS_2}"
 
-      # Split DNS Einstein.
-      FTLCONF_misc_dnsmasq_lines: "address=/einstein.chantevigne.com/10.8.0.1"
+      # DNS local Einstein.
+      FTLCONF_dns_hosts: |-
+        10.8.0.1 einstein.chantevigne.com
 
-      # Pi-hole ne sera pas notre serveur NTP.
+      # Pi-hole ne fournit pas le service NTP.
       FTLCONF_ntp_ipv4_active: "false"
       FTLCONF_ntp_ipv6_active: "false"
 
@@ -34,6 +35,9 @@ services:
     networks:
       pihole_lan:
         ipv4_address: "${PIHOLE_IP}"
+
+      pihole_vpn:
+        ipv4_address: "${PIHOLE_VPN_IP}"
 
     mem_limit: 512m
     cpu_shares: 256
@@ -62,3 +66,11 @@ networks:
       config:
         - subnet: "${LAN_SUBNET}"
           gateway: "${LAN_GATEWAY}"
+
+  pihole_vpn:
+    driver: bridge
+
+    ipam:
+      config:
+        - subnet: "${PIHOLE_VPN_SUBNET}"
+
