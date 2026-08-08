@@ -75,8 +75,17 @@ trap - EXIT HUP INT TERM
 echo "Synchronisation effectuée: $COUNT hôtes -> $OUTPUT_FILE"
 
 if docker inspect "$CONTAINER" >/dev/null 2>&1; then
-    docker exec "$CONTAINER" \
-        sh -c 'kill -HUP "$(cat /run/pihole-FTL.pid)"'
+    docker exec "$CONTAINER" sh -c '
+        PID="$(cat /run/pihole-FTL.pid)"
 
-    echo "Pi-hole FTL rechargé."
+        # Recharge addn-hosts et vide le cache DNS.
+        kill -HUP "$PID"
+        sleep 1
+
+        # Force FTL à re-résoudre immédiatement les noms des clients.
+        RTMIN="$(pihole-FTL sigrtmin)"
+        kill -$((RTMIN + 4)) "$PID"
+    '
+
+    echo "Pi-hole FTL rechargé et noms clients rafraîchis."
 fi
