@@ -17,17 +17,15 @@ services:
 
       # DNS upstream actuels.
       FTLCONF_dns_upstreams: "${UPSTREAM_DNS}"
-      
-      # Reverse DNS des clients LAN.
-      FTLCONF_dns_revServers: |-
-        true,192.168.1.0/24,192.168.1.1#53,fritz.box
+
       # DNS local Einstein.
       FTLCONF_dns_hosts: |-
         192.168.1.3 einstein.chantevigne.com
 
-      # Einstein est un nom strictement privé :
-      # aucune requête non résolue localement n'est transmise aux DNS upstream.
-      FTLCONF_misc_dnsmasq_lines: "local=/einstein.chantevigne.com/"
+      # Configuration dnsmasq additionnelle.
+      FTLCONF_misc_dnsmasq_lines: |-
+        local=/einstein.chantevigne.com/
+        addn-hosts=/etc/pihole/synology-hosts.list
 
       # Pi-hole ne fournit pas le service NTP.
       FTLCONF_ntp_ipv4_active: "false"
