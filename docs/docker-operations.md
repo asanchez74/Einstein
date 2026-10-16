@@ -134,6 +134,7 @@ Les stacks Einstein sont administrées depuis la racine du dépôt :
 ./scripts/stack-down.sh <service>
 ./scripts/stack-status.sh <service>
 ./scripts/stack-logs.sh <service>
+# Pour une stack persistante avec DATA_DIR configuré :
 ./scripts/backup-stack.sh <service>
 ```
 
@@ -165,3 +166,30 @@ Les archives sont placées dans :
 La variable `DATA_DIR` couvre le stockage principal du service. Tout service
 possédant plusieurs emplacements persistants doit documenter et étendre sa
 procédure de sauvegarde.
+
+## Périmètre de sauvegarde
+
+`backup-stack.sh` archive uniquement le répertoire `DATA_DIR`. Il n'inclut ni
+le `.env`, ni les secrets externes, ni la configuration DSM, ni les autres
+volumes éventuels. `DATA_DIR` doit être un chemin absolu existant, écrit
+explicitement dans le `.env` (sans interpolation de variable).
+
+| Stack | Utilisation du script |
+|---|---|
+| `smoke-test` | `DATA_DIR` est défini dans l'exemple et monté sur `/data` |
+| `pihole` | `DATA_DIR` est défini dans l'exemple et monté sur `/etc/pihole` ; voir la procédure dédiée |
+| `einstein-core` | Sans état, aucun `DATA_DIR` ni sauvegarde de données à effectuer |
+
+Sur le NAS, le script ne relance pas automatiquement ses commandes de fichiers
+avec `sudo` : l'exécuter avec `sudo` si les données appartiennent au conteneur
+ou sont inaccessibles à l'utilisateur. Restreindre les permissions de la
+destination avant la sauvegarde si elle contient des données sensibles.
+
+La sauvegarde arrête temporairement la stack : pour Pi-hole, prévoir une
+interruption DNS. Un piège de sortie tente le redémarrage si la stack était
+active ; vérifier son état après l'opération, y compris après un échec.
+Une stack partiellement active peut être entièrement redémarrée par le script.
+
+Voir [la procédure Pi-hole](pihole-operations.md) pour les éléments à conserver
+séparément et les contrôles de restauration. La présence d'une archive et
+d'une empreinte ne remplace pas un test de restauration.

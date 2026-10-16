@@ -86,7 +86,13 @@ applicatifs sont en JSON ; les logs Uvicorn ne sont pas explicitement
 configurés avec ce formateur. Docker assure une rotation locale de 3 fichiers
 de 10 Mo au maximum chacun.
 
-## Reverse proxy et accès VPN
+## Reverse proxy et accès LAN/VPN
+
+La politique retenue le 16 octobre 2026 autorise le LAN `192.168.1.0/24`
+et OpenVPN `10.8.0.0/24`, sans accès depuis Internet. Les contrôles ont confirmé
+la readiness HTTPS depuis le Mac sur le LAN sans VPN, puis via VPN.
+Le contrôle externe de `/health/ready` a reçu HTTP 403. Voir le
+[suivi du Sprint 3](sprints/sprint-3-socle-applicatif.md).
 
 Configuration cible à vérifier dans DSM :
 
@@ -95,16 +101,16 @@ Configuration cible à vérifier dans DSM :
 | Source | HTTPS, `einstein.chantevigne.com`, port 443 |
 | Destination | HTTP, `127.0.0.1`, port 18081 (ou `HOST_PORT`) |
 | Certificat | Valide pour `einstein.chantevigne.com`, affecté à ce service |
-| Contrôle d'accès | Autoriser `10.8.0.0/24`, refuser les autres sources |
+| Contrôle d'accès | Autoriser `192.168.1.0/24` et `10.8.0.0/24`, refuser les autres sources |
 | DNS | `einstein.chantevigne.com` vers `192.168.1.3`, fourni par Pi-hole |
 
-La restriction VPN est assurée par la configuration DSM et réseau. Le Core
+Le contrôle d’accès LAN/VPN repose sur la configuration DSM et réseau. Le Core
 ne possède actuellement aucune authentification ni restriction par adresse IP.
 Le bind Docker sur `127.0.0.1` protège le port direct, mais ne définit pas la
 politique d'accès au reverse proxy. Vérifier l'adresse source effectivement
 vue par DSM et appliquer le contrôle au service Einstein.
 
-Depuis le Mac connecté au VPN :
+Depuis le Mac sur le LAN sans VPN, puis connecté au VPN :
 
 ```bash
 curl --fail --show-error --connect-timeout 5 --max-time 15 https://einstein.chantevigne.com/health/live
@@ -115,15 +121,22 @@ curl --fail --show-error --connect-timeout 5 --max-time 15 https://einstein.chan
 Ouvrir également `https://einstein.chantevigne.com/docs`. Ne pas désactiver la
 vérification TLS pour valider le certificat.
 
-Rejouer le contrôle hors VPN depuis le LAN, puis depuis une connexion externe :
-aucun endpoint Einstein ne doit être accessible. Noter le résultat exact
-(refus HTTP, refus de connexion ou expiration). Un échec DNS seul ne prouve
-pas que le reverse proxy refuse l'accès ; si le NAS est joignable, vérifier
-également avec `curl --resolve einstein.chantevigne.com:443:192.168.1.3` suivi
-de l'URL HTTPS. Aucun port ne doit être ouvert sur le routeur pour ce test.
+Depuis le LAN sans VPN, la readiness doit répondre `{"status":"ready"}`.
+Si la résolution locale échoue, utiliser `curl --resolve
+einstein.chantevigne.com:443:192.168.1.3` suivi de l'URL HTTPS.
 
-Le projet rapporte des validations VPN et hors VPN antérieures. Cette procédure
-ne constitue pas une nouvelle preuve de validation du NAS.
+Depuis une connexion Internet externe, par exemple un partage mobile avec
+le Wi-Fi domestique et le VPN désactivés, aucun endpoint Einstein ne doit
+être accessible. Noter le résultat exact (refus HTTP, refus de connexion ou
+expiration). Un échec DNS seul ne démontre pas une restriction d'accès :
+contrôler également les éventuelles redirections de ports et règles de proxy
+existantes sur le chemin public. Ne pas utiliser l'adresse privée du NAS
+pour démontrer un refus depuis Internet. Aucun port ne doit être ouvert
+pour effectuer ce contrôle.
+
+Le contrôle externe consigné dans le suivi du Sprint 3 confirme un refus
+HTTP 403 pour `/health/ready` depuis la connexion testée. Rejouer ce contrôle
+après toute modification des règles réseau ou du reverse proxy.
 
 ## Arrêt et redémarrage
 
@@ -154,5 +167,5 @@ l'image, les logs ou les exemples versionnés.
 ## Preuves à consigner pour la clôture
 
 Conserver la date, le commit déployé, l'état healthy, les réponses HTTP locales
-et VPN, les résultats hors VPN, le contrôle des ressources et le résultat du
+LAN et VPN, les résultats depuis Internet, le contrôle des ressources et le résultat du
 redémarrage dans le suivi du Sprint 3. La validation NAS reste à consolider.

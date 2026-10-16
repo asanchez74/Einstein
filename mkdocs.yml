@@ -14,6 +14,7 @@ nav:
   - Einstein Core: einstein-core-operations.md
   - Réseau:
       - OpenVPN: network-openvpn.md
+      - Pi-hole: pihole-operations.md
   - Sprints:
       - Sprint 2 — Socle Docker: sprints/sprint-2-socle-docker.md
       - Sprint 3 — Socle applicatif: sprints/sprint-3-socle-applicatif.md

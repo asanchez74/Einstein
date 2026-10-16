@@ -61,7 +61,7 @@ Ils ne seront ajoutés que lorsqu'un besoin applicatif réel le justifiera.
 - [ ] Finaliser la documentation opérationnelle
 - [ ] Consolider les preuves de validation NAS avec date et commit
 
-Les tests locaux ont été vérifiés le 16 octobre 2026 : 5 tests réussis sous
+Les tests locaux ont été complétés le 16 octobre 2026 : 8 tests réussis sous
 Python 3.14.4. Les validations NAS déjà déclarées n'ont pas été rejouées lors
 de cet audit local. Le sprint reste ouvert ; son état détaillé figure dans
 [Sprint 3 — Socle applicatif](sprints/sprint-3-socle-applicatif.md).
@@ -86,3 +86,8 @@ Le [guide Einstein Core](einstein-core-operations.md) décrit désormais la conf
 les contrôles HTTP, le reverse proxy VPN et les futurs secrets. La clôture
 documentaire reste ouverte jusqu'à la consolidation des validations NAS et
 des autres points d'exploitation identifiés lors de l'audit.
+
+La politique d'accès retenue pour le Core autorise le LAN et le VPN, sans
+accès Internet. La readiness HTTPS est validée sur le LAN et via VPN ; le
+refus HTTP 403 est confirmé pour `/health/ready` depuis la connexion
+Internet externe testée. Le déploiement final reste à valider avant clôture.

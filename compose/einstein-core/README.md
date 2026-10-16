@@ -20,5 +20,5 @@ Le développement local et les tests sont décrits dans le
 
 Par défaut, le port Docker est publié sur `127.0.0.1:18081` du NAS. L'accès
 HTTPS prévu est `https://einstein.chantevigne.com`, via le reverse proxy DSM
-avec restriction au VPN. Le guide distingue les validations antérieures des
+avec accès autorisé depuis le LAN et le VPN, sans accès Internet. Le guide distingue les validations antérieures des
 contrôles restant à consigner pour la clôture du Sprint 3.
