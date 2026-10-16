@@ -47,17 +47,24 @@ Ils ne seront ajoutés que lorsqu'un besoin applicatif réel le justifiera.
 
 **Statut : en cours**
 
-Objectifs prévisionnels :
+État des livrables :
 
-- [ ] Définir l'architecture applicative
-- [ ] Choisir le socle technique de l'API Einstein
-- [ ] Créer un premier service applicatif léger
-- [ ] Mettre en place la configuration par environnement
-- [ ] Définir la gestion des secrets
-- [ ] Ajouter un endpoint de santé
-- [ ] Mettre en place les tests automatisés
-- [ ] Préparer l'accès par le reverse proxy Synology
-- [ ] Documenter les nouvelles décisions d'architecture
+- [x] Définir l'architecture applicative (ADR-0005)
+- [x] Choisir le socle technique de l'API Einstein (Python 3.14 et FastAPI)
+- [x] Créer un premier service applicatif léger
+- [x] Mettre en place la configuration par environnement
+- [ ] Définir la gestion des secrets applicatifs (aucun secret requis actuellement)
+- [x] Ajouter les endpoints de santé et de version
+- [x] Mettre en place les tests automatisés et les valider localement
+- [x] Préparer l'accès par le reverse proxy Synology (validation NAS consignée au Sprint 3)
+- [x] Documenter la décision d'architecture applicative
+- [ ] Finaliser la documentation opérationnelle
+- [ ] Consolider les preuves de validation NAS avec date et commit
+
+Les tests locaux ont été vérifiés le 16 octobre 2026 : 5 tests réussis sous
+Python 3.14.4. Les validations NAS déjà déclarées n'ont pas été rejouées lors
+de cet audit local. Le sprint reste ouvert ; son état détaillé figure dans
+[Sprint 3 — Socle applicatif](sprints/sprint-3-socle-applicatif.md).
 
 ## Étapes ultérieures
 
