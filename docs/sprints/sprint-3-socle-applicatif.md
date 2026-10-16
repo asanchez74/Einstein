@@ -71,3 +71,10 @@ modèle IA n'est encore livrée.
 - système de fichiers en lecture seule ;
 - limite mémoire et pondération CPU compatibles DSM ;
 - aucune base de données sans besoin démontré.
+
+## Guide opérationnel du Core
+
+Le [guide Einstein Core](../einstein-core-operations.md) décrit désormais la configuration, le déploiement,
+les contrôles HTTP, le reverse proxy VPN et les futurs secrets. La clôture
+documentaire reste ouverte jusqu'à la consolidation des validations NAS et
+des autres points d'exploitation identifiés lors de l'audit.

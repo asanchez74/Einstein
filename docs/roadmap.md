@@ -79,3 +79,10 @@ Les étapes suivantes seront planifiées après validation du socle applicatif :
 - automatisation des sauvegardes ;
 - éventuelle base PostgreSQL ;
 - éventuelle base vectorielle, uniquement si le besoin est démontré.
+
+## Guide opérationnel du Core
+
+Le [guide Einstein Core](einstein-core-operations.md) décrit désormais la configuration, le déploiement,
+les contrôles HTTP, le reverse proxy VPN et les futurs secrets. La clôture
+documentaire reste ouverte jusqu'à la consolidation des validations NAS et
+des autres points d'exploitation identifiés lors de l'audit.

@@ -1,6 +1,6 @@
 # Einstein Core
 
-Premier service applicatif de la plateforme Einstein.
+Premier service applicatif de la plateforme Einstein : API FastAPI sans état.
 
 ## Endpoints
 
@@ -9,24 +9,16 @@ Premier service applicatif de la plateforme Einstein.
 - `GET /version`
 - `GET /docs`
 
-## Déploiement sur le NAS
+## Documentation opérationnelle
 
-```bash
-cd ~/Development/Einstein/compose/einstein-core
-cp .env.example .env
-chmod 600 .env
+Voir le [guide d'exploitation](../../docs/einstein-core-operations.md) pour la
+configuration, le déploiement NAS, les contrôles HTTP, le reverse proxy VPN,
+les logs, le redémarrage et le périmètre des données et secrets.
 
-cd ~/Development/Einstein
-./scripts/stack-up.sh einstein-core
-```
+Le développement local et les tests sont décrits dans le
+[README du projet](../../README.md).
 
-Le service écoute uniquement sur `127.0.0.1:18081`.
-
-## Accès sécurisé
-
-- API : `https://einstein.chantevigne.com`
-- Documentation OpenAPI : `https://einstein.chantevigne.com/docs`
-- Reverse proxy : Synology DSM vers `127.0.0.1:18081`
-- Accès autorisé uniquement depuis le réseau OpenVPN `10.8.0.0/24`
-- Accès hors VPN testé et refusé
-
+Par défaut, le port Docker est publié sur `127.0.0.1:18081` du NAS. L'accès
+HTTPS prévu est `https://einstein.chantevigne.com`, via le reverse proxy DSM
+avec restriction au VPN. Le guide distingue les validations antérieures des
+contrôles restant à consigner pour la clôture du Sprint 3.
