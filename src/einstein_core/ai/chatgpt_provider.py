@@ -8,7 +8,9 @@ import httpx2 as httpx
 from openai import APIError, APITimeoutError, AsyncOpenAI
 
 from einstein_core.ai.chatgpt_session import access_token
-from einstein_core.ai.provider import Answer, ProviderError, ProviderTimeout
+from einstein_core.ai.provider import Answer, ProviderError, ProviderQuotaExceeded, ProviderTimeout
+
+USAGE_LIMIT_CODES = {"subscription_sharing_usage_limit_exceeded"}
 
 
 class ChatGPTProvider:
@@ -89,7 +91,11 @@ class ChatGPTProvider:
                     return Answer(text=text, provider="chatgpt", model=model)
         except (TimeoutError, APITimeoutError):
             raise ProviderTimeout("Délai ChatGPT dépassé") from None
-        except (APIError, httpx.HTTPError):
+        except APIError as exc:
+            if getattr(exc, "code", None) in USAGE_LIMIT_CODES:
+                raise ProviderQuotaExceeded("Limite d'usage du forfait ChatGPT atteinte") from None
+            raise ProviderError("Service ChatGPT indisponible") from None
+        except httpx.HTTPError:
             raise ProviderError("Service ChatGPT indisponible") from None
 
     async def close(self) -> None:

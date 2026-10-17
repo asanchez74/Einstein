@@ -19,6 +19,10 @@ class ProviderTimeout(ProviderError):
     """Délai total dépassé."""
 
 
+class ProviderQuotaExceeded(ProviderError):
+    """Limite d'usage du fournisseur atteinte ; réessayer plus tard."""
+
+
 class AnswerProvider(Protocol):
     async def answer(self, *, instructions: str, context: str, question: str) -> Answer: ...
 

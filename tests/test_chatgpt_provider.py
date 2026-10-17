@@ -10,7 +10,7 @@ import pytest
 
 from einstein_core.ai import chatgpt_provider, chatgpt_session
 from einstein_core.ai.chatgpt_login import ISSUER, save_record, read_record
-from einstein_core.ai.provider import ProviderError
+from einstein_core.ai.provider import ProviderError, ProviderQuotaExceeded
 
 
 def completed():
@@ -63,6 +63,16 @@ def test_partial_or_failed_stream_rejected(monkeypatch, ending):
     with pytest.raises(ProviderError) as exc:
         run_stream(monkeypatch, events)
     assert "private" not in str(exc.value)
+
+
+def test_usage_limit_is_distinct_and_private(monkeypatch):
+    with pytest.raises(ProviderQuotaExceeded) as exc:
+        run_stream(monkeypatch, [{"error": {"code": "subscription_sharing_usage_limit_exceeded",
+                                            "type": "invalid_request_error", "message": "private"}}])
+    assert "private" not in str(exc.value)
+    with pytest.raises(ProviderError) as exc:
+        run_stream(monkeypatch, [{"error": {"code": "server_error", "message": "private"}}])
+    assert not isinstance(exc.value, ProviderQuotaExceeded)
 
 
 def test_stream_limit(monkeypatch):

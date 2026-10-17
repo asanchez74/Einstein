@@ -97,7 +97,7 @@ Voir le [bilan du Sprint 4](sprints/sprint-4-inventaire-maison.md).
 - [x] Retirer les copies connues de session après transfert au NAS
 - [x] Documenter la révocation (paramètres ChatGPT, procédure non exécutée)
 - [x] Afficher l'échéance de session sans jeton (`--status`, local, non déployé)
-- [ ] Valider le renouvellement réel sur le NAS
+- [x] Valider le renouvellement réel sur le NAS (rotation observée ; inférence après rotation bloquée par la limite Plus, à reconfirmer)
 - [ ] Documentation et validation NAS
 
 Claude (Anthropic) sera intégré ensuite, sans dépendance ajoutée par anticipation.

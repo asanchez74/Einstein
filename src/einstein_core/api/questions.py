@@ -3,7 +3,7 @@
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 
-from einstein_core.ai.provider import ProviderError, ProviderTimeout
+from einstein_core.ai.provider import ProviderError, ProviderQuotaExceeded, ProviderTimeout
 from einstein_core.maison.questions import ContextTooLarge, QuestionsBusy
 
 router = APIRouter(prefix="/api/v1/maison", tags=["maison"])
@@ -31,6 +31,8 @@ async def ask_question(payload: Question, request: Request) -> QuestionAnswer:
         raise HTTPException(status_code=429, detail="Capacité IA occupée") from None
     except ContextTooLarge:
         raise HTTPException(status_code=503, detail="Catalogue trop volumineux pour l'IA") from None
+    except ProviderQuotaExceeded:
+        raise HTTPException(status_code=429, detail="Limite d'usage du forfait IA atteinte ; réessayer plus tard") from None
     except ProviderTimeout:
         raise HTTPException(status_code=504, detail="Délai du fournisseur IA dépassé") from None
     except ProviderError:

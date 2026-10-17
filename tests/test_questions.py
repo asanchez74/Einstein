@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
 from einstein_core.ai.configuration import configure_provider
-from einstein_core.ai.provider import Answer, ProviderError, ProviderTimeout
+from einstein_core.ai.provider import Answer, ProviderError, ProviderQuotaExceeded, ProviderTimeout
 from einstein_core.config import Settings
 from einstein_core.main import create_app
 from einstein_core.maison.questions import QuestionService, QuestionsBusy
@@ -70,7 +70,8 @@ def test_no_configuration_preserves_local_endpoints(tmp_path, enabled):
         assert client.get("/api/v1/maison/equipements").status_code == 200
 
 
-@pytest.mark.parametrize("error,status", [(ProviderError("secret"), 502), (ProviderTimeout("secret"), 504)])
+@pytest.mark.parametrize("error,status", [(ProviderError("secret"), 502), (ProviderTimeout("secret"), 504),
+                                          (ProviderQuotaExceeded("secret"), 429)])
 def test_provider_errors_are_private_and_slots_released(tmp_path, error, status):
     provider = FakeProvider(error)
     with TestClient(create_app(settings_for(tmp_path, ai_enabled=True), provider=provider)) as client:

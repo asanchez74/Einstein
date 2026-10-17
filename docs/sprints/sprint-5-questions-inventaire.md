@@ -34,6 +34,7 @@ Aucun historique de conversation n'est conservé dans ce sprint.
 | Question invalide | 422, sans appel au fournisseur |
 | IA désactivée ou configuration manquante | 503, message sans secret |
 | Limite de concurrence locale atteinte | 429, sans appel supplémentaire |
+| Limite d'usage du forfait Plus atteinte | 429, message distinct, sans repli par clé API |
 | Fournisseur indisponible, refus ou réponse inexploitable | 502, erreur normalisée |
 | Délai fournisseur dépassé | 504 |
 
@@ -520,3 +521,39 @@ La révocation reste documentée via les paramètres ChatGPT, sans exécution.
 Une commande Einstein de révocation distante n'est pas requise pour clôturer
 ce sprint ; elle est reportée à un besoin ultérieur. La suite locale comporte
 139 tests, sans appel fournisseur. Aucun déploiement n'a été effectué.
+
+## Renouvellement réel validé — 17 octobre 2026
+
+Déploiement du commit `ff2c00c` sur le NAS (image
+`sha256:2eac195116f352497a009ea27366ca8625815f89f10ec144dfb309f69a81ee1d`),
+conteneur `healthy`. Les heures du conteneur sont en UTC.
+
+| Contrôle | Résultat |
+|---|---|
+| `--status` avant échéance | expiration `10:04:05Z`, dernier enregistrement `09:04:05Z`, renouvelable |
+| Contrôle de renouvellement après échéance | « Renouvellement et rotation enregistrés. » |
+| `--status` après contrôle | expiration `11:06:22Z`, dernier enregistrement `10:06:22Z` |
+
+Le refresh token et le jeton d'accès ont changé, l'enregistrement est plus
+récent : le renouvellement réel par le NAS est validé. Le dernier
+enregistrement de `09:04:05Z`, postérieur à l'import, indique qu'un premier
+renouvellement avait déjà eu lieu lors d'une question, sans observation directe.
+
+La question HTTPS suivante n'a pas pu confirmer l'inférence :
+
+- depuis le NAS, HTTP 403 de nginx, comme lors du contrôle précédent ;
+- depuis le Mac sur le LAN, HTTP 502 `Réponse du fournisseur IA indisponible`
+  (10:07:41Z puis 10:09:03Z).
+
+Un diagnostic dans le conteneur, sans affichage de jeton, a obtenu un jeton
+puis reçu dans le flux l'erreur `subscription_sharing_usage_limit_exceeded`
+(`invalid_request_error`) : la limite d'usage partagée du forfait Plus est
+atteinte. Le jeton renouvelé est donc accepté et associé au compte ; seule la
+consommation bloque. Aucun repli par clé API n'a été effectué, conformément
+à l'ADR-0007. Une question HTTPS après réinitialisation de la limite reste
+à consigner.
+
+Correctif local : le code `subscription_sharing_usage_limit_exceeded` produit
+désormais HTTP 429 « Limite d'usage du forfait IA atteinte ; réessayer plus
+tard » au lieu du 502 générique. Les autres erreurs restent en 502, sans
+message distant. 141 tests réussis ; correctif non déployé.
