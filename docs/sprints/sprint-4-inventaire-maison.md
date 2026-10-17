@@ -11,7 +11,7 @@ sans scanner le réseau ni commander les appareils. Premier usage : retrouver
 l'adresse et le rôle du NAS, des routeurs et de Pi-hole depuis une source
 explicite et validée.
 
-## Périmètre proposé
+## Périmètre retenu
 
 Un module Maison dans Einstein Core, avec un catalogue déclaratif JSON chargé
 et validé au démarrage. Aucun nouveau service, aucune base de données et
@@ -20,7 +20,7 @@ aucune dépendance supplémentaire ne sont nécessaires pour ce périmètre.
 Le catalogue contient uniquement des informations descriptives. Il ne
 remplace ni le DHCP Synology ni les entrées DNS Pi-hole et ne les modifie pas.
 
-| Champ | Règle proposée |
+| Champ | Règle |
 |---|---|
 | `id` | Identifiant stable, unique, en minuscules avec tirets |
 | `name` | Nom lisible non vide |
@@ -33,7 +33,7 @@ Synology RT2600ac (`192.168.1.2`) et Pi-hole (`192.168.1.56`). Ne pas inventer
 le rôle précis du RT2600ac dans la topologie : le faire confirmer avant de
 renseigner cette description.
 
-## Contrat HTTP proposé
+## Contrat HTTP
 
 | Route | Résultat |
 |---|---|
@@ -46,15 +46,14 @@ Les routes de santé et de version existantes sont conservées.
 
 ## Source et cycle de vie du catalogue
 
-Proposition : fichier local hors Git sur le NAS, sous
+Fichier local hors Git prévu sur le NAS, sous
 `/volume1/docker/einstein/data/einstein-core/equipements.json`, monté en
-lecture seule. Un exemple sans secret serait versionné pour le développement.
-Le chemin serait configuré par `EINSTEIN_MAISON_INVENTORY_PATH`.
+lecture seule. Un exemple sans secret est versionné pour le développement.
+Le chemin est configuré par `EINSTEIN_MAISON_INVENTORY_PATH`.
 
-Cette proposition fait évoluer le Core sans état : le fichier externe devient
+Cette implémentation fait évoluer le Core sans état : le fichier externe devient
 une donnée de configuration à sauvegarder. Documenter cette évolution et sa
-restauration avant déploiement. Une ADR précisera le choix si ce stockage est
-retenu ; aucune ADR existante n'est modifiée par ce cadrage.
+restauration avant déploiement. Le choix est décrit dans l’ADR-0006 ; les ADR existantes sont conservées.
 
 Le fichier est chargé une fois au démarrage, sans surveillance automatique.
 Un redémarrage applique une mise à jour. Un fichier absent, illisible,
@@ -95,7 +94,7 @@ sa documentation ; elles ne sont pas déclarées terminées par ce cadrage.
 
 Modèles, chargement JSON, unicité, instantané, routes liste/détail et erreurs
 404 sont implémentés. Les tests existants et les tests Maison passent
-localement (23 tests). Le montage Compose en lecture seule, le catalogue
+localement (29 tests). Le montage Compose en lecture seule, le catalogue
 d'exemple et les procédures de sauvegarde/restauration sont préparés.
 Voir l'[ADR-0006](../adr/0006-inventaire-json-maison.md).
 
@@ -103,3 +102,15 @@ Le RT2600ac n'est pas inclus dans l'exemple : son rôle attend confirmation.
 La validation Docker effective, le catalogue réel, la sauvegarde/restauration
 et le déploiement NAS restent à effectuer avant clôture. Aucune nouvelle
 infrastructure ni dépendance n'a été ajoutée.
+
+## Validation avant déploiement
+
+La commande `python -m einstein_core.maison <catalogue.json>` valide un
+catalogue sans démarrer le serveur ni modifier le fichier. Elle retourne 0
+si valide, 1 sinon, sans reproduire les données invalides dans les erreurs.
+Les adresses IP doivent être des chaînes : les valeurs numériques et les
+booléens sont rejetés, sans conversion implicite en IPv4.
+
+La suite vérifie aussi les permissions refusées et l'isolation de deux
+applications utilisant des catalogues distincts. Les 29 tests passent
+localement ; cette vérification ne constitue pas une validation Docker/NAS.

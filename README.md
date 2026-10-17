@@ -71,6 +71,12 @@ lorsque la commande est lancée depuis la racine. Pour utiliser un autre fichier
 exporter `EINSTEIN_MAISON_INVENTORY_PATH` avec son chemin. Aucun fichier `.env`
 n'est chargé automatiquement par Python.
 
+Valider un catalogue avant utilisation (code de sortie 0 si valide, 1 sinon) :
+
+```bash
+python -m einstein_core.maison config/equipements.example.json
+```
+
 Démarrer l'API localement :
 
 ```bash

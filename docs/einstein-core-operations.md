@@ -169,6 +169,18 @@ Rejouer les contrôles locaux et HTTPS après le redémarrage.
 
 ## Données et secrets
 
+Avant de transférer un nouveau catalogue sur le NAS, le valider depuis
+l'environnement de développement du Mac :
+
+```bash
+python -m einstein_core.maison /chemin/vers/equipements.json
+```
+
+La commande retourne 0 si le catalogue est valide, 1 sinon. Elle n'affiche
+pas les équipements, ne modifie pas le fichier et ne contacte pas le réseau.
+La validation de structure ne garantit pas que les adresses correspondent aux
+équipements réels. Elle ne vérifie pas non plus les permissions du montage NAS.
+
 Le catalogue est monté en lecture seule sur `/inventory`. Le conteneur
 ne modifie pas cette source. Pour changer le catalogue, préparer et valider
 un nouveau fichier, conserver l'ancien, remplacer le fichier sur le NAS,

@@ -40,7 +40,7 @@ def test_inventory_routes_and_snapshot(tmp_path):
 
 @pytest.mark.parametrize("changes", [
     {"id": "INVALID ID"}, {"name": " "}, {"role": ""},
-    {"address": "not-an-ip"}, {"category": "unknown"}, {"secret": "private-value"},
+    {"address": "not-an-ip"}, {"address": 123}, {"address": True}, {"category": "unknown"}, {"secret": "private-value"},
 ])
 def test_invalid_equipment_blocks_startup(tmp_path, changes):
     path = write_catalogue(tmp_path, [{**EQUIPMENT, **changes}])
@@ -72,3 +72,48 @@ def test_unreadable_inventory_blocks_startup(tmp_path, directory):
     with pytest.raises(InventoryError, match="absent ou illisible"):
         with TestClient(create_app(Settings(maison_inventory_path=path))):
             pytest.fail("Le démarrage ne doit pas réussir")
+
+
+def test_permission_denied_is_sanitized(tmp_path, monkeypatch):
+    from pathlib import Path
+
+    def denied(self):
+        raise PermissionError("sensitive-path")
+
+    monkeypatch.setattr(Path, "read_bytes", denied)
+    with pytest.raises(InventoryError, match="absent ou illisible") as exc:
+        load_inventory(tmp_path / "inventory.json")
+    assert "sensitive-path" not in str(exc.value)
+
+
+def test_validation_command_accepts_catalogue(tmp_path, capsys):
+    from einstein_core.maison.__main__ import main
+
+    path = write_catalogue(tmp_path, [EQUIPMENT])
+    original = path.read_bytes()
+    assert main([str(path)]) == 0
+    captured = capsys.readouterr()
+    assert "1 équipement(s)" in captured.out
+    assert captured.err == ""
+    assert path.read_bytes() == original
+
+
+def test_validation_command_rejects_catalogue(tmp_path, capsys):
+    from einstein_core.maison.__main__ import main
+
+    path = write_catalogue(tmp_path, [{**EQUIPMENT, "secret": "private-value"}])
+    assert main([str(path)]) == 1
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "invalide" in captured.err
+    assert "private-value" not in captured.err
+
+
+def test_apps_have_independent_catalogues(tmp_path):
+    first = write_catalogue(tmp_path, [EQUIPMENT])
+    second = tmp_path / "second.json"
+    second.write_text("[]")
+    with TestClient(create_app(Settings(maison_inventory_path=first))) as client_a:
+        with TestClient(create_app(Settings(maison_inventory_path=second))) as client_b:
+            assert client_a.get("/api/v1/maison/equipements").json() == [EQUIPMENT]
+            assert client_b.get("/api/v1/maison/equipements").json() == []

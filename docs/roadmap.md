@@ -74,6 +74,7 @@ et les limites figurent dans le
 - [x] Charger et valider un catalogue déclaratif JSON
 - [x] Exposer la liste et le détail des équipements
 - [x] Tester les routes et les erreurs de configuration
+- [x] Fournir une commande de validation du catalogue avant déploiement
 - [x] Documenter stockage, sauvegarde et déploiement du catalogue
 - [ ] Valider sur le NAS sans nouvelle infrastructure
 

@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, IPvAnyAddress, TypeAdapter, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, IPvAnyAddress, TypeAdapter, ValidationError, field_validator
 
 
 class Equipment(BaseModel):
@@ -16,6 +16,14 @@ class Equipment(BaseModel):
     category: Literal["nas", "router", "dns"]
     address: IPvAnyAddress
     role: str = Field(min_length=1)
+
+
+    @field_validator("address", mode="before")
+    @classmethod
+    def address_must_be_text(cls, value: object) -> str:
+        if not isinstance(value, str):
+            raise ValueError("L'adresse IP doit être une chaîne")
+        return value
 
 
 _catalogue = TypeAdapter(list[Equipment])
