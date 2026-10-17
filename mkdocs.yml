@@ -30,3 +30,4 @@ nav:
       - ADR-0005: adr/0005-monolithe-modulaire-fastapi.md
       - ADR-0006: adr/0006-inventaire-json-maison.md
       - ADR-0007: adr/0007-fournisseurs-ia.md
+      - ADR-0008: adr/0008-routage-retour-openvpn.md

@@ -84,7 +84,7 @@ Voir le [bilan du Sprint 4](sprints/sprint-4-inventaire-maison.md).
 
 ## Sprint 5 — Questions sur l'inventaire
 
-**Statut : en cours — API de questions locale, IA désactivée par défaut**
+**Statut : en cours — mode Plus déployé sur le NAS, premier essai HTTPS réussi**
 
 - [x] API de questions en langage naturel sur le catalogue Maison
 - [x] Interface fournisseur et adaptateur OpenAI Responses

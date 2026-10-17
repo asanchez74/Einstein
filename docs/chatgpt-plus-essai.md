@@ -111,7 +111,8 @@ Aucun basculement vers une clé API n'est implémenté.
 
 La stack NAS de base reste sans IA ; le complément `compose.openai.yaml`
 concerne uniquement l'authentification par clé API et ne doit pas être utilisé
-pour monter une session Plus. Aucun jeton Plus n'a été transféré au NAS.
+pour monter une session Plus. La session a ensuite été transférée au NAS pour le déploiement décrit dans
+le suivi du Sprint 5. Ne plus utiliser la copie Mac pour son renouvellement.
 
 ## Préparation du déploiement Plus sur le NAS
 
@@ -172,4 +173,6 @@ ordinaire du catalogue.
 Valider Compose et les permissions avant de fixer `EINSTEIN_AI_ENABLED=true`
 et déployer avec `stack-up.sh einstein-core`. En cas d'échec, sélectionner
 `COMPOSE_FILE=compose.yaml` puis redéployer : aucun repli payant n'est effectué.
-Le build, le transfert et les contrôles Plus NAS restent à exécuter.
+Le build, l’import et un premier test HTTPS NAS ont réussi ; voir le
+[suivi Sprint 5](sprints/sprint-5-questions-inventaire.md) pour les contrôles
+restants.

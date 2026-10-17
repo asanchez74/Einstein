@@ -245,3 +245,98 @@ et d'import préserve l'identifiant NAS, refuse les écrasements et n'affiche pa
 les jetons. La suite comporte 99 tests réussis. La validation Docker réelle,
 le transfert sécurisé et l'essai NAS restent à effectuer. Aucun jeton n'a été
 transféré et aucun conteneur NAS n'a été modifié pendant cette préparation.
+
+## Préparation NAS au commit 2eb664e
+
+Le clone NAS a été mis à jour par fast-forward au commit
+`2eb664ebcc5e434d18485627f5d948202885e7b3`. Docker Compose a validé la fusion
+de la stack de base et de `compose.chatgpt.yaml` avec le modèle `gpt-6-luna`.
+Le `.env` runtime a été préparé pour Plus ; son ancienne version est sauvegardée
+dans un dossier privé hors dépôt.
+
+La session a été transférée par SSH dans un dossier temporaire privé du NAS
+(0700, fichier 0600), sans affichage. Aucun import dans le dossier runtime,
+build Plus ou redémarrage du conteneur n'est encore confirmé. Les commandes
+Docker nécessitent une authentification sudo interactive du propriétaire.
+Le Mac ne doit plus renouveler cette session pendant le transfert de
+responsabilité au NAS. L'import et le test NAS restent à réaliser.
+
+## Déploiement Plus et essai HTTPS NAS réussis
+
+Les sorties du propriétaire confirment la construction avec l'extra `chatgpt`,
+l'import de session sans affichage de jeton et le démarrage par `stack-up.sh`.
+
+- Commit du clone : `2eb664ebcc5e434d18485627f5d948202885e7b3`.
+- Image : `einstein-core:0.1.0`, identifiant
+  `sha256:24c0308146c447a197bd3a71d69358f3211a1a89bdd77202db906b605fb60a4b`.
+- État initial Docker : `health: starting` immédiatement après création.
+
+Contrôles réels depuis le Mac vers le reverse proxy du NAS :
+
+| Route | Résultat |
+|---|---|
+| `GET /health/ready` | HTTP 200, `{"status":"ready"}` |
+| `GET /api/v1/maison/equipements` | HTTP 200, catalogue des trois équipements |
+| `POST /api/v1/maison/questions` | HTTP 200, fournisseur `chatgpt`, modèle `gpt-6-luna` |
+
+Question envoyée : « Quelle est l'adresse du NAS ? ».
+Réponse : « L’adresse du NAS Synology DS918+ est **192.168.1.3**. »
+L'appel utilise la session Plus importée sur le NAS ; aucun repli par clé API.
+
+Le mode exact de connexion Mac (LAN/VPN) n'a pas été établi par ce contrôle.
+Restent : état Docker healthy, contrôle des ressources, accès LAN/VPN séparés,
+refus externe de la route POST, renouvellement réel et gestion de révocation.
+Les copies temporaires de session doivent être retirées après vérification,
+et la copie Mac ne doit plus être utilisée pour renouveler la session NAS.
+Le Sprint 5 reste ouvert.
+
+## Santé Docker et refus externe de la route IA
+
+Le propriétaire confirme `healthy` après déploiement Plus. Le contrôle POST
+vers `/api/v1/maison/questions` depuis la connexion externe testée retourne :
+
+```text
+HTTP/2 403
+server: nginx
+date: Sat, 17 Oct 2026 08:28:16 GMT
+```
+
+L'en-tête Date correspond au 17 octobre 2026 à 10:28:16 en Europe/Zurich.
+Ce contrôle confirme le refus de cette route POST sur la connexion testée ;
+il ne constitue pas un audit de tous les accès réseau. Le service healthy
+et le premier appel HTTPS Plus réussi sont désormais consignés. Le refresh
+réel, la révocation et les contrôles LAN/VPN séparés restent à compléter.
+
+## Contrôle VPN mobile — accès forcé validé, chemin DNS en échec
+
+Depuis une connexion mobile avec VPN, le propriétaire a fourni :
+
+- DNS via `172.23.0.2` : `einstein.chantevigne.com` résout vers `192.168.1.3` ;
+- routes vers `192.168.1.3` et `10.8.0.1` : tunnel `utun4`, passerelle `10.8.0.5` ;
+- HTTPS readiness vers `192.168.1.3` : expiration de connexion ;
+- HTTPS readiness en imposant `10.8.0.1` avec `--resolve` : `ready` ;
+- POST question en imposant `10.8.0.1` : HTTP réussi, réponse NAS
+  `192.168.1.3`, fournisseur `chatgpt`, modèle `gpt-6-luna`.
+
+La vérification TLS garde le nom `einstein.chantevigne.com`. Cela valide la
+fonction IA par le tunnel, mais pas l'accès normal par DNS : celui-ci renvoie
+encore l'adresse LAN qui ne répond pas sur le port 443 via ce chemin.
+La cause (filtrage, règle d'interface ou autre traitement réseau) reste à
+établir. Ne pas remplacer globalement le DNS LAN par l'adresse VPN pour
+masquer cet écart. Aucune règle DSM n'a été modifiée.
+
+## Correction temporaire du chemin VPN validée
+
+Les règles DSM ont confirmé la sélection de `ovs_bond0-table` pour les
+réponses depuis `192.168.1.3`, alors que seule `main` connaissait le réseau
+VPN. L'exception limitée à cette source et à `10.8.0.0/24` a été ajoutée
+manuellement à la priorité 1.
+
+Le propriétaire confirme ensuite readiness et question IA en HTTP réussi
+via le nom DNS normal sur mobile + VPN, sans `--resolve`. Le modèle
+`gpt-6-luna` répond avec l'adresse NAS `192.168.1.3`.
+
+La persistance est préparée dans `vpn-return-route.sh`, testée sur une
+commande ip simulée. L'ADR-0008 décrit limites et retour arrière. Les tâches
+DSM ne sont pas encore installées ; aucune nouvelle modification réseau
+n'a été exécutée par l'assistant pendant cette préparation.
