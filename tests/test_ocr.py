@@ -96,10 +96,12 @@ def test_invalid_cache_entries_are_ignored(corpus):
     assert build_index(corpus.documents_path, ocr=lookup).skipped_files == 1
 
 
-def image_only_pdf(text):
+def image_only_pdf(text, workdir):
     """PDF dont l'unique page est une image : rendu d'un PDF texte par pdftoppm."""
-    pgm = subprocess.run(["pdftoppm", "-r", "150", "-gray", "-singlefile", "-", "-"],
-                         input=pdf_bytes(text), stdout=subprocess.PIPE, check=True).stdout
+    (workdir / "source.pdf").write_bytes(pdf_bytes(text))
+    subprocess.run(["pdftoppm", "-r", "150", "-gray", "-singlefile", str(workdir / "source.pdf"),
+                    str(workdir / "page")], check=True)
+    pgm = (workdir / "page.pgm").read_bytes()
     magic, width, height, maxval, pixels = pgm.split(maxsplit=4)
     assert magic == b"P5" and maxval == b"255"
     writer = PdfWriter()
@@ -126,7 +128,7 @@ def test_real_tesseract_reads_image_only_pdf(tmp_path):
     docs.mkdir()
     cache = tmp_path / "cache"
     cache.mkdir(mode=0o700)
-    (docs / "scan.pdf").write_bytes(image_only_pdf("CONTRAT ASSURANCE HABITATION"))
+    (docs / "scan.pdf").write_bytes(image_only_pdf("CONTRAT ASSURANCE HABITATION", tmp_path))
     assert build_index(docs).skipped_files == 1
     counts = ocr.run(Settings(documents_path=docs, documents_ocr_cache_path=cache), 1, 300)
     assert counts["reconnus"] == 1, counts
