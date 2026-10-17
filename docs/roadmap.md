@@ -115,9 +115,10 @@ Recherche locale sur les PDF, Word `.docx` et textes du dossier choisi
 `/volume1/Documents/03_Tonio/Travail`, avec extraits et sources, sans transmission à l’IA.
 Voir le [Sprint 6](sprints/sprint-6-recherche-documentaire.md). Le dossier
 complet dépasse les plafonds ; le sous-dossier `Lombard Odier` est indexé en
-arrière-plan (30 documents, 22 scans sans texte). Restent le refus externe,
-l’évaluation de pertinence et le cadrage de l’OCR local. Le traitement OpenAI
-du corpus est implémenté localement, sans ingestion réelle ni déploiement.
+arrière-plan (30 documents, 22 scans sans texte). Accès LAN/VPN, refus
+externe et pertinence sont validés ; reste le cadrage de l’OCR local des scans.
+Le traitement OpenAI du corpus est implémenté localement, sans ingestion réelle
+ni déploiement.
 L’interface utilisateur viendra ensuite.
 
 ## Étapes ultérieures

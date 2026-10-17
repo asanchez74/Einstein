@@ -24,10 +24,12 @@ Voir l'[ADR-0009](../adr/0009-recherche-documentaire-locale.md).
 - [x] Essai vision Plus sur une image synthétique
 - [x] Traitement documentaire OpenAI avec cache local et limites (implémenté localement, non déployé)
 - [x] Validation NAS sur corpus synthétique : montage, droits, ressources, démarrage
-- [ ] Validation NAS sur le corpus réel
+- [x] Validation NAS sur un sous-dossier réel (`Lombard Odier`)
+- [ ] Couverture des PDF scannés (OCR, lot suivant)
+- [ ] Dossier `Travail` complet (index persistant, si le besoin est confirmé)
 - [x] Accès LAN et refus externe de la nouvelle route
 - [x] Accès via VPN de la nouvelle route
-- [ ] Évaluation de pertinence sur quelques recherches choisies
+- [x] Évaluation de pertinence sur quelques recherches choisies
 
 Aucun document réel n'a été consulté ni transféré pendant l'implémentation.
 L'interface pour interagir facilement avec Einstein sera le chantier suivant.
@@ -409,3 +411,22 @@ espaces. Diagnostic dans un conteneur jetable, compteurs uniquement :
 Correctif local : rattrapage `layout` par page en cas de mots collés et délai
 par fichier porté à dix secondes. 145 tests réussis ; correctif non déployé.
 Voir la révision de l'[ADR-0009](../adr/0009-recherche-documentaire-locale.md).
+
+## Évaluation de pertinence après correctifs — 17 octobre 2026
+
+Après déploiement de `3dd39d9`, compteurs inchangés (`indexed_files: 30`,
+`skipped_files: 27`) : le rattrapage `layout` n'a écarté aucun fichier.
+
+| Recherche | Résultat | Appréciation |
+|---|---|---|
+| `secret bancaire` | directive (p. 1) et PDF Scanbot du même jour, score 4 | attendu ; le PDF Scanbot avait le même défaut d'espacement |
+| `banque` | cinq documents distincts, directive et Scanbot désormais inclus | pertinent |
+| `piscine`, `TON_MOT` | aucun résultat | attendu |
+| `custody` | aucun résultat | non confirmé par le propriétaire |
+| `responsable` | préparation de réunion (Word et PDF) | non confirmé |
+
+Limites observées : les versions Word et PDF d'un même contenu apparaissent
+deux fois ; les 22 scans sans texte restent invisibles ; la recherche exige
+tous les mots dans un même passage, sans variantes ni pluriels. Un certificat
+de salaire figure parmi les résultats : tout appareil du LAN ou du VPN peut en
+lire l'extrait, la route n'ayant pas d'authentification.
