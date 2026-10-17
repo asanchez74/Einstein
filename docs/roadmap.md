@@ -100,7 +100,7 @@ Voir le [bilan du Sprint 4](sprints/sprint-4-inventaire-maison.md).
 - [x] Valider le renouvellement réel sur le NAS (rotation observée ; inférence après rotation bloquée par la limite Plus, à reconfirmer)
 - [ ] Documentation et validation NAS
 
-Claude (Anthropic) sera intégré ensuite, sans dépendance ajoutée par anticipation.
+Claude (Anthropic) est reporté : l’abonnement Max ne peut pas être utilisé par une application tierce et aucune facturation API n’est ouverte pour l’instant (voir ADR-0007).
 Voir le [cadrage du Sprint 5](sprints/sprint-5-questions-inventaire.md).
 
 ## Sprint 6 — Recherche documentaire

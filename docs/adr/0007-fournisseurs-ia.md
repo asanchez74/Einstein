@@ -66,3 +66,27 @@ OAuth optionnelles. Seul le répertoire privé de session est inscriptible pour
 la rotation ; le catalogue et la racine restent en lecture seule. L'import
 préserve l'identifiant d'hôte NAS. Une session transférée ne doit pas être
 renouvelée simultanément par le Mac et le NAS. Ce déploiement reste à valider.
+
+## Extension : Claude (Anthropic) reporté — 17 octobre 2026
+
+Le propriétaire dispose d'un abonnement Claude Max et souhaitait l'utiliser
+comme le forfait Plus. Les conditions d'Anthropic l'excluent : la connexion
+par abonnement (Free, Pro, Max) est réservée aux applications Anthropic,
+et les applications tierces doivent utiliser une clé API Claude Console ou
+un fournisseur cloud. Collecter, stocker ou relayer des jetons de session
+Claude.ai n'est pas autorisé. Aucun équivalent de « Sign in with ChatGPT »
+n'existe donc pour Einstein.
+
+Faire tourner Claude Code sur le NAS avec le compte Max pour servir l'API
+est écarté : usage ambigu au regard des conditions, Node et processus lourd
+sur le DS918+. Le propriétaire choisit de ne pas ouvrir de facturation API
+Anthropic pour l'instant : l'adaptateur Claude est reporté. S'il est repris,
+ce sera par clé API fichier, sur le modèle de l'adaptateur OpenAI par clé,
+avec plafond de dépense défini dans la Console et sans repli automatique.
+
+L'orchestrateur choisissant un fournisseur selon la tâche est également
+reporté jusqu'à disposer de deux fournisseurs opérationnels ; il fera
+l'objet d'une ADR distincte.
+
+Source vérifiée le 17 octobre 2026 :
+[Claude Code — Legal and compliance, Authentication and credential use](https://code.claude.com/docs/en/legal-and-compliance)
