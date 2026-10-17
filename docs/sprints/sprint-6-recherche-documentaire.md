@@ -25,7 +25,8 @@ Voir l'[ADR-0009](../adr/0009-recherche-documentaire-locale.md).
 - [x] Traitement documentaire OpenAI avec cache local et limites (implémenté localement, non déployé)
 - [x] Validation NAS sur corpus synthétique : montage, droits, ressources, démarrage
 - [ ] Validation NAS sur le corpus réel
-- [ ] Contrôles LAN/VPN et refus externe de la nouvelle route
+- [x] Accès LAN et refus externe de la nouvelle route
+- [ ] Accès via VPN de la nouvelle route
 - [ ] Évaluation de pertinence sur quelques recherches choisies
 
 Aucun document réel n'a été consulté ni transféré pendant l'implémentation.
@@ -371,3 +372,12 @@ exclusion n'est due au délai, mais le maximum observé est proche des trois
 secondes par fichier sur le DS918+. Les scans représentent 39 % des candidats
 de ce dossier : la reconnaissance de texte (OCR local ou vision OpenAI,
 décrites plus haut) conditionne leur couverture.
+
+## Refus externe de la route documentaire — 17 octobre 2026
+
+Depuis le Mac relié au partage de connexion 4G de l'iPhone (passerelle par
+défaut `172.20.10.1`, interface `en7`, VPN non actif), la requête POST vers
+`/api/v1/documents/recherche` reçoit `HTTP/2 403` de nginx
+(`Sat, 17 Oct 2026 12:52:27 GMT`), page d'erreur Synology sans contenu
+documentaire. L'accès LAN est validé par les recherches précédentes ;
+l'accès par le VPN n'a pas encore été contrôlé pour cette route.
