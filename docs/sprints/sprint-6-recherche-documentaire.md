@@ -2,7 +2,8 @@
 
 ## Statut
 
-En cours : premier lot implémenté localement, non déployé. Les validations
+En cours : mode local déployé sur le NAS et validé sur un corpus synthétique
+le 17 octobre 2026 ; corpus réel et mode OpenAI non déployés. Les validations
 restantes du Sprint 5 restent ouvertes ; le redémarrage NAS est reporté.
 
 ## Périmètre confirmé
@@ -21,8 +22,9 @@ Voir l'[ADR-0009](../adr/0009-recherche-documentaire-locale.md).
 - [x] API désactivée par défaut, indépendante de la configuration IA
 - [x] Complément Compose en lecture seule
 - [x] Essai vision Plus sur une image synthétique
-- [ ] Traitement documentaire OpenAI avec cache local et limites (lot suivant)
-- [ ] Validation NAS : droits, ressources, temps de démarrage et corpus réel
+- [x] Traitement documentaire OpenAI avec cache local et limites (implémenté localement, non déployé)
+- [x] Validation NAS sur corpus synthétique : montage, droits, ressources, démarrage
+- [ ] Validation NAS sur le corpus réel
 - [ ] Contrôles LAN/VPN et refus externe de la nouvelle route
 - [ ] Évaluation de pertinence sur quelques recherches choisies
 
@@ -292,3 +294,34 @@ budget d'appels, réutilisation et invalidation du cache, pagination, refus des
 sorties invalides, verrou, permissions et recherche cache seule. `compileall`,
 `pip check`, MkDocs strict et `git diff --check` passent. Les compléments YAML
 sont vérifiés ; la fusion Compose réelle reste à valider sur le NAS.
+
+## Validation NAS du mode local sur corpus synthétique — 17 octobre 2026
+
+Corpus dédié `/volume1/docker/einstein/tmp/documents-test`, dossier
+`10001:10001` en 0750, deux fichiers synthétiques en 0640 (`assurance.txt`,
+`chaudiere.md`). Aucun document réel n'est monté. Le `.env` runtime a été
+sauvegardé dans le dossier personnel privé avant modification :
+
+```dotenv
+COMPOSE_FILE=compose.yaml:compose.chatgpt.yaml:compose.documents.yaml
+DOCUMENTS_DIR=/volume1/docker/einstein/tmp/documents-test
+EINSTEIN_DOCUMENTS_ENABLED=true
+```
+
+Déploiement par `stack-up.sh` avec le code applicatif de `f618387` (commit
+exact du clone non relevé), image `sha256:d7f10042f93c897362aef96b2dca394c2e741ba4704962a0643721dc0dfdb386`.
+La fusion Compose avec Plus est acceptée ; conteneur `healthy` 40 secondes
+après création. Mémoire relevée : 80 MiB puis 77 MiB sur 256 MiB.
+
+Recherches HTTPS depuis le Mac sur le LAN, index construit à `10:27:33Z` :
+
+| Requête | Résultat |
+|---|---|
+| `assurance habitation` | HTTP 200, `indexed_files: 2`, `skipped_files: 0`, `partial: false`, résultat `assurance.txt`, score 2 |
+| `piscine` | mêmes compteurs, `results: []` |
+
+Ces essais valident montage en lecture seule, permissions, extraction au
+démarrage et accès par le reverse proxy. Ils ne caractérisent ni le temps de
+démarrage ni la mémoire sur le corpus réel, et le refus externe de la route
+reste à contrôler. Prochaine étape : vérifier taille et droits du dossier
+`Travail` pour l'UID 10001 avant de modifier `DOCUMENTS_DIR`.
