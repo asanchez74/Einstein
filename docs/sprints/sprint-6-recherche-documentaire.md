@@ -494,3 +494,29 @@ texte compris. La chaîne `pdftoppm` puis Tesseract `fra` est validée dans
 l'image Debian. pypdf a affiché des avertissements de polices (`fontTools`
 absent) contenant des dictionnaires de police, sans texte documentaire :
 la commande coupe désormais la journalisation, comme l'extracteur.
+
+### Lot OCR complet et recherche — 17 octobre 2026
+
+Après déploiement de `5e018f9`, `run --rm ocr --max-files 30 --max-minutes 120` :
+
+```text
+reconnus=25 pages_reconnues=130 deja_en_cache=1 sans_besoin=27 ecartes=0 echecs=0 partiel=False
+```
+
+Durée 25 min 19 s, soit environ 11,7 s par page sur le DS918+. Vingt-six
+documents ont une entrée OCR : les 22 scans et quatre des cinq fichiers de plus
+de 5 MiB. Une relance immédiate retourne `deja_en_cache=26` en 37 s, sans
+retraitement.
+
+Après redémarrage du Core, « banque » retourne `indexed_files: 54`,
+`skipped_files: 3` (contre 30 et 27), avec en tête quatre documents reconnus
+par OCR (contrat de travail, ouverture de compte, résiliation et convention
+de résiliation) marqués `ocr: true`.
+
+Les trois fichiers encore écartés seraient des PDF de plus de 5 MiB contenant
+déjà du texte : trop grands pour l'extracteur ordinaire, ils ne nécessitent
+pas d'OCR et n'ont donc pas d'entrée en cache.
+
+Correctif local : la commande OCR met aussi en cache le texte des PDF que
+l'extracteur ordinaire refuse (plus de 5 MiB, 50 pages ou 100 000 caractères)
+même sans page à reconnaître ; compteur `texte_seul`. 151 tests réussis.

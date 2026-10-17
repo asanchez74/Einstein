@@ -60,7 +60,10 @@ Au démarrage, le Core consulte le cache pour les PDF dont une page au moins
 est sans texte, ou que l'extracteur ordinaire refuse (taille, pages), sans
 exécuter Tesseract. L'entrée contient toutes les pages : texte extrait pour
 les pages qui en ont, texte reconnu pour les autres. Les passages issus de
-l'OCR portent `ocr: true` dans les résultats. Une entrée OCR est limitée à
+l'OCR portent `ocr: true` dans les résultats. Un PDF entièrement textuel mais
+refusé par l'extracteur ordinaire (plus de 5 MiB, 50 pages ou 100 000
+caractères) reçoit aussi une entrée, sans reconnaissance, pour ne pas tomber
+entre les deux traitements. Une entrée OCR est limitée à
 400 000 caractères ; le plafond total de l'index passe de un à trois millions
 de caractères, dans la limite mémoire existante du Core. Un cache absent, invalide ou obsolète est
 ignoré : le fichier reste compté comme écarté.

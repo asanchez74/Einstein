@@ -17,6 +17,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from einstein_core.config import Settings
 from einstein_core.documents.cache import check_directory, read_private, write_private
+from einstein_core.documents import worker
 from einstein_core.documents.worker import page_text
 
 VERSION = 1
@@ -48,8 +49,6 @@ def validate(raw: str) -> OcrDocument:
         raise ValueError("Pages OCR invalides")
     if sum(len(item.text) for item in document.pages) > MAX_CHARS:
         raise ValueError("Texte OCR trop long")
-    if not any(item.ocr for item in document.pages):
-        raise ValueError("Aucune page reconnue")
     return document
 
 
@@ -111,8 +110,11 @@ def ocr_page(descriptor: int, number: int, workdir: str) -> str:
     return result.stdout.decode("utf-8", "replace")
 
 
-def scan_document(file, recognize: Callable[[int], str]) -> list[dict] | None:
-    """Pages avec texte conservées ; pages sans texte reconnues. None si aucune n'en a besoin."""
+def scan_document(file, recognize: Callable[[int], str], *, oversized: bool = False) -> list[dict] | None:
+    """Pages avec texte conservées ; pages sans texte reconnues.
+
+    None si aucune page n'a besoin d'OCR et que l'extracteur ordinaire accepte le fichier.
+    """
     from pypdf import PdfReader
 
     file.seek(0)
@@ -124,7 +126,12 @@ def scan_document(file, recognize: Callable[[int], str]) -> list[dict] | None:
         text = " ".join(page_text(page).split())
         pages.append({"page": number, "text": text, "ocr": not text})
     if not any(item["ocr"] for item in pages):
-        return None
+        # Trop grand pour l'extracteur ordinaire : le texte est mis en cache sans OCR.
+        beyond = (oversized or len(pages) > worker.MAX_PAGES
+                  or sum(len(item["text"]) for item in pages) > worker.MAX_CHARS)
+        if not beyond or sum(len(item["text"]) for item in pages) > MAX_CHARS:
+            return None
+        return pages
     for item in pages:
         if item["ocr"]:
             item["text"] = " ".join(recognize(item["page"]).split())
@@ -168,7 +175,8 @@ def run(settings: Settings, max_files: int, max_seconds: int, *,
     root = settings.documents_path
     version = engine()
     counts: dict[str, int | bool] = {"reconnus": 0, "pages_reconnues": 0, "deja_en_cache": 0,
-                                     "sans_besoin": 0, "ecartes": 0, "echecs": 0, "partiel": False}
+                                     "texte_seul": 0, "sans_besoin": 0, "ecartes": 0, "echecs": 0,
+                                     "partiel": False}
     deadline = time.monotonic() + max_seconds
     descriptor = os.open(directory / ".ocr.lock", os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
     with os.fdopen(descriptor, "w") as lock:
@@ -196,7 +204,8 @@ def run(settings: Settings, max_files: int, max_seconds: int, *,
                     pass
                 try:
                     with tempfile.TemporaryDirectory(prefix="einstein-ocr-") as workdir:
-                        pages = scan_document(file, lambda number: page_ocr(file.fileno(), number, workdir))
+                        pages = scan_document(file, lambda number: page_ocr(file.fileno(), number, workdir),
+                                              oversized=info.st_size > worker.MAX_BYTES)
                 except Exception:
                     # Parseurs et binaires sur fichiers non fiables : aucun message n'est affiché.
                     counts["echecs"] += 1
@@ -205,8 +214,9 @@ def run(settings: Settings, max_files: int, max_seconds: int, *,
                     counts["sans_besoin"] += 1
                     continue
                 write_private(directory, key, {"engine": version, "pages": pages})
-                counts["reconnus"] += 1
-                counts["pages_reconnues"] += sum(item["ocr"] for item in pages)
+                recognized = sum(item["ocr"] for item in pages)
+                counts["reconnus" if recognized else "texte_seul"] += 1
+                counts["pages_reconnues"] += recognized
     return counts
 
 

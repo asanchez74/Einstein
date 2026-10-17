@@ -10,6 +10,7 @@ from zipfile import ZipFile
 
 MAX_BYTES = 5 * 1024 * 1024
 MAX_CHARS = 100_000
+MAX_PAGES = 50
 
 
 def page_text(page) -> str:
@@ -48,7 +49,7 @@ def extract(data: bytes, suffix: str) -> list[dict]:
         from pypdf import PdfReader
 
         reader = PdfReader(BytesIO(data), strict=True)
-        if reader.is_encrypted or len(reader.pages) > 50:
+        if reader.is_encrypted or len(reader.pages) > MAX_PAGES:
             raise ValueError
         sections, length = [], 0
         for number, page in enumerate(reader.pages, 1):

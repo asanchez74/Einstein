@@ -146,3 +146,17 @@ def test_command_prints_counters_only(corpus, monkeypatch, capsys):
         logging.disable(logging.NOTSET)
     output = capsys.readouterr()
     assert output.out.startswith("reconnus=1 ") and "privé" not in output.out + output.err
+
+
+def test_oversized_text_pdf_is_cached_without_ocr(corpus, monkeypatch):
+    from einstein_core.documents import search, worker
+    monkeypatch.setattr(worker, "MAX_BYTES", 100)
+    monkeypatch.setattr(search, "MAX_BYTES", 100)
+    calls = []
+    counts = ocr.run(corpus, 5, 60, page_ocr=fake_ocr(calls), engine=lambda: "v1")
+    assert counts["texte_seul"] == 1 and counts["reconnus"] == 1 and calls == [1, 2]
+    lookup = ocr.cached_ocr(corpus.documents_path, corpus.documents_ocr_cache_path)
+    index = build_index(corpus.documents_path, ocr=lookup)
+    assert index.skipped_files == 0
+    hit = index.search("assurance", 5).results[0]
+    assert hit.source == "texte.pdf" and not hit.ocr
