@@ -25,6 +25,7 @@ class SearchHit(BaseModel):
     passage: int
     excerpt: str
     score: int
+    ocr: bool = False
 
 
 class SearchResult(BaseModel):
@@ -75,7 +76,7 @@ class IndexBudgetExceeded(Exception):
 
 
 def build_index(root: Path, *, extractor: Callable | None = None, budget_seconds: int = 30,
-                stop: threading.Event | None = None) -> DocumentIndex:
+                stop: threading.Event | None = None, ocr: Callable | None = None) -> DocumentIndex:
     passages, indexed, skipped, visited, chars = [], 0, 0, 0, 0
     partial = False
     deadline = time.monotonic() + budget_seconds
@@ -113,31 +114,45 @@ def build_index(root: Path, *, extractor: Callable | None = None, budget_seconds
                     fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory)
                     with os.fdopen(fd, "rb") as file:
                         info = os.fstat(file.fileno())
-                        if not stat.S_ISREG(info.st_mode) or info.st_size > MAX_BYTES:
+                        if not stat.S_ISREG(info.st_mode):
                             raise ValueError
-                        data = file.read(MAX_BYTES + 1)
-                    if len(data) > MAX_BYTES:
-                        raise ValueError
-                    remaining = deadline - time.monotonic()
-                    if remaining <= 0:
-                        raise ValueError
-                    if extractor is None:
-                        result = subprocess.run(
-                            [sys.executable, "-m", "einstein_core.documents.worker", suffix],
-                            input=data, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-                            timeout=min(10, remaining), check=True,
-                        )
-                        sections = json.loads(result.stdout)
-                    else:
-                        sections = extractor(source, data, suffix)
+                        sections = None
+                        try:
+                            if info.st_size > MAX_BYTES:
+                                raise ValueError
+                            data = file.read(MAX_BYTES + 1)
+                            if len(data) > MAX_BYTES:
+                                raise ValueError
+                            remaining = deadline - time.monotonic()
+                            if remaining <= 0:
+                                raise ValueError
+                            if extractor is None:
+                                result = subprocess.run(
+                                    [sys.executable, "-m", "einstein_core.documents.worker", suffix],
+                                    input=data, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                                    timeout=min(10, remaining), check=True,
+                                )
+                                sections = json.loads(result.stdout)
+                            else:
+                                sections = extractor(source, data, suffix)
+                        except (ValueError, subprocess.SubprocessError):
+                            if ocr is None or suffix != ".pdf":
+                                raise
+                        # PDF illisible, trop gros ou avec des pages sans texte : texte OCR en cache s'il existe.
+                        if ocr is not None and suffix == ".pdf" and (
+                                sections is None or any(not section["text"].strip() for section in sections)):
+                            sections = ocr(source, file) or sections
+                        if sections is None:
+                            raise ValueError
                     new = []
                     for section in sections:
                         text = " ".join(section["text"].split())
                         for offset in range(0, len(text), 600):
                             new.append(SearchHit(source=source, page=section["page"],
-                                                 passage=len(new) + 1, excerpt=text[offset:offset + 800], score=0))
+                                                 passage=len(new) + 1, excerpt=text[offset:offset + 800],
+                                                 score=0, ocr=bool(section.get("ocr", False))))
                     size = sum(len(item.excerpt) for item in new)
-                    if not new or chars + size > 1_000_000:
+                    if not new or chars + size > 3_000_000:
                         raise ValueError
                     passages.extend(new)
                     chars += size

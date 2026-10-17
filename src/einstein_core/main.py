@@ -39,9 +39,13 @@ def create_app(settings: Settings | None = None, *, provider: AnswerProvider | N
         async def index_documents(extractor) -> None:
             # En arrière-plan : le Core répond pendant l'extraction ; aucun nom ni contenu journalisé.
             try:
+                ocr = None
+                if settings.documents_ocr_cache_path is not None:
+                    from einstein_core.documents.ocr import cached_ocr
+                    ocr = cached_ocr(settings.documents_path, settings.documents_ocr_cache_path)
                 index = await asyncio.to_thread(
                     build_index, settings.documents_path, extractor=extractor,
-                    budget_seconds=settings.documents_index_budget_seconds, stop=stop_indexing,
+                    budget_seconds=settings.documents_index_budget_seconds, stop=stop_indexing, ocr=ocr,
                 )
                 app.state.documents = index
                 logger.info("Index documentaire prêt — fichiers=%d écartés=%d partiel=%s",

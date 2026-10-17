@@ -14,6 +14,14 @@ RUN groupadd --gid 10001 einstein \
         --shell /usr/sbin/nologin \
         einstein
 
+# OCR facultatif (ADR-0010) : binaires système, aucune bibliothèque Python ajoutée.
+ARG INSTALL_OCR=false
+RUN if [ "$INSTALL_OCR" = "true" ]; then \
+        apt-get update \
+        && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-fra poppler-utils \
+        && rm -rf /var/lib/apt/lists/*; \
+    fi
+
 COPY pyproject.toml README.md ./
 COPY src ./src
 

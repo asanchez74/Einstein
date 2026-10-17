@@ -49,7 +49,8 @@ def check_directory(directory: Path) -> None:
         raise ValueError("Cache privé requis (0700)")
 
 
-def read_cache(directory: Path, key: str, pages: int | None) -> list[dict]:
+def read_private(directory: Path, key: str, limit: int) -> str:
+    """Lit une entrée privée du cache, refusée si lien, autre propriétaire ou trop grande."""
     check_directory(directory)
     descriptor = os.open(directory / (key + ".json"), os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
     with os.fdopen(descriptor, "rb") as file:
@@ -57,21 +58,30 @@ def read_cache(directory: Path, key: str, pages: int | None) -> list[dict]:
         info = os.fstat(file.fileno())
         if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
             raise ValueError("Cache non privé")
-        raw = file.read(512 * 1024 + 1)
-    if len(raw) > 512 * 1024:
+        raw = file.read(limit + 1)
+    if len(raw) > limit:
         raise ValueError("Cache trop volumineux")
-    return validate_transcript(raw.decode("utf-8"), pages)
+    return raw.decode("utf-8")
 
 
-def write_cache(directory: Path, key: str, sections: list[dict]) -> None:
+def write_private(directory: Path, key: str, payload: dict) -> None:
+    """Écriture atomique 0600 dans le dossier cache privé."""
     check_directory(directory)
     descriptor, temporary = tempfile.mkstemp(dir=directory, prefix=".pending-")
     try:
         with os.fdopen(descriptor, "w") as file:
-            json.dump({"pages": sections}, file, ensure_ascii=True)
+            json.dump(payload, file, ensure_ascii=True)
             file.flush()
             os.fsync(file.fileno())
         os.replace(temporary, directory / (key + ".json"))
     finally:
         if os.path.exists(temporary):
             os.unlink(temporary)
+
+
+def read_cache(directory: Path, key: str, pages: int | None) -> list[dict]:
+    return validate_transcript(read_private(directory, key, 512 * 1024), pages)
+
+
+def write_cache(directory: Path, key: str, sections: list[dict]) -> None:
+    write_private(directory, key, {"pages": sections})

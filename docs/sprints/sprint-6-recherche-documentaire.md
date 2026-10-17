@@ -430,3 +430,51 @@ deux fois ; les 22 scans sans texte restent invisibles ; la recherche exige
 tous les mots dans un même passage, sans variantes ni pluriels. Un certificat
 de salaire figure parmi les résultats : tout appareil du LAN ou du VPN peut en
 lire l'extrait, la route n'ayant pas d'authentification.
+
+## OCR local des PDF scannés — implémentation locale
+
+Cadrage validé par le propriétaire dans l'[ADR-0010](../adr/0010-ocr-local-pdf-scannes.md),
+avec des plafonds de 50 MiB et 80 pages par fichier. La commande
+`python -m einstein_core.documents.ocr` rend chaque page sans texte avec
+`pdftoppm` (300 dpi, niveaux de gris) puis la reconnaît avec Tesseract `fra`.
+Elle n'affiche que des compteurs, traite un fichier à la fois, 120 s au plus
+par page, avec plafonds de fichiers (`--max-files`, 1 à 200) et de durée
+(`--max-minutes`, 1 à 600) et reprise à l'exécution suivante.
+
+L'image n'embarque les binaires que si `INSTALL_OCR=true`, fixé par le
+complément `compose.documents-ocr.yaml`. Celui-ci monte le cache en lecture
+seule pour le Core et définit un service `ocr` à profil, jamais démarré par
+`stack-up.sh` : sans réseau, 768 MiB, `cpu_shares` 128, système de fichiers en
+lecture seule, `/tmp` de 256 MiB, originaux en lecture seule.
+
+Tests : faux moteur pour reconnaissance, cache privé, reprise, invalidation
+après modification ou changement de version, échec sans message, entrée de
+cache invalide et recherche marquée `ocr: true` ; un test avec les vrais
+binaires sur un PDF composé d'une seule image est sauté s'ils sont absents.
+Aucun document réel n'a été traité.
+
+### Déploiement à préparer après revue
+
+Créer le cache privé :
+
+```bash
+sudo install -d -o 10001 -g 10001 -m 0700 /volume1/docker/einstein/data/einstein-ocr
+```
+
+Dans le `.env` runtime, ajouter le complément et le dossier :
+
+```dotenv
+COMPOSE_FILE=compose.yaml:compose.chatgpt.yaml:compose.documents.yaml:compose.documents-ocr.yaml
+DOCUMENTS_OCR_CACHE_DIR=/volume1/docker/einstein/data/einstein-ocr
+```
+
+Reconstruire et redéployer avec `stack-up.sh`, puis lancer un premier fichier :
+
+```bash
+cd ~/Development/Einstein/compose/einstein-core
+sudo /usr/local/bin/docker compose --env-file .env run --rm ocr --max-files 1
+```
+
+Redémarrer le service Core pour recharger l'index avec le texte reconnu.
+Retour arrière : retirer le complément du `COMPOSE_FILE` et redéployer ;
+le cache peut être conservé ou supprimé séparément.

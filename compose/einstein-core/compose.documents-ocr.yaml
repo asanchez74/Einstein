@@ -1,0 +1,56 @@
+# OCR local des PDF scannés (ADR-0010), à ajouter après compose.documents.yaml.
+# Le Core lit le cache en lecture seule ; la reconnaissance n'est lancée que par :
+#   sudo docker compose --env-file .env run --rm ocr --max-files 1
+services:
+  api:
+    build:
+      args:
+        INSTALL_OCR: "true"
+    environment:
+      EINSTEIN_DOCUMENTS_OCR_CACHE_PATH: /ocr-cache
+    volumes:
+      - type: bind
+        source: ${DOCUMENTS_OCR_CACHE_DIR:?Définir le cache OCR privé}
+        target: /ocr-cache
+        read_only: true
+        bind:
+          create_host_path: false
+
+  # Conteneur ponctuel, jamais démarré par stack-up.sh (profil) : sans réseau,
+  # mémoire propre, originaux en lecture seule, seul le cache est inscriptible.
+  ocr:
+    image: einstein-core:0.1.0
+    profiles: ["ocr"]
+    entrypoint: ["python", "-m", "einstein_core.documents.ocr"]
+    command: ["--max-files", "1"]
+    network_mode: none
+    environment:
+      EINSTEIN_DOCUMENTS_PATH: /documents
+      EINSTEIN_DOCUMENTS_OCR_CACHE_PATH: /ocr-cache
+    volumes:
+      - type: bind
+        source: ${DOCUMENTS_DIR:?Définir le dossier documentaire choisi}
+        target: /documents
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${DOCUMENTS_OCR_CACHE_DIR:?Définir le cache OCR privé}
+        target: /ocr-cache
+        read_only: false
+        bind:
+          create_host_path: false
+    mem_limit: 768m
+    cpu_shares: 128
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m,mode=1777
+    logging:
+      driver: local
+      options:
+        max-size: 10m
+        max-file: "3"
