@@ -557,3 +557,20 @@ Correctif local : le code `subscription_sharing_usage_limit_exceeded` produit
 désormais HTTP 429 « Limite d'usage du forfait IA atteinte ; réessayer plus
 tard » au lieu du 502 générique. Les autres erreurs restent en 502, sans
 message distant. 141 tests réussis ; correctif non déployé.
+
+Après déploiement de `f618387`, la question HTTPS depuis le Mac sur le LAN
+retourne HTTP 429 et `{"detail":"Limite d'usage du forfait IA atteinte ; réessayer plus tard"}`
+(`Sat, 17 Oct 2026 10:13:48 GMT`). Le correctif est validé sur le NAS ;
+l'inférence après rotation reste à confirmer après réinitialisation de la limite.
+
+## Tâches DSM du routage retour VPN confirmées — 17 octobre 2026
+
+`vpn-return-route.sh --check` confirme l'exception présente. Les deux
+tâches root sont activées avec la commande `--apply` du dépôt :
+
+- démarrage : « Einstein - demarrage routage VPN », événement `bootup` ;
+- récurrente : toutes les cinq minutes, dernière exécution à 12:15:01
+  heure locale, statut `Success`.
+
+Détails dans [OpenVPN](../network-openvpn.md). Le contrôle après redémarrage
+du NAS reste reporté et suivi séparément ; il ne bloque pas la clôture.

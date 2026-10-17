@@ -85,9 +85,16 @@ Le mode `--check` retourne 0 si la règle exacte est présente, 1 sinon.
 
 Le 17 octobre 2026, le propriétaire confirme la readiness via le nom DNS
 normal après reconnexion VPN et la présence de l'exception via `--check`.
-L'installation des tâches reste à confirmer explicitement. Le contrôle après
-redémarrage DSM est reporté à un autre créneau, avec accès de récupération
-disponible ; il n'a pas été réalisé.
+Le même jour, les deux tâches sont confirmées sur le NAS, exécutées par root
+et activées avec la commande ci-dessus :
+
+- « Einstein - demarrage routage VPN », événement `bootup`
+  (base `esynoscheduler`) ;
+- tâche récurrente toutes les cinq minutes, dernière exécution
+  `2026-10-17 12:15:01` avec le statut `Success` (`synoschedtask --get`).
+
+Le contrôle après redémarrage DSM est reporté à un autre créneau, avec accès
+de récupération disponible ; il n'a pas été réalisé.
 
 ### Retour arrière
 
