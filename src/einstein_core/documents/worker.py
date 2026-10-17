@@ -3,12 +3,28 @@
 from io import BytesIO
 import json
 import logging
+import re
 import sys
 from xml.etree import ElementTree
 from zipfile import ZipFile
 
 MAX_BYTES = 5 * 1024 * 1024
 MAX_CHARS = 100_000
+
+
+def page_text(page) -> str:
+    """Texte d'une page ; mode layout en rattrapage si les mots sortent collés."""
+    text = page.extract_text() or ""
+    words = re.findall(r"\w+", text)
+    # Certains PDF positionnent les mots sans caractère espace : l'extraction simple les colle.
+    if words and sum(len(word) > 25 for word in words) > 0.05 * len(words):
+        try:
+            layout = " ".join((page.extract_text(extraction_mode="layout") or "").split())
+        except Exception:
+            return text
+        if layout:
+            return layout
+    return text
 
 
 def extract(data: bytes, suffix: str) -> list[dict]:
@@ -36,7 +52,7 @@ def extract(data: bytes, suffix: str) -> list[dict]:
             raise ValueError
         sections, length = [], 0
         for number, page in enumerate(reader.pages, 1):
-            text = page.extract_text() or ""
+            text = page_text(page)
             length += len(text)
             if length > MAX_CHARS:
                 raise ValueError

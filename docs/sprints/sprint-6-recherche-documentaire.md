@@ -395,3 +395,17 @@ laissait un long document occuper toute la liste. Correctif local : un seul
 résultat par document, son meilleur passage. Les versions Word et PDF d'un
 même contenu restent deux documents distincts. 144 tests réussis ; correctif
 non déployé. L'évaluation reprend après déploiement.
+
+Après déploiement de `18efbd9`, « banque » retourne cinq documents distincts.
+« piscine » ne retourne rien, comme attendu. « secret bancaire » ne retournait
+rien malgré un document `Directive_secret_bancaire` : son texte PDF sortait sans
+espaces. Diagnostic dans un conteneur jetable, compteurs uniquement :
+
+| Mode pypdf | Durée | Mots | Mots > 25 caractères | « secret » | « bancaire » |
+|---|---|---|---|---|---|
+| simple | 1,2 s | 517 | 162 | 0 | 0 |
+| `layout` | 1,2 s | 2151 | 0 | 40 | 2 |
+
+Correctif local : rattrapage `layout` par page en cas de mots collés et délai
+par fichier porté à dix secondes. 145 tests réussis ; correctif non déployé.
+Voir la révision de l'[ADR-0009](../adr/0009-recherche-documentaire-locale.md).

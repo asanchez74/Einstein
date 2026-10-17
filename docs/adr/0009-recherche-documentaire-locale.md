@@ -21,7 +21,8 @@ Les `.txt` et `.md` doivent être UTF-8. Les anciens `.doc` ne sont pas pris en 
 
 ## Limites et isolation
 
-Extraction séquentielle dans des sous-processus, trois secondes par fichier,
+Extraction séquentielle dans des sous-processus, dix secondes par fichier
+(initialement trois),
 budget de parcours configurable (`EINSTEIN_DOCUMENTS_INDEX_BUDGET_SECONDS`,
 300 secondes par défaut, initialement trente). Sous Linux, chaque extracteur a une limite
 d'espace virtuel de 128 MiB ; elle ne remplace pas la limite mémoire Docker
@@ -108,3 +109,13 @@ de 300 secondes. L'isolation par sous-processus et les autres plafonds sont
 conservés. Le dossier `Travail` complet (13 219 candidats, profondeur 18)
 reste hors de portée de cette conception : un index persistant et incrémental
 ferait l'objet d'une décision distincte, si le besoin est confirmé.
+
+## Révision : texte PDF sans espaces — 17 octobre 2026
+
+Un PDF réel positionne ses mots sans caractère espace : l'extraction simple de
+pypdf produisait des mots collés (517 « mots » dont 162 de plus de 25 caractères,
+aucune occurrence de « secret »). Le mode `layout` de pypdf reconstitue
+l'espacement (2151 mots, aucun mot collé) en 1,2 seconde sur le DS918+.
+Il est utilisé en rattrapage, page par page, lorsque plus de 5 % des mots
+extraits dépassent 25 caractères ; les autres pages restent en mode simple.
+Le délai par fichier passe à dix secondes, l'indexation n'étant plus bloquante.

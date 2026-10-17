@@ -199,3 +199,21 @@ def test_one_result_per_document(tmp_path):
     results = index.search("banque", 5).results
     assert [hit.source for hit in results] == ["long.txt", "court.txt"]
     assert results[0].score == 2
+
+
+class FakePage:
+    def __init__(self, plain, layout):
+        self.plain, self.layout, self.modes = plain, layout, []
+
+    def extract_text(self, extraction_mode="plain"):
+        self.modes.append(extraction_mode)
+        return self.layout if extraction_mode == "layout" else self.plain
+
+
+def test_glued_pdf_text_uses_layout_fallback():
+    from einstein_core.documents.worker import page_text
+    glued = FakePage("Directive secretprofessionneldubanquieretdesemployesdebanque",
+                     "Directive   secret professionnel du\n banquier et des employés de banque")
+    assert page_text(glued) == "Directive secret professionnel du banquier et des employés de banque"
+    normal = FakePage("Le secret bancaire protège les clients.", "inutilisé")
+    assert page_text(normal) == "Le secret bancaire protège les clients." and normal.modes == ["plain"]

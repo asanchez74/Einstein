@@ -125,7 +125,7 @@ def build_index(root: Path, *, extractor: Callable | None = None, budget_seconds
                         result = subprocess.run(
                             [sys.executable, "-m", "einstein_core.documents.worker", suffix],
                             input=data, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-                            timeout=min(3, remaining), check=True,
+                            timeout=min(10, remaining), check=True,
                         )
                         sections = json.loads(result.stdout)
                     else:
