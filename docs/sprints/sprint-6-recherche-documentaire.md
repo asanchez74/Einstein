@@ -349,3 +349,25 @@ retourne 503 « Indexation documentaire en cours » jusqu'à la fin. Le journal
 indique à la fin les compteurs, sans nom ni contenu. L'arrêt du service
 interrompt le parcours. 143 tests réussis ; correctif non déployé.
 Voir la révision de l'[ADR-0009](../adr/0009-recherche-documentaire-locale.md).
+
+## Indexation en arrière-plan validée et diagnostic des exclusions
+
+Après déploiement de `5f235c7`, la recherche « LATAM » retourne les mêmes
+sources pertinentes avec `indexed_files: 30`, `skipped_files: 27`,
+`partial: true` (index à `10:43:30Z`) : les 57 candidats sont désormais tous
+parcourus.
+
+Diagnostic dans un conteneur jetable (même image et extracteur, UID 10001,
+sans réseau, lecture seule, 256 MiB, délai 60 s), compteurs uniquement :
+
+| Cause | Fichiers |
+|---|---|
+| Extraction réussie en moins de 3 s (médiane 1,7 s, maximum 2,8 s) | 30 |
+| PDF sans texte extractible (scans) | 22 |
+| Plus de 5 MiB | 5 |
+
+Total extrait : 101 200 caractères, loin du plafond d'un million. Aucune
+exclusion n'est due au délai, mais le maximum observé est proche des trois
+secondes par fichier sur le DS918+. Les scans représentent 39 % des candidats
+de ce dossier : la reconnaissance de texte (OCR local ou vision OpenAI,
+décrites plus haut) conditionne leur couverture.
