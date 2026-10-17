@@ -68,17 +68,19 @@ et les limites figurent dans le
 
 ## Sprint 4 — Premier inventaire Einstein Maison
 
-**Statut : en cours — implémentation locale, déploiement NAS à valider**
+**Statut : terminé — clôture documentaire le 17 octobre 2026**
 
-- [ ] Confirmer les données et le contrat d'API en lecture
+- [x] Confirmer les données et le contrat d'API en lecture (catalogue de trois équipements)
 - [x] Charger et valider un catalogue déclaratif JSON
 - [x] Exposer la liste et le détail des équipements
 - [x] Tester les routes et les erreurs de configuration
 - [x] Fournir une commande de validation du catalogue avant déploiement
 - [x] Documenter stockage, sauvegarde et déploiement du catalogue
-- [ ] Valider sur le NAS sans nouvelle infrastructure
+- [x] Valider sur le NAS sans nouvelle infrastructure
+- [x] Vérifier la sauvegarde et le catalogue extrait en répertoire temporaire
 
-Voir le [cadrage du Sprint 4](sprints/sprint-4-inventaire-maison.md).
+Déployé au commit `a15e636`, accès LAN/VPN et refus externe vérifiés.
+Voir le [bilan du Sprint 4](sprints/sprint-4-inventaire-maison.md).
 
 ## Étapes ultérieures
 

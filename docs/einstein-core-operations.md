@@ -194,7 +194,11 @@ contenu de l'archive. Pour restaurer, arrêter la stack, préserver le catalogue
 actuel, extraire l'archive dans un répertoire de préparation, remettre le
 catalogue sous `DATA_DIR` avec UID/GID `10001:10001` et les permissions de
 lecture, puis démarrer et contrôler la santé et les routes Maison.
-Cette restauration reste à valider sur le NAS.
+Le Sprint 4 a validé l'extraction d'une archive dans un répertoire temporaire
+et la lecture du catalogue restauré par le validateur dans un conteneur.
+Le remplacement du catalogue actif et un contrôle HTTP sur les données
+restaurées n'ont pas été exécutés ; voir le
+[bilan Sprint 4](sprints/sprint-4-inventaire-maison.md).
 
 Le Core ne lit actuellement aucun secret et ne prend en charge aucune variable
 `*_FILE`. Lorsqu'une fonctionnalité nécessitera un secret, prévoir une lecture

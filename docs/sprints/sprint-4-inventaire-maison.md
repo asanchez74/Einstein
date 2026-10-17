@@ -2,7 +2,11 @@
 
 ## Statut
 
-**En cours — implémentation locale le 17 octobre 2026 ; NAS non déployé.**
+**Terminé — clôture documentaire le 17 octobre 2026.**
+
+Déployé au commit `a15e636`. Les preuves ci-dessous distinguent les contrôles
+successifs et leurs limites. La restauration est validée par extraction et
+lecture applicative en répertoire temporaire, sans remplacement en production.
 
 ## Objectif
 
@@ -99,8 +103,8 @@ d'exemple et les procédures de sauvegarde/restauration sont préparés.
 Voir l'[ADR-0006](../adr/0006-inventaire-json-maison.md).
 
 Le RT2600ac n'est pas inclus dans l'exemple : son rôle attend confirmation.
-La validation Docker effective, le catalogue réel, la sauvegarde/restauration
-et le déploiement NAS restent à effectuer avant clôture. Aucune nouvelle
+Le catalogue d’exemple est déployé. La santé, les accès HTTPS et le test de
+restauration en répertoire temporaire sont confirmés dans les sections suivantes. Aucune nouvelle
 infrastructure ni dépendance n'a été ajoutée.
 
 ## Validation avant déploiement
@@ -114,3 +118,81 @@ booléens sont rejetés, sans conversion implicite en IPv4.
 La suite vérifie aussi les permissions refusées et l'isolation de deux
 applications utilisant des catalogues distincts. Les 29 tests passent
 localement ; cette vérification ne constitue pas une validation Docker/NAS.
+
+## Déploiement NAS du 17 octobre 2026
+
+Le clone NAS a été mis à jour par fast-forward au commit
+`a15e6364f12131137cf7786ddd4b45b47cdbed86`.
+Les sorties terminal transmises par le propriétaire confirment :
+
+- construction réussie avec Python `3.14.6-slim-bookworm` ;
+- image `einstein-core:0.1.0`, identifiant
+  `sha256:b61a0499f0f8aec07e846cf3b9e5a4b98ccc3be37b61ce91c6a72082864649f7` ;
+- validation du fichier monté via un conteneur temporaire :
+  `Inventaire valide : 3 équipement(s)` ;
+- déploiement par `stack-up.sh einstein-core` réussi ;
+- liste HTTP locale contenant `fritzbox`, `nas`, `pihole`, dans cet ordre ;
+- détail HTTP local de `nas` conforme au catalogue.
+
+Le healthcheck affichait encore `starting` lors des premiers relevés.
+Les sections suivantes consignent les vérifications healthy, HTTPS et sauvegarde.
+
+## Contrôles complémentaires après déploiement
+
+Le propriétaire transmet ensuite les résultats suivants :
+
+| Contrôle | Résultat |
+|---|---|
+| Healthcheck Docker Einstein Core | `healthy` |
+| HTTPS `/api/v1/maison/equipements` depuis le Mac | Liste conforme : `fritzbox`, `nas`, `pihole` |
+
+Cette première sortie HTTPS ne précisait pas le mode de connexion du Mac.
+La confirmation des accès LAN/VPN et du refus externe est consignée ci-dessous.
+
+## Validation des accès à l'inventaire
+
+Le propriétaire confirme que `/api/v1/maison/equipements` répond sur le LAN
+et via VPN, et reçoit HTTP 403 depuis la connexion externe sans VPN.
+La politique LAN/VPN autorisés, accès Internet refusé est donc vérifiée pour
+cette route après déploiement. Le test de sauvegarde/restauration est décrit
+dans la section suivante.
+
+## Sauvegarde et restauration en répertoire temporaire
+
+Le 17 octobre 2026 à 09:28:49 (Europe/Zurich), le propriétaire a exécuté
+`backup-stack.sh einstein-core`. Les sorties confirment l'arrêt temporaire,
+la création de l'archive et le redémarrage du service.
+
+- Archive : `/volume1/docker/einstein/backups/einstein-core/einstein-core-20261017-092848.tar.gz`.
+- Commit du manifeste : `a15e6364f12131137cf7786ddd4b45b47cdbed86`.
+- Source : `/volume1/docker/einstein/data/einstein-core`.
+- SHA-256 calculé et identique au manifeste :
+  `4e8c731cb1dfcc791dbd6c2720dbc1a575721e78bfff8fb2197e44d27da87e0e`.
+- Contenu inspecté : `einstein-core/equipements.json`.
+
+L'archive a été extraite dans un répertoire temporaire sous
+`/volume1/docker/einstein/tmp/core-restore.*`, avec permissions de lecture
+pour l'UID/GID `10001:10001`. Un conteneur temporaire utilisant ce répertoire
+sur `/inventory:ro` a retourné `Inventaire valide : 3 équipement(s)`.
+
+Ce test valide l'extraction et la lecture du catalogue restauré avec le
+validateur applicatif. Il n'a pas remplacé le catalogue actif et ne constitue
+pas un test HTTP complet de l'application sur les données restaurées.
+Le répertoire temporaire reste à nettoyer après vérification de son chemin.
+Après sauvegarde, le propriétaire a confirmé `healthy` sur le NAS et une
+réponse HTTPS contenant les trois équipements depuis le Mac.
+
+## Bilan de clôture
+
+- 29 tests locaux réussis, `compileall`, MkDocs strict et diff vérifiés.
+- Construction et déploiement NAS identifiés par commit et empreinte d'image.
+- Liste et détail validés localement ; liste validée en HTTPS LAN et VPN.
+- Refus externe HTTP 403 confirmé sur la route de liste.
+- Sauvegarde avec manifeste, empreinte vérifiée et catalogue extrait valide.
+- Service healthy et inventaire accessible après sauvegarde.
+
+Le RT2600ac reste exclu du catalogue tant que son rôle précis n'est pas
+confirmé. Les fichiers temporaires de restauration sont à nettoyer après
+vérification du chemin ; la copie externe des sauvegardes reste à organiser.
+Aucune restauration complète en production ni tenue en charge n'est déclarée
+validée. Les tâches Pi-hole reportées du Sprint 3 restent au suivi d'exploitation.

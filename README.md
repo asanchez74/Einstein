@@ -42,15 +42,15 @@ Premier domaine fonctionnel du projet.
 
 ## Statut
 
-Sprint 3 — socle applicatif terminé.
+Sprint 4 — premier inventaire Maison terminé.
 
 Einstein Core expose les endpoints de santé et de version. Le socle est
 testé et déployé sur le NAS ; les validations et leurs limites sont
-consignées dans le suivi du sprint. Le Sprint 4 ajoute localement un inventaire Maison ; son déploiement
-reste à valider.
+consignées dans le suivi du sprint. L’inventaire Maison est déployé,
+accessible sur le LAN et via VPN.
 
 Voir la [roadmap](docs/roadmap.md) et le
-[suivi du Sprint 3](docs/sprints/sprint-3-socle-applicatif.md).
+[bilan du Sprint 4](docs/sprints/sprint-4-inventaire-maison.md).
 
 ## Développement local
 

@@ -1,6 +1,6 @@
 # ADR-0006 — Inventaire Maison déclaratif JSON
 
-- **Statut :** accepté pour l'implémentation locale, déploiement à valider
+- **Statut :** accepté — déployé et validé au Sprint 4
 - **Date :** 17 octobre 2026
 
 ## Besoin
