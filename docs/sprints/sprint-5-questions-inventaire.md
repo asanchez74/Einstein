@@ -498,3 +498,25 @@ L'inférence reste opérationnelle après migration. La cause du refus depuis
 le NAS n'est pas établie ; aucune règle d'accès n'a été modifiée.
 Le renouvellement réel, la révocation et la reconnexion réelle après retrait
 des jetons ne sont pas validés par ces résultats.
+
+## État de session lisible — implémentation locale
+
+Le contrôle du 17 octobre n'a pas observé de renouvellement parce que le
+jeton d'accès était encore valide, sans moyen de connaître son échéance.
+`python -m einstein_core.ai.chatgpt_session --directory /session --status`
+affiche désormais l'expiration, la date du dernier enregistrement et la
+présence d'un refresh token. La commande ne fait aucun appel réseau, ne
+prend pas le verrou, n'écrit aucun fichier et n'affiche aucun jeton.
+
+Procédure de clôture du renouvellement réel, décrite dans le
+[guide Plus](../chatgpt-plus-essai.md#controle-reel-du-renouvellement-de-session) :
+
+1. après déploiement, relever `--status` et noter l'expiration ;
+2. après l'échéance, lancer le contrôle de renouvellement existant ;
+3. vérifier par `--status` un nouvel enregistrement, puis une question HTTPS ;
+4. consigner les deux résultats ici avant de cocher la case de la roadmap.
+
+La révocation reste documentée via les paramètres ChatGPT, sans exécution.
+Une commande Einstein de révocation distante n'est pas requise pour clôturer
+ce sprint ; elle est reportée à un besoin ultérieur. La suite locale comporte
+139 tests, sans appel fournisseur. Aucun déploiement n'a été effectué.

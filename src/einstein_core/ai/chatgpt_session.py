@@ -69,6 +69,30 @@ def access_token(path: Path) -> str:
         raise ProviderError("Session ChatGPT indisponible ; reconnecter le compte si nécessaire") from None
 
 
+def session_status(path: Path, now: float | None = None) -> str:
+    """Résumé lisible sans jeton ni appel réseau, pour planifier le contrôle de refresh."""
+    from datetime import datetime
+
+    record = read_record(path)
+    if not record:
+        return "Aucune session enregistrée."
+    try:
+        saved = float(record["saved_at"])
+        expires = saved + float(record["expires_in"])
+        if not math.isfinite(expires):
+            raise ValueError
+    except (KeyError, TypeError, ValueError):
+        return "Session présente ; expiration inconnue ou invalide."
+    remaining = round((expires - (time.time() if now is None else now)) / 60)
+    renewable = "oui" if isinstance(record.get("refresh_token"), str) and record["refresh_token"] else "non"
+    state = (f"valide encore {remaining} min" if remaining > 1 else
+             f"à renouveler (échéance dépassée de {max(-remaining, 0)} min)")
+    return (f"Session présente ; jeton d'accès {state}. "
+            f"Expiration : {datetime.fromtimestamp(expires).astimezone().isoformat(timespec='seconds')}. "
+            f"Dernier enregistrement : {datetime.fromtimestamp(saved).astimezone().isoformat(timespec='seconds')}. "
+            f"Renouvelable : {renewable}.")
+
+
 def prepare_host(directory: Path, source: Path | None = None) -> None:
     """Initialise l'hôte distant ; importe au plus une session sans écraser."""
     import uuid
@@ -107,8 +131,17 @@ def main(argv: list[str] | None = None) -> int:
 
     parser = argparse.ArgumentParser(description="Préparer un hôte Einstein pour une session Plus")
     parser.add_argument("--directory", type=Path, required=True)
-    parser.add_argument("--import-from", dest="source", type=Path)
+    action = parser.add_mutually_exclusive_group()
+    action.add_argument("--import-from", dest="source", type=Path)
+    action.add_argument("--status", action="store_true", help="Afficher l'expiration sans jeton ni réseau")
     args = parser.parse_args(argv)
+    if args.status:
+        try:
+            print(session_status(args.directory / "credentials.json"))
+        except (LoginError, OSError):
+            print("État de session illisible ; vérifier permissions et UID.")
+            return 1
+        return 0
     try:
         prepare_host(args.directory, args.source)
     except (LoginError, OSError):

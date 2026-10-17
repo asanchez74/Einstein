@@ -159,6 +159,23 @@ def test_host_import_preserves_destination_host(tmp_path):
         chatgpt_session.prepare_host(target, source)
 
 
+def test_status_reports_expiry_without_tokens(tmp_path, capsys):
+    path = session(tmp_path)
+    before = path.read_bytes()
+    assert chatgpt_session.main(["--directory", str(tmp_path), "--status"]) == 0
+    output = capsys.readouterr().out
+    assert "valide encore 60 min" in output and "Renouvelable : oui" in output
+    assert "fake" not in output and path.read_bytes() == before
+    assert not (tmp_path / "host.json").exists()
+
+
+def test_status_expired_and_missing(tmp_path):
+    path = session(tmp_path, expired=True)
+    assert "à renouveler (échéance dépassée de 7 min)" in chatgpt_session.session_status(path)
+    path.unlink()
+    assert chatgpt_session.session_status(path) == "Aucune session enregistrée."
+
+
 def test_invalid_import_does_not_write_credentials(tmp_path):
     source = tmp_path / "invalid.json"
     save_record(source, {"issuer": ISSUER})

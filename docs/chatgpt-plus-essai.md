@@ -238,7 +238,18 @@ La sortie est consignée dans le [Sprint 5](sprints/sprint-5-questions-inventair
 
 Le renouvellement utilise le même verrou et le même fichier que les questions
 IA. Ne pas altérer `saved_at` ou `expires_in` pour forcer ce test, ni restaurer
-une ancienne copie après rotation. Exécuter sur le NAS, sans question simultanée :
+une ancienne copie après rotation.
+
+Consulter d'abord l'échéance, sans appel réseau ni affichage de jeton :
+
+```bash
+sudo /usr/local/bin/docker exec einstein-core \
+  python -m einstein_core.ai.chatgpt_session --directory /session --status
+```
+
+Noter les valeurs `Expiration` et `Dernier enregistrement`. Attendre que
+l'état indique « à renouveler », puis exécuter sur le NAS, sans question
+simultanée :
 
 ```bash
 sudo /usr/local/bin/docker exec -i einstein-core python - <<'PY'
@@ -267,7 +278,9 @@ PY
 ```
 
 Un jeton encore valide ne provoque aucun appel de renouvellement. Dans ce cas,
-répéter ultérieurement sans modifier les fichiers. Après une rotation observée,
+répéter ultérieurement sans modifier les fichiers. Une question IA reçue
+après l'échéance déclenche aussi le renouvellement : `--status` montre alors
+un `Dernier enregistrement` plus récent que celui noté. Après une rotation observée,
 faire une question par l'API HTTPS habituelle pour vérifier aussi l'inférence.
 Consigner les deux résultats au Sprint 5 avant de cocher le renouvellement réel.
 Ce contrôle ne prouve pas la révocation et n'affiche aucun contenu de session.

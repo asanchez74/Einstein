@@ -95,7 +95,9 @@ Voir le [bilan du Sprint 4](sprints/sprint-4-inventaire-maison.md).
 - [x] Déployer Plus sur le NAS et valider une réponse HTTPS
 - [x] Évaluer les cas connus, inconnus et les instructions malveillantes testées
 - [x] Retirer les copies connues de session après transfert au NAS
-- [ ] Valider le renouvellement réel et documenter la révocation
+- [x] Documenter la révocation (paramètres ChatGPT, procédure non exécutée)
+- [x] Afficher l'échéance de session sans jeton (`--status`, local, non déployé)
+- [ ] Valider le renouvellement réel sur le NAS
 - [ ] Documentation et validation NAS
 
 Claude (Anthropic) sera intégré ensuite, sans dépendance ajoutée par anticipation.
