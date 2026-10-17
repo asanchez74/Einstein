@@ -478,3 +478,19 @@ sudo /usr/local/bin/docker compose --env-file .env run --rm ocr --max-files 1
 Redémarrer le service Core pour recharger l'index avec le texte reconnu.
 Retour arrière : retirer le complément du `COMPOSE_FILE` et redéployer ;
 le cache peut être conservé ou supprimé séparément.
+
+### Premier OCR sur le NAS — 17 octobre 2026
+
+Après déploiement de `dd582b5` avec `compose.documents-ocr.yaml` et le cache
+`/volume1/docker/einstein/data/einstein-ocr` (`10001:10001`, 0700), la commande
+`run --rm ocr --max-files 1` affiche :
+
+```text
+reconnus=1 pages_reconnues=1 deja_en_cache=0 sans_besoin=6 ecartes=0 echecs=0 partiel=True
+```
+
+Durée totale 1 min 13 s, démarrage du conteneur et lecture de six PDF avec
+texte compris. La chaîne `pdftoppm` puis Tesseract `fra` est validée dans
+l'image Debian. pypdf a affiché des avertissements de polices (`fontTools`
+absent) contenant des dictionnaires de police, sans texte documentaire :
+la commande coupe désormais la journalisation, comme l'extracteur.

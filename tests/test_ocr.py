@@ -132,3 +132,17 @@ def test_real_tesseract_reads_image_only_pdf(tmp_path):
     assert counts["reconnus"] == 1, counts
     index = build_index(docs, ocr=ocr.cached_ocr(docs, cache))
     assert index.search("assurance habitation", 5).results[0].ocr
+
+
+def test_command_prints_counters_only(corpus, monkeypatch, capsys):
+    import logging
+    monkeypatch.setattr(ocr, "Settings", lambda: corpus)
+    monkeypatch.setattr(ocr, "tesseract_version", lambda: "v1")
+    monkeypatch.setattr(ocr, "ocr_page", lambda descriptor, number, workdir: "texte privé")
+    try:
+        assert ocr.main(["--max-files", "5"]) == 0
+        logging.getLogger("pypdf").warning("avertissement privé")
+    finally:
+        logging.disable(logging.NOTSET)
+    output = capsys.readouterr()
+    assert output.out.startswith("reconnus=1 ") and "privé" not in output.out + output.err

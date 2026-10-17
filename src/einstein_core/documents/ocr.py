@@ -5,6 +5,7 @@ from collections.abc import Callable, Iterator
 import fcntl
 import hashlib
 import json
+import logging
 import os
 from pathlib import Path
 import stat
@@ -156,8 +157,10 @@ def iter_pdfs(root: Path) -> Iterator[tuple[str, Path]]:
 
 
 def run(settings: Settings, max_files: int, max_seconds: int, *,
-        page_ocr: Callable[[int, int, str], str] = ocr_page,
-        engine: Callable[[], str] = tesseract_version) -> dict[str, int | bool]:
+        page_ocr: Callable[[int, int, str], str] | None = None,
+        engine: Callable[[], str] | None = None) -> dict[str, int | bool]:
+    page_ocr = page_ocr or ocr_page
+    engine = engine or tesseract_version
     directory = settings.documents_ocr_cache_path
     if directory is None:
         raise ValueError("Cache OCR requis")
@@ -212,6 +215,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--max-files", type=int, default=1, choices=range(1, 201), metavar="1..200")
     parser.add_argument("--max-minutes", type=int, default=60, choices=range(1, 601), metavar="1..600")
     args = parser.parse_args(argv)
+    # Les avertissements des parseurs PDF peuvent citer des éléments des documents.
+    logging.disable(logging.CRITICAL)
     try:
         counts = run(Settings(), args.max_files, args.max_minutes * 60)
     except (OSError, ValueError, subprocess.SubprocessError):
