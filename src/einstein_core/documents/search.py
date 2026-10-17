@@ -59,9 +59,15 @@ class DocumentIndex:
                     score = sum(words.count(term) for term in terms)
                     hits.append(passage.model_copy(update={"score": score}))
         hits.sort(key=lambda item: (-item.score, item.source, item.passage))
+        # Un résultat par document : son meilleur passage, pour éviter qu'un long fichier occupe toute la liste.
+        best, seen = [], set()
+        for hit in hits:
+            if hit.source not in seen:
+                seen.add(hit.source)
+                best.append(hit)
         return SearchResult(indexed_at=self.indexed_at, indexed_files=self.indexed_files,
                             skipped_files=self.skipped_files, partial=self.partial,
-                            results=hits[:limit])
+                            results=best[:limit])
 
 
 class IndexBudgetExceeded(Exception):

@@ -190,3 +190,12 @@ def test_stop_interrupts_indexing(tmp_path):
     stop.set()
     index = build_index(tmp_path, stop=stop)
     assert index.partial and index.indexed_files == 0
+
+
+def test_one_result_per_document(tmp_path):
+    (tmp_path / "long.txt").write_text(("La banque gère la banque. " + "x " * 400) * 4)
+    (tmp_path / "court.txt").write_text("Une banque privée.")
+    index = build_index(tmp_path)
+    results = index.search("banque", 5).results
+    assert [hit.source for hit in results] == ["long.txt", "court.txt"]
+    assert results[0].score == 2

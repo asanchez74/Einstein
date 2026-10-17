@@ -26,7 +26,7 @@ Voir l'[ADR-0009](../adr/0009-recherche-documentaire-locale.md).
 - [x] Validation NAS sur corpus synthétique : montage, droits, ressources, démarrage
 - [ ] Validation NAS sur le corpus réel
 - [x] Accès LAN et refus externe de la nouvelle route
-- [ ] Accès via VPN de la nouvelle route
+- [x] Accès via VPN de la nouvelle route
 - [ ] Évaluation de pertinence sur quelques recherches choisies
 
 Aucun document réel n'a été consulté ni transféré pendant l'implémentation.
@@ -42,7 +42,8 @@ L'interface pour interagir facilement avec Einstein sera le chantier suivant.
 
 Réponse : `indexed_at`, `indexed_files`, `skipped_files`, `partial`, `results`.
 Chaque résultat contient `source`, `page` (ou null), `passage`, `excerpt`,
-`score` (occurrences des mots). Maximum 20 résultats, requête de 1 à 300
+`score` (occurrences des mots). Un seul résultat par document : son meilleur
+passage. Maximum 20 résultats, requête de 1 à 300
 caractères. Aucun résultat : liste vide ; entrée invalide : 422 ; module
 indisponible/désactivé : 503. Une requête composée uniquement de ponctuation
 ne contient aucun mot et retourne une liste vide.
@@ -379,5 +380,18 @@ Depuis le Mac relié au partage de connexion 4G de l'iPhone (passerelle par
 défaut `172.20.10.1`, interface `en7`, VPN non actif), la requête POST vers
 `/api/v1/documents/recherche` reçoit `HTTP/2 403` de nginx
 (`Sat, 17 Oct 2026 12:52:27 GMT`), page d'erreur Synology sans contenu
-documentaire. L'accès LAN est validé par les recherches précédentes ;
-l'accès par le VPN n'a pas encore été contrôlé pour cette route.
+documentaire. L'accès LAN est validé par les recherches précédentes.
+
+Depuis la même connexion 4G avec OpenVPN actif (route vers `192.168.1.3`
+par `utun4`), la recherche « LATAM » répond normalement : `indexed_files: 30`,
+`skipped_files: 27`, `partial: true`, première source attendue.
+
+## Première évaluation de pertinence
+
+La recherche « banque » retournait cinq passages du même document (quatre de
+la version Word, un de la version PDF), alors que d'autres documents du
+dossier contiennent ce mot selon le propriétaire : le classement par passage
+laissait un long document occuper toute la liste. Correctif local : un seul
+résultat par document, son meilleur passage. Les versions Word et PDF d'un
+même contenu restent deux documents distincts. 144 tests réussis ; correctif
+non déployé. L'évaluation reprend après déploiement.
