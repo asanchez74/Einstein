@@ -360,7 +360,8 @@ Pour terminer le sprint :
 
 - vérifier le renouvellement réel de session et documenter une procédure
   de révocation, sans utiliser simultanément la copie Mac ;
-- documenter la procédure de révocation ;
+- déployer et valider la migration des métadonnées compte/client séparées
+  des jetons, puis le parcours de reconnexion ;
 - confirmer les tâches DSM ; suivre séparément le contrôle après
   redémarrage NAS, explicitement reporté.
 
@@ -448,3 +449,24 @@ Aucun contenu de jeton n'a été affiché. Les fichiers `env.before-plus` et
 `env.prepared` sont conservés dans le dossier temporaire privé. Ces contrôles
 couvrent les copies connues du transfert, pas d'éventuelles autres sauvegardes.
 Ils ne constituent ni une révocation, ni un nouveau test d'inférence.
+
+## Procédure de déconnexion documentée
+
+Le guide Plus décrit la déconnexion via les paramètres ChatGPT, la
+désactivation locale et les conditions d'une reconnexion. Aucune révocation
+réelle n'a été effectuée. La commande de révocation Einstein n'existe pas.
+L'inspection identifie un point restant : séparer les métadonnées compte/client
+des jetons pour conserver l'inscription après nettoyage. Le parcours complet
+reste à implémenter et tester ; le Sprint 5 n'est pas clôturé.
+
+## Métadonnées de reconnexion séparées — implémentation locale
+
+`registration.json` conserve uniquement issuer, sujet et client émis, en
+0600. Login et préparation d'hôte migrent les sessions existantes ; l'import
+conserve aussi ces informations. Une identité ou un client incohérent avec
+l'inscription enregistrée est refusé. Le login reste possible après retrait
+des jetons, en réutilisant le client et le contrôle du sujet.
+
+Les tests isolés couvrent migration, suppression des jetons, réutilisation du
+client, permissions et conflit d'identité. Aucun déploiement, migration NAS,
+login réel ou révocation n'a été effectué pour cette modification.

@@ -271,3 +271,73 @@ répéter ultérieurement sans modifier les fichiers. Après une rotation observ
 faire une question par l'API HTTPS habituelle pour vérifier aussi l'inférence.
 Consigner les deux résultats au Sprint 5 avant de cocher le renouvellement réel.
 Ce contrôle ne prouve pas la révocation et n'affiche aucun contenu de session.
+
+## Révocation et reconnexion — procédure préparée, non exécutée
+
+Cette procédure interrompt volontairement l'accès IA. Elle n'est pas un
+contrôle à effectuer sur la session active pour clôturer la documentation.
+
+### Déconnexion depuis ChatGPT
+
+1. Désactiver l'IA (`EINSTEIN_AI_ENABLED=false`) dans le `.env` runtime NAS,
+   puis appliquer avec `scripts/stack-up.sh einstein-core` depuis le clone NAS.
+   Vérifier santé et inventaire, et que la route de questions retourne 503.
+2. Dans les paramètres ChatGPT du compte concerné, identifier la connexion
+   Einstein et la déconnecter. Cette action concerne l'autorisation distante ;
+   supprimer un fichier local ne la remplace pas.
+3. Après déconnexion, retirer les jetons locaux inutilisables du dossier
+   runtime et des copies connues, sans supprimer `host.json`. Préparer auparavant
+   la conservation privée de l'association compte/client décrite ci-dessous.
+   Ne jamais joindre ces métadonnées ou jetons à une conversation de support.
+
+OpenAI ne transmet pas de notification de déconnexion à Einstein. L'échec
+d'une requête ou d'un renouvellement peut révéler la révocation ; une panne
+réseau temporaire ne justifie pas de supprimer les identifiants.
+
+### Limites actuelles et reconnexion
+
+Einstein ne possède pas encore de commande de déconnexion : aucun appel au
+point de révocation n'est implémenté. La voie utilisateur ci-dessus passe
+par les paramètres ChatGPT. Une future commande devra découvrir
+`revocation_endpoint` dans la configuration OIDC, révoquer le refresh token
+et distinguer succès distant et simple suppression locale.
+
+Les versions préparées localement conservent l'association `issuer`, `subject`
+et `client_id` dans `registration.json` (0600), sans jeton. Le login réutilise
+cette inscription même après suppression de `credentials.json`. Il refuse
+un désaccord entre inscription conservée et session existante. `host.json`
+conserve séparément l'identifiant d'hôte.
+
+Avant de supprimer une ancienne session, déployer cette version puis migrer
+les métadonnées sur le NAS, en tant qu'UID du conteneur, avec la commande de
+préparation déjà disponible :
+
+```bash
+sudo /usr/local/bin/docker exec einstein-core \
+  python -m einstein_core.ai.chatgpt_session --directory /session
+```
+
+Cette commande conserve les métadonnées d'une session existante sans appel
+réseau et sans retirer les jetons. L'import de nouvelles sessions conserve
+aussi cette association. La migration ne peut pas reconstruire l'inscription
+du Mac dont les jetons ont déjà été supprimés : prévoir un transfert privé
+des seules métadonnées de l'inscription NAS vers le dossier de connexion Mac,
+en conservant l'hôte Mac. Ne pas afficher ces fichiers dans le terminal.
+La migration et ce transfert réel n'ont pas été effectués.
+
+Le login doit ensuite être validé dans le navigateur du Mac, puis la nouvelle
+session transférée de manière privée au NAS. L'import actuel refuse tout
+écrasement ; l'ancienne session doit avoir été retirée, IA désactivée.
+Préserver l'hôte NAS lors de l'import et laisser le NAS seul gérer les refreshs.
+Réactiver l'IA uniquement après import réussi ; vérifier santé, inventaire et
+question HTTPS, puis nettoyer les copies de transfert. Ne pas restaurer un
+ancien refresh token pour annuler une révocation.
+
+Le parcours révocation/reconnexion n'a pas été exécuté. La session de
+production reste active ; aucune révocation n'a été déclenchée pendant la
+rédaction de cette procédure.
+
+Sources officielles vérifiées le 17 octobre 2026 :
+
+- [Comptes, sessions et révocation](https://developers.openai.com/siwc/token-sharing-open-source/profiles-and-sessions)
+- [Déconnexion et récupération des erreurs](https://developers.openai.com/siwc/token-sharing-open-source/errors-and-recovery)

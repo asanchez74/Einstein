@@ -12,7 +12,7 @@ import jwt
 import pytest
 
 from einstein_core.ai.chatgpt_login import (
-    ISSUER, LoginError, authorization_params, read_record, save_record,
+    ISSUER, LoginError, authorization_params, load_registration, read_record, retain_registration, save_record,
     validate_callback, validate_identity,
 )
 
@@ -124,3 +124,33 @@ def test_multiple_audiences_require_authorized_party(signed_tokens):
         validate_identity(make(aud=["oaiapp_test", "other"]), keys, "oaiapp_test", "nonce", {})
     with pytest.raises(LoginError):
         validate_identity(make(azp="other"), keys, "oaiapp_test", "nonce", {})
+
+
+def test_registration_survives_token_removal(tmp_path):
+    record = {"issuer": ISSUER, "subject": "account", "client_id": "oaiapp_saved"}
+    save_record(tmp_path / "credentials.json", {**record, "access_token": "private", "refresh_token": "secret"})
+    assert load_registration(tmp_path) == record
+    saved = tmp_path / "registration.json"
+    assert read_record(saved) == record
+    assert saved.stat().st_mode & 0o777 == 0o600
+    (tmp_path / "credentials.json").unlink()
+    previous = load_registration(tmp_path)
+    params, _ = authorization_params("urn:uuid:test", "http://127.0.0.1:1234/auth/callback", previous)
+    assert params["client_id"] == "oaiapp_saved"
+    assert "agent_name_hint" not in params
+
+
+def test_registration_conflict_preserves_identity(tmp_path):
+    original = {"issuer": ISSUER, "subject": "account", "client_id": "oaiapp_saved"}
+    retain_registration(tmp_path, original)
+    save_record(tmp_path / "credentials.json", {**original, "subject": "other"})
+    with pytest.raises(LoginError):
+        load_registration(tmp_path)
+    assert read_record(tmp_path / "registration.json") == original
+
+
+@pytest.mark.parametrize("change", [{"issuer": "wrong"}, {"subject": ""}, {"client_id": "dynamic_agent_client"}])
+def test_invalid_registration_rejected(tmp_path, change):
+    with pytest.raises(LoginError):
+        retain_registration(tmp_path, {"issuer": ISSUER, "subject": "account", "client_id": "oaiapp_saved", **change})
+    assert not (tmp_path / "registration.json").exists()

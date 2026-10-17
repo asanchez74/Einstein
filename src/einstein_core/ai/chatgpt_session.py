@@ -8,7 +8,7 @@ import time
 
 import httpx2 as httpx
 
-from einstein_core.ai.chatgpt_login import ISSUER, RESOURCE, LoginError, read_record, save_record
+from einstein_core.ai.chatgpt_login import ISSUER, RESOURCE, LoginError, load_registration, read_record, retain_registration, save_record
 from einstein_core.ai.provider import ProviderError
 
 
@@ -83,6 +83,7 @@ def prepare_host(directory: Path, source: Path | None = None) -> None:
     if not host:
         host = {"ext_agent_host_id": f"urn:uuid:{uuid.uuid4()}"}
         save_record(directory / "host.json", host)
+    load_registration(directory)
     if source is None:
         return
     target = directory / "credentials.json"
@@ -96,6 +97,7 @@ def prepare_host(directory: Path, source: Path | None = None) -> None:
         "resource.invoke", "chatgpt.tokens.use.direct",
     }.issubset(record["scope"].split()):
         raise LoginError("Session source non autorisée pour le forfait")
+    retain_registration(directory, record)
     # Ne jamais importer l'identifiant d'hôte du Mac sur le NAS.
     save_record(target, {**record, "ext_agent_host_id": host["ext_agent_host_id"]})
 

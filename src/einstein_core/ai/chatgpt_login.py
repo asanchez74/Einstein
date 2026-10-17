@@ -55,6 +55,35 @@ def save_record(path: Path, record: dict) -> None:
             os.unlink(temporary)
 
 
+REGISTRATION_FIELDS = ("issuer", "subject", "client_id")
+
+
+def retain_registration(directory: Path, record: dict) -> dict:
+    """Conserve uniquement l'association validée, jamais les jetons."""
+    registration = {field: record.get(field) for field in REGISTRATION_FIELDS}
+    if (registration["issuer"] != ISSUER
+            or not isinstance(registration["subject"], str) or not registration["subject"]
+            or not isinstance(registration["client_id"], str)
+            or not registration["client_id"].startswith("oaiapp_")):
+        raise LoginError("Inscription locale invalide")
+    saved = read_record(directory / "registration.json")
+    if saved and saved != registration:
+        raise LoginError("Inscription différente de celle conservée")
+    save_record(directory / "registration.json", registration)
+    return registration
+
+
+def load_registration(directory: Path) -> dict:
+    """Migre les anciennes sessions et permet un login sans jetons conservés."""
+    credentials = read_record(directory / "credentials.json")
+    if credentials:
+        return retain_registration(directory, credentials)
+    registration = read_record(directory / "registration.json")
+    if registration:
+        return retain_registration(directory, registration)
+    return {}
+
+
 def authorization_params(host_id: str, redirect: str, previous: dict) -> tuple[dict, str]:
     verifier = secrets.token_urlsafe(48)
     challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).decode().rstrip("=")
@@ -145,7 +174,7 @@ def run(directory: Path, timeout: int) -> None:
     directory.mkdir(mode=0o700, parents=True, exist_ok=True)
     if directory.stat().st_uid != os.getuid() or directory.stat().st_mode & 0o077:
         raise LoginError("Le répertoire de connexion doit appartenir à l'utilisateur et être en mode 0700")
-    previous = read_record(directory / "credentials.json")
+    previous = load_registration(directory)
     host = read_record(directory / "host.json")
     if not host:
         host = {"ext_agent_host_id": f"urn:uuid:{uuid.uuid4()}"}
@@ -202,6 +231,9 @@ def run(directory: Path, timeout: int) -> None:
             jwks = client.get(ISSUER + "/.well-known/jwks.json")
             jwks.raise_for_status()
             identity = validate_identity(tokens, jwks.json(), client_id, params["nonce"], previous)
+            retain_registration(directory, {
+                "issuer": ISSUER, "subject": identity["sub"], "client_id": client_id,
+            })
             save_record(directory / "credentials.json", {
                 "issuer": ISSUER, "subject": identity["sub"], "client_id": client_id,
                 "ext_agent_host_id": host["ext_agent_host_id"],
