@@ -35,7 +35,8 @@ règle ou par des doublons. L'application est différée si la route VPN via
 Configurer des tâches DSM root au démarrage et toutes les cinq minutes
 pour réappliquer l'exception après une remise à zéro des règles réseau.
 Cela implique un délai maximal lié à la planification si DSM retire la règle.
-La tâche et sa tenue au redémarrage/reconnexion restent à valider sur le NAS.
+L'accès après reconnexion VPN est confirmé le 17 octobre 2026. L'installation
+des tâches reste à confirmer ; le contrôle après redémarrage NAS est reporté.
 
 ## Retour arrière et réévaluation
 

@@ -83,9 +83,11 @@ lors de la prochaine exécution. S'assurer que le clone de déploiement est
 accessible à la tâche. Éviter les exécutions concurrentes de ces tâches.
 Le mode `--check` retourne 0 si la règle exacte est présente, 1 sinon.
 
-L'installation des tâches, le contrôle après reconnexion VPN et le contrôle
-après redémarrage DSM restent à effectuer. Un test de redémarrage doit être
-planifié avec accès de récupération disponible ; il n'a pas été réalisé.
+Le 17 octobre 2026, le propriétaire confirme la readiness via le nom DNS
+normal après reconnexion VPN et la présence de l'exception via `--check`.
+L'installation des tâches reste à confirmer explicitement. Le contrôle après
+redémarrage DSM est reporté à un autre créneau, avec accès de récupération
+disponible ; il n'a pas été réalisé.
 
 ### Retour arrière
 

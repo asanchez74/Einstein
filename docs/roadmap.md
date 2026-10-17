@@ -88,11 +88,14 @@ Voir le [bilan du Sprint 4](sprints/sprint-4-inventaire-maison.md).
 
 - [x] API de questions en langage naturel sur le catalogue Maison
 - [x] Interface fournisseur et adaptateur OpenAI Responses
-- [ ] Configuration, secret par fichier et limites d'appel
-- [ ] Tests sans réseau et évaluation réelle séparée
+- [x] Configuration, secret par fichier et limites d'appel
+- [x] Tests sans réseau et premiers essais réels séparés
 - [x] Valider la connexion officielle Plus et le catalogue du compte
 - [x] Brancher l’adaptateur Plus et valider une première génération locale
-- [ ] Évaluer les réponses et préparer le déploiement Plus sur le NAS
+- [x] Déployer Plus sur le NAS et valider une réponse HTTPS
+- [x] Évaluer les cas connus, inconnus et les instructions malveillantes testées
+- [x] Retirer les copies connues de session après transfert au NAS
+- [ ] Valider le renouvellement réel et documenter la révocation
 - [ ] Documentation et validation NAS
 
 Claude (Anthropic) sera intégré ensuite, sans dépendance ajoutée par anticipation.
