@@ -325,3 +325,27 @@ démarrage et accès par le reverse proxy. Ils ne caractérisent ni le temps de
 démarrage ni la mémoire sur le corpus réel, et le refus externe de la route
 reste à contrôler. Prochaine étape : vérifier taille et droits du dossier
 `Travail` pour l'UID 10001 avant de modifier `DOCUMENTS_DIR`.
+
+## Premier dossier réel et indexation en arrière-plan — 17 octobre 2026
+
+Contrôle préalable du dossier `Travail` par un conteneur jetable sans réseau,
+UID 10001, lecture seule, compteurs uniquement : 65 507 entrées, 13 219
+candidats, 443 fichiers de plus de 5 MiB, profondeur 18, aucun élément
+illisible. Le dossier complet dépasse largement les plafonds (1000 entrées,
+100 candidats, profondeur 8). Seuls les sous-dossiers `Credit Suisse` (19
+candidats) et `Lombard Odier` (57 candidats, à plat) les respectent.
+
+`DOCUMENTS_DIR` pointe désormais vers `Travail/Lombard Odier`. La recherche
+« LATAM » depuis le Mac retourne deux sources pertinentes (Word et PDF page 1),
+mais avec `indexed_files: 13`, `skipped_files: 7`, `partial: true` : 20 fichiers
+traités sur 57. Démarrage du conteneur `10:34:43Z`, index `10:35:19Z` : le
+budget de trente secondes est atteint, chaque extraction lançant un
+sous-processus Python sur le DS918+.
+
+Correctif local : l'index est construit en arrière-plan avec un budget de
+300 secondes (`EINSTEIN_DOCUMENTS_INDEX_BUDGET_SECONDS`, transmis par le
+complément Compose). Le Core répond pendant l'extraction ; la recherche
+retourne 503 « Indexation documentaire en cours » jusqu'à la fin. Le journal
+indique à la fin les compteurs, sans nom ni contenu. L'arrêt du service
+interrompt le parcours. 143 tests réussis ; correctif non déployé.
+Voir la révision de l'[ADR-0009](../adr/0009-recherche-documentaire-locale.md).

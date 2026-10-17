@@ -1,6 +1,8 @@
 """Recherche réelle sur fichiers synthétiques, sans réseau ni documents privés."""
 
 from io import BytesIO
+import threading
+import time
 from zipfile import ZipFile
 
 from fastapi.testclient import TestClient
@@ -10,6 +12,7 @@ import pytest
 
 from einstein_core.config import Settings
 from einstein_core.documents.search import build_index
+from einstein_core import main
 from einstein_core.main import create_app
 
 
@@ -26,6 +29,15 @@ def pdf_bytes(text):
     output = BytesIO()
     writer.write(output)
     return output.getvalue()
+
+
+def wait_for_index(client, query):
+    for _ in range(100):
+        response = client.post("/api/v1/documents/recherche", json={"query": query})
+        if "en cours" not in response.text:
+            return response
+        time.sleep(0.05)
+    raise AssertionError("Indexation non terminée")
 
 
 def test_three_formats_and_relative_references(tmp_path):
@@ -97,7 +109,7 @@ def test_document_api_independent_and_snapshot(tmp_path):
     (docs / "test.txt").write_text("Facture chaudière")
     settings = Settings(maison_inventory_path=inventory, documents_enabled=True, documents_path=docs)
     with TestClient(create_app(settings)) as client:
-        response = client.post("/api/v1/documents/recherche", json={"query": "chaudiere"})
+        response = wait_for_index(client, "chaudiere")
         assert response.status_code == 200
         assert response.json()["results"][0]["source"] == "test.txt"
         (docs / "test.txt").unlink()
@@ -146,3 +158,35 @@ def test_pdf_page_limit_and_blank_scan(tmp_path):
     index = build_index(tmp_path)
     assert index.skipped_files == 2
     assert not index.passages
+
+
+def test_background_indexing_keeps_core_available(tmp_path, monkeypatch):
+    inventory = tmp_path / "inventory.json"
+    inventory.write_text("[]")
+    (tmp_path / "test.txt").write_text("Facture chaudière")
+    release, calls = threading.Event(), []
+    original = main.build_index
+
+    def slow_build(root, **kwargs):
+        calls.append(kwargs)
+        release.wait(5)
+        return original(root, **kwargs)
+
+    monkeypatch.setattr(main, "build_index", slow_build)
+    settings = Settings(maison_inventory_path=inventory, documents_enabled=True, documents_path=tmp_path,
+                        documents_index_budget_seconds=120)
+    with TestClient(create_app(settings)) as client:
+        assert client.get("/health/ready").status_code == 200
+        response = client.post("/api/v1/documents/recherche", json={"query": "facture"})
+        assert response.status_code == 503 and "en cours" in response.json()["detail"]
+        release.set()
+        assert wait_for_index(client, "facture").json()["results"][0]["source"] == "test.txt"
+    assert calls[0]["budget_seconds"] == 120
+
+
+def test_stop_interrupts_indexing(tmp_path):
+    (tmp_path / "test.txt").write_text("contenu")
+    stop = threading.Event()
+    stop.set()
+    index = build_index(tmp_path, stop=stop)
+    assert index.partial and index.indexed_files == 0

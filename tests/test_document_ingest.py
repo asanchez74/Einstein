@@ -17,6 +17,7 @@ from einstein_core.documents.cache import cache_key, read_cache, validate_transc
 from einstein_core.documents.ingest import cached_extractor, ingest, main
 from einstein_core.documents.search import build_index
 from einstein_core.main import create_app
+from tests.test_documents import wait_for_index
 
 
 class FakeTranscriber:
@@ -93,13 +94,13 @@ def test_cache_only_api_never_calls_provider(corpus, tmp_path):
     inventory.write_text("[]")
     settings = corpus.model_copy(update={"maison_inventory_path": inventory})
     with TestClient(create_app(settings)) as client:
-        result = client.post("/api/v1/documents/recherche", json={"query": "test"})
+        result = wait_for_index(client, "test")
         assert result.status_code == 200
         assert result.json()["partial"]
         assert result.json()["results"] == []
     ingest(corpus, FakeTranscriber(), 1)
     with TestClient(create_app(settings)) as client:
-        assert client.post("/api/v1/documents/recherche", json={"query": "facture"}).json()["results"]
+        assert wait_for_index(client, "facture").json()["results"]
 
 
 def test_private_cache_and_symlink_refused(corpus, tmp_path):

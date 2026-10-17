@@ -4,6 +4,7 @@ services:
     environment:
       EINSTEIN_DOCUMENTS_ENABLED: ${EINSTEIN_DOCUMENTS_ENABLED:-false}
       EINSTEIN_DOCUMENTS_PATH: /documents
+      EINSTEIN_DOCUMENTS_INDEX_BUDGET_SECONDS: ${EINSTEIN_DOCUMENTS_INDEX_BUDGET_SECONDS:-300}
     volumes:
       - type: bind
         source: ${DOCUMENTS_DIR:?Définir le dossier documentaire choisi}

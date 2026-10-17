@@ -17,6 +17,8 @@ class SearchQuery(BaseModel):
 @router.post("/recherche", response_model=SearchResult)
 def search_documents(payload: SearchQuery, request: Request) -> SearchResult:
     index = request.app.state.documents
+    if index is None and getattr(request.app.state, "documents_indexing", False):
+        raise HTTPException(status_code=503, detail="Indexation documentaire en cours ; réessayer plus tard")
     if index is None:
         raise HTTPException(status_code=503, detail="Recherche documentaire désactivée ou indisponible")
     return index.search(payload.query, payload.limit)

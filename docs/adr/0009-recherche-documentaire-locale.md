@@ -22,7 +22,8 @@ Les `.txt` et `.md` doivent être UTF-8. Les anciens `.doc` ne sont pas pris en 
 ## Limites et isolation
 
 Extraction séquentielle dans des sous-processus, trois secondes par fichier,
-trente secondes pour le parcours. Sous Linux, chaque extracteur a une limite
+budget de parcours configurable (`EINSTEIN_DOCUMENTS_INDEX_BUDGET_SECONDS`,
+300 secondes par défaut, initialement trente). Sous Linux, chaque extracteur a une limite
 d'espace virtuel de 128 MiB ; elle ne remplace pas la limite mémoire Docker
 partagée avec le Core. Sur macOS, le délai s'applique sans ce plafond virtuel.
 Les erreurs de parseur et les contenus ne sont pas journalisés.
@@ -45,7 +46,10 @@ sélectionné sans lien physique vers un contenu à exclure.
 L'instantané est reconstruit au démarrage et ne suit pas les changements en
 cours d'exécution. Une suppression source nécessite un redémarrage pour retirer
 ses extraits de la mémoire. Dossier absent : recherche 503, Core préservé.
-Une extraction lente retarde le démarrage, dans la limite prévue du parcours.
+L'instantané est construit en arrière-plan : le Core, la santé et les
+questions répondent pendant l'extraction ; la recherche retourne 503
+« indexation en cours » jusqu'à la fin du parcours. L'arrêt du service
+interrompt le parcours au fichier suivant.
 Aucun fichier d'index persistant ni téléchargement de document n'est ajouté.
 
 Recherche par mots, sans casse ni accents ; tous les mots doivent apparaître
@@ -92,3 +96,15 @@ au redémarrage ; les anciennes transcriptions sur disque ne sont pas purgées
 automatiquement. Le cache inscriptible est limité au dossier dédié ; le reste
 du système de fichiers reste en lecture seule. La validation NAS et les
 premiers essais PDF/Word restent ouverts.
+
+## Révision : indexation en arrière-plan — 17 octobre 2026
+
+Sur le NAS, le premier dossier réel (57 candidats) n'a été traité qu'à
+20 fichiers : le démarrage d'un sous-processus Python par fichier sur le
+DS918+ consomme l'essentiel du budget de trente secondes, mesuré à 36 secondes
+entre démarrage du conteneur et fin d'indexation. Plutôt que d'allonger le
+démarrage bloquant, le parcours est déplacé en tâche de fond avec un budget
+de 300 secondes. L'isolation par sous-processus et les autres plafonds sont
+conservés. Le dossier `Travail` complet (13 219 candidats, profondeur 18)
+reste hors de portée de cette conception : un index persistant et incrémental
+ferait l'objet d'une décision distincte, si le besoin est confirmé.

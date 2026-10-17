@@ -10,6 +10,7 @@ import re
 import stat
 import subprocess
 import sys
+import threading
 import time
 import unicodedata
 
@@ -67,7 +68,8 @@ class IndexBudgetExceeded(Exception):
     """Arrêt explicite d'un lot, sans traiter les fichiers suivants."""
 
 
-def build_index(root: Path, *, extractor: Callable | None = None, budget_seconds: int = 30) -> DocumentIndex:
+def build_index(root: Path, *, extractor: Callable | None = None, budget_seconds: int = 30,
+                stop: threading.Event | None = None) -> DocumentIndex:
     passages, indexed, skipped, visited, chars = [], 0, 0, 0, 0
     partial = False
     deadline = time.monotonic() + budget_seconds
@@ -76,7 +78,8 @@ def build_index(root: Path, *, extractor: Callable | None = None, budget_seconds
         nonlocal indexed, skipped, visited, chars, partial
         with os.scandir(directory) as entries:
             for entry in entries:
-                if visited >= 1000 or indexed + skipped >= 100 or time.monotonic() >= deadline:
+                if (visited >= 1000 or indexed + skipped >= 100 or time.monotonic() >= deadline
+                        or (stop is not None and stop.is_set())):
                     partial = True
                     return
                 visited += 1

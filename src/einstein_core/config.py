@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     documents_path: Path = Path("/documents")
     documents_mode: Literal["local", "openai"] = "local"
     documents_cache_path: Path | None = None
+    documents_index_budget_seconds: int = Field(default=300, ge=1, le=3600)
     ai_enabled: bool = False
     ai_provider: Literal["openai", "chatgpt"] = "openai"
     ai_model: str | None = Field(default=None, min_length=1, pattern=r"\S")
