@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     environment: Literal["development", "test", "production"] = "development"
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
     version: str = __version__
+    documents_enabled: bool = False
+    documents_path: Path = Path("/documents")
+    documents_mode: Literal["local", "openai"] = "local"
+    documents_cache_path: Path | None = None
     ai_enabled: bool = False
     ai_provider: Literal["openai", "chatgpt"] = "openai"
     ai_model: str | None = Field(default=None, min_length=1, pattern=r"\S")

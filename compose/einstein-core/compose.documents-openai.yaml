@@ -1,0 +1,14 @@
+# À ajouter après compose.documents.yaml et compose.chatgpt.yaml.
+# La recherche ne fait aucun appel ; seule la commande d'ingestion transmet.
+services:
+  api:
+    environment:
+      EINSTEIN_DOCUMENTS_MODE: openai
+      EINSTEIN_DOCUMENTS_CACHE_PATH: /document-cache
+    volumes:
+      - type: bind
+        source: ${DOCUMENTS_CACHE_DIR:?Définir le cache documentaire privé}
+        target: /document-cache
+        read_only: false
+        bind:
+          create_host_path: false

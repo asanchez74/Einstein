@@ -1,0 +1,294 @@
+# Sprint 6 — Recherche documentaire locale
+
+## Statut
+
+En cours : premier lot implémenté localement, non déployé. Les validations
+restantes du Sprint 5 restent ouvertes ; le redémarrage NAS est reporté.
+
+## Périmètre confirmé
+
+Dossier NAS `/volume1/Documents/03_Tonio/Travail` ; formats PDF, Word `.docx`, texte `.txt`
+et Markdown `.md`. Recherche locale uniquement, avec extraits et sources.
+Le chemin `./03_Tonio/Travail/` est interprété relativement à
+`/volume1/Documents`. Seul ce sous-dossier et ses descendants visibles seront
+montés dans le conteneur ; les autres dossiers de Documents restent hors corpus.
+Voir l'[ADR-0009](../adr/0009-recherche-documentaire-locale.md).
+
+## Livrables
+
+- [x] Extraction bornée et isolée des trois familles de formats
+- [x] Recherche lexicale avec référence relative, passage et page PDF
+- [x] API désactivée par défaut, indépendante de la configuration IA
+- [x] Complément Compose en lecture seule
+- [x] Essai vision Plus sur une image synthétique
+- [ ] Traitement documentaire OpenAI avec cache local et limites (lot suivant)
+- [ ] Validation NAS : droits, ressources, temps de démarrage et corpus réel
+- [ ] Contrôles LAN/VPN et refus externe de la nouvelle route
+- [ ] Évaluation de pertinence sur quelques recherches choisies
+
+Aucun document réel n'a été consulté ni transféré pendant l'implémentation.
+L'interface pour interagir facilement avec Einstein sera le chantier suivant.
+
+## API
+
+`POST /api/v1/documents/recherche`
+
+```json
+{"query":"assurance habitation","limit":5}
+```
+
+Réponse : `indexed_at`, `indexed_files`, `skipped_files`, `partial`, `results`.
+Chaque résultat contient `source`, `page` (ou null), `passage`, `excerpt`,
+`score` (occurrences des mots). Maximum 20 résultats, requête de 1 à 300
+caractères. Aucun résultat : liste vide ; entrée invalide : 422 ; module
+indisponible/désactivé : 503. Une requête composée uniquement de ponctuation
+ne contient aucun mot et retourne une liste vide.
+
+## Préparation du déploiement
+
+Après revue, commit et push, mettre à jour le clone NAS puis reconstruire
+l'image. Dans le `.env` runtime, sélectionner les compléments souhaités :
+
+```dotenv
+COMPOSE_FILE=compose.yaml:compose.chatgpt.yaml:compose.documents.yaml
+DOCUMENTS_DIR=/volume1/Documents/03_Tonio/Travail
+EINSTEIN_DOCUMENTS_ENABLED=true
+```
+
+Le conteneur lit avec UID/GID `10001:10001`. Vérifier les permissions du dossier
+sélectionné ; ne pas appliquer de changement récursif global aux documents.
+Un sous-dossier dédié est préférable si le corpus dépasse les limites ou
+contient des fichiers qui ne doivent pas être consultables via Einstein.
+Le chemin source ne peut pas être un lien symbolique.
+
+Utiliser les scripts habituels pour déployer puis vérifier la santé et :
+
+```bash
+curl --fail --show-error --connect-timeout 5 --max-time 10 \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"assurance","limit":5}' \
+  https://einstein.chantevigne.com/api/v1/documents/recherche
+```
+
+Consulter `partial` et les compteurs avant d'interpréter une absence de résultat.
+Le total des fichiers exclus concerne les candidats supportés qui échouent ;
+les formats non supportés, fichiers cachés et liens ignorés n'y figurent pas.
+
+Retour arrière : mettre `EINSTEIN_DOCUMENTS_ENABLED=false` et redéployer ;
+retirer aussi le complément si le montage n'est plus souhaité. Aucun fichier
+source n'est modifié par Einstein. Pas d'accès à OpenAI pour cette recherche.
+
+## Vérifications locales
+
+119 tests passent, sans réseau : extraction réelle sur PDF et DOCX synthétiques,
+texte accentué, références, recherche et limites HTTP, instantané, liens exclus,
+fichiers cachés, PDF chiffrés ou sans texte, plafond de pages, fichier trop gros,
+XML avec DTD, budget de parcours et timeout d'extraction simulé. Les routes
+existantes restent disponibles lorsque le dossier documentaire est absent.
+`compileall`, `pip check`, MkDocs strict et `git diff --check` passent.
+
+Le YAML du complément est vérifié. Docker n'est pas disponible sur le Mac :
+la fusion Compose et le plafond mémoire de l'extracteur sous DSM restent à
+valider sur le NAS. Aucun fichier utilisateur ni corpus NAS n'a été lu.
+
+## Lot suivant confirmé — OCR local des PDF scannés
+
+Le propriétaire ajoute l'OCR au périmètre. Il n'est pas implémenté dans le
+lot actuel : les PDF sans texte restent écartés par le lecteur existant.
+
+Traitement prévu :
+
+1. Extraire le texte existant et repérer les pages sans texte exploitable.
+2. Reconnaître ces pages en français avec Tesseract, localement, dans un
+   traitement séparé du démarrage et des requêtes HTTP.
+3. Conserver le texte dérivé dans un cache runtime distinct des originaux,
+   avec référence au fichier, empreinte de version et numéro de page.
+4. Rendre les passages disponibles à la recherche, en indiquant leur origine
+   OCR et les pages non traitées ou en erreur.
+
+Les originaux restent montés en lecture seule depuis
+`/volume1/Documents/03_Tonio/Travail`. Aucun envoi à OpenAI. Les images isolées,
+l'écriture manuscrite et les autres langues sont hors de ce premier lot OCR.
+Une page mixte avec du texte extractible et une image textuelle peut nécessiter
+un traitement supplémentaire ; la détection initiale ne garantit pas sa couverture.
+
+Un seul fichier sera traité à la fois, avec limites de pages, résolution,
+délai et mémoire. L'enveloppe mémoire et la méthode de rendu PDF seront fixées
+après un essai sur document synthétique, sans augmenter le budget du Core par
+anticipation. L'OCR ne doit pas utiliser les trois secondes prévues pour
+l'extraction actuelle : ce sera un chemin distinct, activé explicitement.
+
+Avant intégration : tester un PDF entièrement scanné, un PDF mixte, un fichier
+chiffré, un dépassement de délai, la préservation des originaux et
+l'invalidation du cache après modification ou suppression d'une source.
+Mesurer ensuite ressources et qualité sur un petit échantillon choisi du NAS.
+
+Références vérifiées le 17 octobre 2026 :
+
+- [Tesseract — langues disponibles, dont `fra`](https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html)
+- [OCRmyPDF — traitements et limites](https://ocrmypdf.readthedocs.io/en/latest/advanced.html)
+
+Tesseract est le moteur envisagé ; le choix d'OCRmyPDF ou d'un rendu PDF
+minimal reste ouvert. Aucun binaire OCR ni service supplémentaire n'a été
+installé pour ce cadrage.
+
+## Essai vision OpenAI autorisé
+
+Le propriétaire demande un essai de transcription par IA et exprime sa
+préférence pour un traitement OpenAI de tout le corpus choisi si l'essai
+est concluant. Cela concerne uniquement `/volume1/Documents/03_Tonio/Travail`,
+pas les autres documents du NAS. Ce changement de direction reste à intégrer
+à l'architecture après mesure du résultat ; aucun envoi massif n'est activé.
+
+`scripts/ocr-openai-probe.py` génère un PNG synthétique en mémoire et transmet
+uniquement cette image via Plus, au modèle configuré du conteneur NAS.
+Aucune lecture documentaire, aucun appel Files upload, aucun repli par clé API.
+L'appel exige `--run-real`, consomme les limites du forfait et attend la fin
+du flux. Délai 60 secondes, sortie limitée à 2000 caractères, pas de retries.
+
+Le script est transféré hors dépôt dans le dossier privé du propriétaire sur
+le NAS ; son exécution Docker nécessite un sudo interactif :
+
+```bash
+sudo /usr/local/bin/docker exec -i einstein-core python - --run-real \
+  < /var/services/homes/tonio/.einstein-ocr-probe.py
+```
+
+Texte de référence présent uniquement dans l'image, pas dans la consigne :
+
+```text
+TEST OCR
+NAS 192.168.1.3
+TOTAL 123.45 CHF
+```
+
+Le script affiche la transcription et une comparaison exacte. Un écart de
+mise en forme n'est pas nécessairement une erreur de lecture : examiner la
+sortie. Même une réussite n'établit pas la qualité sur scans réels, tableaux
+ou manuscrits. L’image synthétique a été vérifiée visuellement sur le Mac
+puis transcrite sur le NAS ; voir le résultat ci-dessous. Aucun document réel
+n’a été envoyé.
+
+[Entrées acceptées par le parcours Plus](https://developers.openai.com/siwc/token-sharing-open-source/preview-limitations) : images et fichiers selon le modèle,
+sans API d'upload Files. Vérifié le 17 octobre 2026.
+
+## Vision Plus validée — 17 octobre 2026
+
+Sortie transmise par le propriétaire après exécution dans le conteneur NAS :
+
+```text
+Fournisseur=chatgpt modèle=gpt-6-luna
+TEST OCR
+NAS 192.168.1.3
+TOTAL 123.45 CHF
+Transcription exacte : oui
+```
+
+L'image synthétique est transcrite exactement. Cela valide cette entrée image
+avec la session et le modèle testés, pas encore l'envoi PDF, les fichiers Word,
+les scans complexes ni un traitement de masse. Aucun décompte détaillé de
+consommation ou relevé de latence n'a été enregistré.
+
+Orientation retenue selon la préférence du propriétaire : préparer le
+traitement OpenAI du corpus sélectionné. L'option OCR local décrite plus haut
+reste une alternative ; Tesseract n'est pas installé. L'extraction locale
+actuelle reste inchangée et aucun document réel n'est envoyé automatiquement.
+
+Le prochain lot doit ajouter un traitement explicitement déclenché, séparé
+du démarrage HTTP, avec un fichier à la fois, un plafond de fichiers/pages,
+un cache local lié à l'empreinte et au modèle, des références aux sources et
+une reprise des fichiers non terminés. Les fichiers inchangés déjà traités
+ne doivent pas être renvoyés à chaque recherche. Aucun repli facturable par
+clé API. D'abord vérifier quelques documents choisis avant le lot complet.
+
+## Lot OpenAI et cache — implémentation locale
+
+Une commande séparée transmet les PDF et Word `.docx` inline à Responses,
+et les textes/Markdown UTF-8 comme texte. Aucun appel à Files upload. Le modèle
+retourne un JSON de transcription, validé avant écriture du cache. La réception
+de `response.completed` reste obligatoire, sans repli par clé API. Le test
+réel image réussi ne valide pas encore ces entrées PDF/Word : les premiers
+fichiers réels restent à contrôler avant d'élargir le lot.
+
+Plafonds initiaux : un MiB par fichier, dix pages par PDF, 65 536 caractères
+pour la réponse, un appel par commande par défaut (maximum dix), budget de
+parcours 300 secondes. Les PDF chiffrés ou dépassant le plafond sont écartés
+avant l'envoi. Le contrôle de pages PDF reste dans l'extracteur isolé. Les
+fichiers plus grands ne sont pas découpés automatiquement dans ce lot.
+
+La sortie doit contenir une entrée par page physique PDF ; Word et textes
+ont une seule entrée sans numéro de page. Une réponse non JSON, vide, refusée,
+interrompue ou avec une pagination incohérente n'est pas mise en cache.
+Les contrôles structurels ne garantissent pas l'exactitude de la transcription.
+
+Le cache est privé (répertoire 0700, propriétaire UID du Core ; fichiers 0600),
+écrit atomiquement, et contient les textes transmis/reconnus. Sa clé inclut
+l'empreinte source, le chemin relatif, le corpus, le modèle demandé et la
+version de la consigne. Les fichiers inchangés sont réutilisés ; les échecs
+sont repris lors d'une exécution explicite ultérieure. Aucun retry automatique.
+Un verrou exclut les ingestions simultanées utilisant ce cache. Éviter les
+questions IA pendant un lot : la limite de concurrence HTTP ne couvre pas
+ce processus d'ingestion.
+
+Le mode `openai` charge uniquement les transcriptions du cache, sans appel
+fournisseur. Fichier modifié, cache absent/invalide ou source supprimée :
+aucun ancien texte n'est repris lors de la reconstruction de l'instantané.
+L'index mémoire reste figé jusqu'au redémarrage du Core, même après ingestion.
+Les anciennes entrées restent sur disque jusqu'à un nettoyage explicite ;
+la suppression d'une source n'est donc pas une suppression du cache disque.
+
+### Déploiement à préparer après revue et commit
+
+Sur le NAS, créer le seul dossier cache dédié :
+
+```bash
+sudo install -d -o 10001 -g 10001 -m 0700 \
+  /volume1/docker/einstein/data/einstein-documents
+```
+
+Dans le `.env` runtime :
+
+```dotenv
+COMPOSE_FILE=compose.yaml:compose.chatgpt.yaml:compose.documents.yaml:compose.documents-openai.yaml
+DOCUMENTS_DIR=/volume1/Documents/03_Tonio/Travail
+DOCUMENTS_CACHE_DIR=/volume1/docker/einstein/data/einstein-documents
+EINSTEIN_DOCUMENTS_ENABLED=true
+```
+
+Conserver les variables Plus existantes. Après mise à jour du clone, build
+et déploiement avec les scripts habituels, l'index peut être vide tant que
+le corpus n'a pas été traité. Déclencher un premier envoi explicitement :
+
+```bash
+sudo /usr/local/bin/docker exec einstein-core \
+  python -m einstein_core.documents.ingest --run-real --max-files 1
+```
+
+La commande transmet au plus un fichier nécessitant une transcription et
+n'affiche que les compteurs, jamais le texte. Le fichier choisi dépend de
+l'ordre du parcours ; pour une validation initiale ciblée, préparer un petit
+corpus de test choisi avant le corpus complet. Chaque nouvelle exécution
+réutilise le cache puis continue dans la limite indiquée. Les compteurs
+`partiel` signalent limites ou exclusions, sans promettre une couverture totale.
+
+Pour charger les nouvelles transcriptions dans l'index, redémarrer uniquement
+le service Core :
+
+```bash
+cd ~/Development/Einstein/compose/einstein-core
+sudo /usr/local/bin/docker compose --env-file .env restart api
+```
+
+Contrôler ensuite healthy et la recherche depuis le Mac LAN/VPN. Retirer le
+complément `compose.documents-openai.yaml` rétablit le mode local après
+redéploiement. Le cache contient des données documentaires : le protéger comme
+les sources et définir sa rétention/sauvegarde avant l'usage régulier.
+Aucune ingestion réelle ni modification de configuration NAS n'a été exécutée
+pour cette implémentation ; les tests utilisent un faux fournisseur.
+
+Vérification après ajout du cache : **137 tests réussis**, sans appel réseau
+fournisseur, dont validation des requêtes SDK inline dans les quatre formats,
+budget d'appels, réutilisation et invalidation du cache, pagination, refus des
+sorties invalides, verrou, permissions et recherche cache seule. `compileall`,
+`pip check`, MkDocs strict et `git diff --check` passent. Les compléments YAML
+sont vérifiés ; la fusion Compose réelle reste à valider sur le NAS.

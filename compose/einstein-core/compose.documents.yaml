@@ -1,0 +1,13 @@
+# Complément facultatif, cumulable avec compose.chatgpt.yaml.
+services:
+  api:
+    environment:
+      EINSTEIN_DOCUMENTS_ENABLED: ${EINSTEIN_DOCUMENTS_ENABLED:-false}
+      EINSTEIN_DOCUMENTS_PATH: /documents
+    volumes:
+      - type: bind
+        source: ${DOCUMENTS_DIR:?Définir le dossier documentaire choisi}
+        target: /documents
+        read_only: true
+        bind:
+          create_host_path: false

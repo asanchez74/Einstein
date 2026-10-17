@@ -101,6 +101,18 @@ Voir le [bilan du Sprint 4](sprints/sprint-4-inventaire-maison.md).
 Claude (Anthropic) sera intégré ensuite, sans dépendance ajoutée par anticipation.
 Voir le [cadrage du Sprint 5](sprints/sprint-5-questions-inventaire.md).
 
+## Sprint 6 — Recherche documentaire
+
+**Statut : premier lot local, non déployé**
+
+Recherche locale sur les PDF, Word `.docx` et textes du dossier choisi
+`/volume1/Documents/03_Tonio/Travail`, avec extraits et sources, sans transmission à l’IA.
+Voir le [Sprint 6](sprints/sprint-6-recherche-documentaire.md). Les validations
+restantes du Sprint 5 sont suivies séparément. L’interface utilisateur viendra
+ensuite. Un essai vision Plus sur image synthétique est réussi ; le traitement
+OpenAI explicite du corpus et son cache sont implémentés localement, sans
+ingestion réelle ni déploiement documentaire.
+
 ## Étapes ultérieures
 
 Les étapes suivantes seront planifiées après validation du socle applicatif :

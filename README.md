@@ -42,7 +42,8 @@ Premier domaine fonctionnel du projet.
 
 ## Statut
 
-Sprint 4 — premier inventaire Maison terminé.
+Sprint 5 — questions sur l’inventaire déployées avec Plus ; validations restantes suivies.
+Sprint 6 — recherche documentaire locale en développement, non déployée.
 
 Einstein Core expose les endpoints de santé et de version. Le socle est
 testé et déployé sur le NAS ; les validations et leurs limites sont
@@ -89,6 +90,7 @@ Les endpoints sont accessibles sur `http://127.0.0.1:8000` :
 - `/health/ready` ;
 - `/version` ;
 - `/docs` pour la documentation OpenAPI ;
+- `/api/v1/documents/recherche` (POST, activation explicite ; voir le [Sprint 6](docs/sprints/sprint-6-recherche-documentaire.md)) ;
 - `/api/v1/maison/equipements` et `/api/v1/maison/equipements/{id}` pour l’inventaire.
 
 ## Documentation

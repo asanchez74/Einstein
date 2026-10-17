@@ -1,5 +1,6 @@
 """Point d'entrée HTTP d'Einstein Core."""
 
+import asyncio
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 import logging
@@ -9,6 +10,8 @@ from fastapi import FastAPI
 from einstein_core.ai.configuration import configure_provider
 from einstein_core.ai.provider import AnswerProvider
 from einstein_core.api.questions import router as questions_router
+from einstein_core.api.documents import router as documents_router
+from einstein_core.documents.search import build_index
 from einstein_core.maison.questions import QuestionService
 from einstein_core.api.health import router as health_router
 from einstein_core.api.maison import router as maison_router
@@ -27,6 +30,18 @@ def create_app(settings: Settings | None = None, *, provider: AnswerProvider | N
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         app.state.inventory = load_inventory(settings.maison_inventory_path)
+        app.state.documents = None
+        if settings.documents_enabled:
+            try:
+                extractor = None
+                if settings.documents_mode == "openai":
+                    from einstein_core.documents.ingest import cached_extractor
+                    if settings.documents_cache_path is None or not settings.ai_model:
+                        raise ValueError("Cache documentaire et modèle requis")
+                    extractor = cached_extractor(settings.documents_path, settings.documents_cache_path, settings.ai_model)
+                app.state.documents = await asyncio.to_thread(build_index, settings.documents_path, extractor=extractor)
+            except (OSError, ValueError):
+                logger.warning("Recherche documentaire indisponible")
         active_provider = (provider or configure_provider(settings)) if settings.ai_enabled else None
         app.state.questions = (
             QuestionService(
@@ -52,6 +67,7 @@ def create_app(settings: Settings | None = None, *, provider: AnswerProvider | N
     app.include_router(health_router)
     app.include_router(maison_router)
     app.include_router(questions_router)
+    app.include_router(documents_router)
 
     @app.get("/version", tags=["metadata"])
     def version() -> dict[str, str]:
