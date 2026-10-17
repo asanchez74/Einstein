@@ -16,9 +16,18 @@ services:
     environment:
       EINSTEIN_ENVIRONMENT: ${EINSTEIN_ENVIRONMENT:-production}
       EINSTEIN_LOG_LEVEL: ${EINSTEIN_LOG_LEVEL:-INFO}
+      EINSTEIN_MAISON_INVENTORY_PATH: /inventory/equipements.json
 
     ports:
       - "127.0.0.1:${HOST_PORT:-18081}:8000"
+
+    volumes:
+      - type: bind
+        source: ${DATA_DIR:-/volume1/docker/einstein/data/einstein-core}
+        target: /inventory
+        read_only: true
+        bind:
+          create_host_path: false
 
     mem_limit: 256m
     cpu_shares: 256

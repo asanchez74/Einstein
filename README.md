@@ -42,11 +42,12 @@ Premier domaine fonctionnel du projet.
 
 ## Statut
 
-🚧 Sprint 3 — socle applicatif en cours de finalisation.
+Sprint 3 — socle applicatif terminé.
 
-Einstein Core expose les endpoints de santé et de version. La clôture du
-sprint reste conditionnée à la documentation opérationnelle et à la
-consolidation des validations NAS.
+Einstein Core expose les endpoints de santé et de version. Le socle est
+testé et déployé sur le NAS ; les validations et leurs limites sont
+consignées dans le suivi du sprint. Le Sprint 4 ajoute localement un inventaire Maison ; son déploiement
+reste à valider.
 
 Voir la [roadmap](docs/roadmap.md) et le
 [suivi du Sprint 3](docs/sprints/sprint-3-socle-applicatif.md).
@@ -65,6 +66,11 @@ python -m pip install -e '.[dev]'
 python -m pytest
 ```
 
+Le catalogue d'exemple `config/equipements.example.json` est utilisé par défaut
+lorsque la commande est lancée depuis la racine. Pour utiliser un autre fichier,
+exporter `EINSTEIN_MAISON_INVENTORY_PATH` avec son chemin. Aucun fichier `.env`
+n'est chargé automatiquement par Python.
+
 Démarrer l'API localement :
 
 ```bash
@@ -76,7 +82,8 @@ Les endpoints sont accessibles sur `http://127.0.0.1:8000` :
 - `/health/live` ;
 - `/health/ready` ;
 - `/version` ;
-- `/docs` pour la documentation OpenAPI.
+- `/docs` pour la documentation OpenAPI ;
+- `/api/v1/maison/equipements` et `/api/v1/maison/equipements/{id}` pour l’inventaire.
 
 ## Documentation
 

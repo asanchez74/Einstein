@@ -5,10 +5,18 @@ import logging
 import pytest
 from fastapi.testclient import TestClient
 
-from einstein_core.main import app
+from einstein_core.config import Settings
+from einstein_core.main import create_app
 
 @pytest.fixture
-def client():
+def app(tmp_path):
+    path = tmp_path / "inventory.json"
+    path.write_text("[]")
+    return create_app(Settings(maison_inventory_path=path))
+
+
+@pytest.fixture
+def client(app):
     with TestClient(app) as test_client:
         yield test_client
 
@@ -37,7 +45,7 @@ def test_version(client) -> None:
     assert payload["environment"] == "development"
 
 
-def test_lifespan_logs_startup_and_shutdown(caplog) -> None:
+def test_lifespan_logs_startup_and_shutdown(caplog, app) -> None:
     with caplog.at_level(logging.INFO, logger="einstein_core.main"):
         with TestClient(app) as client:
             assert client.get("/health/ready").status_code == 200

@@ -1,6 +1,6 @@
 # Einstein Core
 
-Premier service applicatif de la plateforme Einstein : API FastAPI sans état.
+Premier service applicatif de la plateforme Einstein : API FastAPI avec inventaire déclaratif en lecture seule.
 
 ## Endpoints
 
@@ -8,6 +8,8 @@ Premier service applicatif de la plateforme Einstein : API FastAPI sans état.
 - `GET /health/ready`
 - `GET /version`
 - `GET /docs`
+- `GET /api/v1/maison/equipements`
+- `GET /api/v1/maison/equipements/{id}`
 
 ## Documentation opérationnelle
 

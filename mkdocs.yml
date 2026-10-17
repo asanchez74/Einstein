@@ -18,6 +18,7 @@ nav:
   - Sprints:
       - Sprint 2 — Socle Docker: sprints/sprint-2-socle-docker.md
       - Sprint 3 — Socle applicatif: sprints/sprint-3-socle-applicatif.md
+      - Sprint 4 — Inventaire Maison: sprints/sprint-4-inventaire-maison.md
   - Roadmap: roadmap.md
   - Décisions d'architecture:
       - ADR-0001: adr/0001-architecture.md
@@ -25,3 +26,4 @@ nav:
       - ADR-0003: adr/0003-gestion-docker-compose.md
       - ADR-0004: adr/0004-gestion-ressources-cpu-dsm.md
       - ADR-0005: adr/0005-monolithe-modulaire-fastapi.md
+      - ADR-0006: adr/0006-inventaire-json-maison.md

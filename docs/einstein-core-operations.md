@@ -2,8 +2,9 @@
 
 ## Périmètre
 
-Einstein Core est une API FastAPI sans base de données, sans donnée persistante
-et sans secret applicatif à ce stade. Le développement local et les tests sont
+Einstein Core est une API FastAPI sans base de données ni secret applicatif.
+Depuis le Sprint 4, elle dépend d'un catalogue JSON externe monté en lecture
+seule. La procédure ci-dessous doit être appliquée avant son premier déploiement. Le développement local et les tests sont
 décrits dans le README à la racine du dépôt.
 
 ## Configuration
@@ -14,6 +15,8 @@ décrits dans le README à la racine du dépôt.
 | `EINSTEIN_ENVIRONMENT` | `development` | `production` | `development`, `test` ou `production` |
 | `EINSTEIN_LOG_LEVEL` | `INFO` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR` ou `CRITICAL` |
 | `EINSTEIN_VERSION` | `0.1.0` | Non transmise par Compose | Version exposée ; conserver celle du paquet |
+| `EINSTEIN_MAISON_INVENTORY_PATH` | `config/equipements.example.json` | `/inventory/equipements.json` | Catalogue chargé au démarrage |
+| `DATA_DIR` | Sans objet | `/volume1/docker/einstein/data/einstein-core` | Répertoire source du montage Compose |
 | `HOST_PORT` | Sans objet | `18081` | Port local du NAS, variable Compose |
 
 Le fichier `compose/einstein-core/.env` sert à l'interpolation Compose.
@@ -44,6 +47,21 @@ cd ~/Development/Einstein/compose/einstein-core
 cp -n .env.example .env
 chmod 600 .env
 ```
+
+Préparer le catalogue avant déploiement (ne pas remplacer un fichier existant) :
+
+```bash
+sudo install -d -o 10001 -g 10001 -m 0750 /volume1/docker/einstein/data/einstein-core
+sudo cp -n ~/Development/Einstein/config/equipements.example.json /volume1/docker/einstein/data/einstein-core/equipements.json
+sudo chown 10001:10001 /volume1/docker/einstein/data/einstein-core/equipements.json
+sudo chmod 0640 /volume1/docker/einstein/data/einstein-core/equipements.json
+```
+
+Adapter le catalogue aux équipements confirmés. Le RT2600ac est absent de
+l'exemple tant que son rôle précis n'est pas confirmé. Renseigner `DATA_DIR`
+dans le `.env` NAS pour permettre la sauvegarde. Le montage n'est pas créé
+automatiquement si le répertoire manque ; le démarrage échoue si le fichier
+est absent ou invalide.
 
 Vérifier les valeurs du `.env`, puis valider et déployer :
 
@@ -151,9 +169,20 @@ Rejouer les contrôles locaux et HTTPS après le redémarrage.
 
 ## Données et secrets
 
-Aucun volume persistant n'est monté pour le Core. Sa reconstruction repose sur
-Git et sur le `.env` NAS. `backup-stack.sh` exige un `DATA_DIR` et ne s'applique
-pas à cette stack sans état. Ne pas créer de répertoire de données artificiel.
+Le catalogue est monté en lecture seule sur `/inventory`. Le conteneur
+ne modifie pas cette source. Pour changer le catalogue, préparer et valider
+un nouveau fichier, conserver l'ancien, remplacer le fichier sur le NAS,
+puis redémarrer le Core. Les changements de contenu ne sont pas rechargés
+à chaud. Si le démarrage échoue, restaurer l'ancien fichier puis redémarrer.
+
+Avec `DATA_DIR` explicite dans le `.env`, `sudo ./scripts/backup-stack.sh
+einstein-core` archive le répertoire du catalogue en arrêtant brièvement le
+service. Conserver aussi le `.env` séparément. Vérifier l'empreinte et le
+contenu de l'archive. Pour restaurer, arrêter la stack, préserver le catalogue
+actuel, extraire l'archive dans un répertoire de préparation, remettre le
+catalogue sous `DATA_DIR` avec UID/GID `10001:10001` et les permissions de
+lecture, puis démarrer et contrôler la santé et les routes Maison.
+Cette restauration reste à valider sur le NAS.
 
 Le Core ne lit actuellement aucun secret et ne prend en charge aucune variable
 `*_FILE`. Lorsqu'une fonctionnalité nécessitera un secret, prévoir une lecture
@@ -168,4 +197,5 @@ l'image, les logs ou les exemples versionnés.
 
 Conserver la date, le commit déployé, l'état healthy, les réponses HTTP locales
 LAN et VPN, les résultats depuis Internet, le contrôle des ressources et le résultat du
-redémarrage dans le suivi du Sprint 3. La validation NAS reste à consolider.
+redémarrage dans le suivi du Sprint 3. La validation du socle est consolidée
+dans ce suivi, avec la chronologie et les limites des contrôles.

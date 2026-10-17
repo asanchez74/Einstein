@@ -178,7 +178,7 @@ explicitement dans le `.env` (sans interpolation de variable).
 |---|---|
 | `smoke-test` | `DATA_DIR` est défini dans l'exemple et monté sur `/data` |
 | `pihole` | `DATA_DIR` est défini dans l'exemple et monté sur `/etc/pihole` ; voir la procédure dédiée |
-| `einstein-core` | Sans état, aucun `DATA_DIR` ni sauvegarde de données à effectuer |
+| `einstein-core` | Depuis le Sprint 4, catalogue JSON sous `DATA_DIR`, monté en lecture seule ; procédure dans le guide Core |
 
 Sur le NAS, le script ne relance pas automatiquement ses commandes de fichiers
 avec `sudo` : l'exécuter avec `sudo` si les données appartiennent au conteneur
