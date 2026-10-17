@@ -84,7 +84,7 @@ Voir le [bilan du Sprint 4](sprints/sprint-4-inventaire-maison.md).
 
 ## Sprint 5 — Questions sur l'inventaire
 
-**Statut : en cours — mode Plus déployé sur le NAS, premier essai HTTPS réussi**
+**Statut : terminé — clôture le 17 octobre 2026**
 
 - [x] API de questions en langage naturel sur le catalogue Maison
 - [x] Interface fournisseur et adaptateur OpenAI Responses
@@ -96,24 +96,29 @@ Voir le [bilan du Sprint 4](sprints/sprint-4-inventaire-maison.md).
 - [x] Évaluer les cas connus, inconnus et les instructions malveillantes testées
 - [x] Retirer les copies connues de session après transfert au NAS
 - [x] Documenter la révocation (paramètres ChatGPT, procédure non exécutée)
-- [x] Afficher l'échéance de session sans jeton (`--status`, local, non déployé)
-- [x] Valider le renouvellement réel sur le NAS (rotation observée ; inférence après rotation bloquée par la limite Plus, à reconfirmer)
-- [ ] Documentation et validation NAS
+- [x] Afficher l'échéance de session sans jeton (`--status`)
+- [x] Valider le renouvellement réel sur le NAS, puis une question HTTPS après rotation
+- [x] Distinguer la limite d'usage Plus (HTTP 429) d'une panne fournisseur
+- [x] Confirmer les tâches DSM du routage retour VPN
+- [x] Documentation et validation NAS
+
+Le contrôle après redémarrage du NAS reste suivi séparément.
 
 Claude (Anthropic) est reporté : l’abonnement Max ne peut pas être utilisé par une application tierce et aucune facturation API n’est ouverte pour l’instant (voir ADR-0007).
 Voir le [cadrage du Sprint 5](sprints/sprint-5-questions-inventaire.md).
 
 ## Sprint 6 — Recherche documentaire
 
-**Statut : premier lot local, non déployé**
+**Statut : en cours — mode local déployé sur le NAS, sous-dossier réel indexé**
 
 Recherche locale sur les PDF, Word `.docx` et textes du dossier choisi
 `/volume1/Documents/03_Tonio/Travail`, avec extraits et sources, sans transmission à l’IA.
-Voir le [Sprint 6](sprints/sprint-6-recherche-documentaire.md). Les validations
-restantes du Sprint 5 sont suivies séparément. L’interface utilisateur viendra
-ensuite. Un essai vision Plus sur image synthétique est réussi ; le traitement
-OpenAI explicite du corpus et son cache sont implémentés localement, sans
-ingestion réelle ni déploiement documentaire.
+Voir le [Sprint 6](sprints/sprint-6-recherche-documentaire.md). Le dossier
+complet dépasse les plafonds ; le sous-dossier `Lombard Odier` est indexé en
+arrière-plan (30 documents, 22 scans sans texte). Restent le refus externe,
+l’évaluation de pertinence et le cadrage de l’OCR local. Le traitement OpenAI
+du corpus est implémenté localement, sans ingestion réelle ni déploiement.
+L’interface utilisateur viendra ensuite.
 
 ## Étapes ultérieures
 

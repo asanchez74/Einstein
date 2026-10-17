@@ -2,7 +2,7 @@
 
 ## Statut
 
-**En cours — Plus déployé et testé sur le NAS le 17 octobre 2026.**
+**Terminé — 17 octobre 2026.** Le contrôle après redémarrage du NAS reste suivi séparément.
 
 Les sections suivantes conservent la chronologie des étapes. Le bilan actuel
 et les validations restantes figurent en fin de document.
@@ -574,3 +574,18 @@ tâches root sont activées avec la commande `--apply` du dépôt :
 
 Détails dans [OpenVPN](../network-openvpn.md). Le contrôle après redémarrage
 du NAS reste reporté et suivi séparément ; il ne bloque pas la clôture.
+
+## Inférence après rotation et clôture — 17 octobre 2026
+
+Après réinitialisation de la limite sur cinq heures, la question HTTPS depuis
+le Mac sur le LAN retourne HTTP 200 (`Sat, 17 Oct 2026 12:44:29 GMT`) :
+
+```json
+{"answer":"L’adresse du NAS Synology DS918+ est **192.168.1.3**.","provider":"chatgpt","model":"gpt-6-luna"}
+```
+
+La session renouvelée par le NAS est donc pleinement opérationnelle. Tous les
+livrables du sprint sont validés ; le Sprint 5 est clôturé. Restent hors sprint :
+le contrôle après redémarrage du NAS, la cause du 403 sur les requêtes émises
+depuis le NAS lui-même, et l'éventuel nettoyage des autorisations « Einstein »
+en double dans les paramètres ChatGPT, lors d'un test de révocation planifié.
