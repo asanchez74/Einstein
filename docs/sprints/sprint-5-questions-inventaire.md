@@ -470,3 +470,31 @@ des jetons, en réutilisant le client et le contrôle du sujet.
 Les tests isolés couvrent migration, suppression des jetons, réutilisation du
 client, permissions et conflit d'identité. Aucun déploiement, migration NAS,
 login réel ou révocation n'a été effectué pour cette modification.
+
+## Migration NAS et inférence après migration — 17 octobre 2026
+
+Après les instructions de déploiement du commit `3285633`, le propriétaire
+a exécuté la préparation de session dans le conteneur existant. La commande
+s'est terminée avec « Identifiant d'hôte prêt. ». Le contrôle confirme :
+
+```text
+600 10001:10001 /session/registration.json
+```
+
+Cela confirme la présence du fichier de métadonnées et ses permissions ;
+son contenu n'a pas été affiché. Le commit exact du clone et l'identifiant
+de l'image reconstruite n'ont pas été joints à ce contrôle.
+
+La première question HTTPS, exécutée depuis le NAS, a reçu HTTP 403.
+Depuis le Mac, la même question a ensuite reçu HTTP 200 :
+
+```json
+{"answer":"L’adresse du NAS (Synology DS918+) est **192.168.1.3**.","provider":"chatgpt","model":"gpt-6-luna"}
+```
+
+L'en-tête Date indique `Sat, 17 Oct 2026 09:24:10 GMT`, soit 11:24:10
+en Europe/Zurich. Le mode LAN/VPN du Mac n'a pas été précisé pour ce test.
+L'inférence reste opérationnelle après migration. La cause du refus depuis
+le NAS n'est pas établie ; aucune règle d'accès n'a été modifiée.
+Le renouvellement réel, la révocation et la reconnexion réelle après retrait
+des jetons ne sont pas validés par ces résultats.
