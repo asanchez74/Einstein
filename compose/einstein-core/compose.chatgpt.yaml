@@ -1,0 +1,26 @@
+# Mode Plus : ne pas combiner avec compose.openai.yaml (clé API).
+services:
+  api:
+    build:
+      args:
+        INSTALL_CHATGPT: "true"
+
+    environment:
+      EINSTEIN_AI_ENABLED: ${EINSTEIN_AI_ENABLED:-false}
+      EINSTEIN_AI_PROVIDER: chatgpt
+      EINSTEIN_AI_MODEL: ${EINSTEIN_AI_MODEL:?Choisir un modèle du catalogue Plus}
+      EINSTEIN_AI_CHATGPT_CREDENTIALS_FILE: /session/credentials.json
+      EINSTEIN_AI_TIMEOUT_SECONDS: ${EINSTEIN_AI_TIMEOUT_SECONDS:-45}
+      EINSTEIN_AI_MAX_OUTPUT_CHARS: ${EINSTEIN_AI_MAX_OUTPUT_CHARS:-8192}
+      EINSTEIN_AI_MAX_CONCURRENCY: ${EINSTEIN_AI_MAX_CONCURRENCY:-1}
+      EINSTEIN_AI_MAX_CONTEXT_BYTES: ${EINSTEIN_AI_MAX_CONTEXT_BYTES:-32768}
+
+    # Écriture nécessaire à la rotation atomique des jetons et au verrou fichier.
+    # Seul ce répertoire privé est inscriptible ; la racine reste read_only.
+    volumes:
+      - type: bind
+        source: ${CHATGPT_SESSION_DIR:-/volume1/docker/einstein/secrets/einstein-core/chatgpt}
+        target: /session
+        read_only: false
+        bind:
+          create_host_path: false

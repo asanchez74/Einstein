@@ -17,6 +17,7 @@ services:
       EINSTEIN_ENVIRONMENT: ${EINSTEIN_ENVIRONMENT:-production}
       EINSTEIN_LOG_LEVEL: ${EINSTEIN_LOG_LEVEL:-INFO}
       EINSTEIN_MAISON_INVENTORY_PATH: /inventory/equipements.json
+      EINSTEIN_AI_ENABLED: "false"
 
     ports:
       - "127.0.0.1:${HOST_PORT:-18081}:8000"

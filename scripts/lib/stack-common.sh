@@ -17,14 +17,14 @@ init_stack() {
         die "nom du service manquant"
 
     STACK_DIR="${REPO_ROOT}/compose/${SERVICE}"
-    COMPOSE_FILE="${STACK_DIR}/compose.yaml"
+    STACK_COMPOSE_FILE="${STACK_DIR}/compose.yaml"
     ENV_FILE="${STACK_DIR}/.env"
 
     [[ -d "$STACK_DIR" ]] ||
         die "service inconnu : ${SERVICE}"
 
-    [[ -f "$COMPOSE_FILE" ]] ||
-        die "fichier absent : ${COMPOSE_FILE}"
+    [[ -f "$STACK_COMPOSE_FILE" ]] ||
+        die "fichier absent : ${STACK_COMPOSE_FILE}"
 
     [[ -f "$ENV_FILE" ]] ||
         die "fichier local absent : ${ENV_FILE}"

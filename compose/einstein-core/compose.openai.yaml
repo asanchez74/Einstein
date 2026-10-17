@@ -1,0 +1,21 @@
+# Complément explicite : COMPOSE_FILE=compose.yaml:compose.openai.yaml dans .env.
+# La clé reste un fichier privé hors du dépôt, jamais une variable de valeur.
+services:
+  api:
+    environment:
+      EINSTEIN_AI_ENABLED: ${EINSTEIN_AI_ENABLED:-false}
+      EINSTEIN_AI_PROVIDER: openai
+      EINSTEIN_AI_MODEL: ${EINSTEIN_AI_MODEL:?Définir le modèle OpenAI dans .env}
+      EINSTEIN_AI_API_KEY_FILE: /run/secrets/openai_api_key
+      EINSTEIN_AI_TIMEOUT_SECONDS: ${EINSTEIN_AI_TIMEOUT_SECONDS:-20}
+      EINSTEIN_AI_MAX_OUTPUT_TOKENS: ${EINSTEIN_AI_MAX_OUTPUT_TOKENS:-512}
+      EINSTEIN_AI_MAX_CONCURRENCY: ${EINSTEIN_AI_MAX_CONCURRENCY:-1}
+      EINSTEIN_AI_MAX_CONTEXT_BYTES: ${EINSTEIN_AI_MAX_CONTEXT_BYTES:-32768}
+
+    volumes:
+      - type: bind
+        source: ${OPENAI_KEY_FILE:-/volume1/docker/einstein/secrets/einstein-core/openai_api_key.txt}
+        target: /run/secrets/openai_api_key
+        read_only: true
+        bind:
+          create_host_path: false

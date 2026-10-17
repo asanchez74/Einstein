@@ -12,12 +12,15 @@ dependencies = [
     "fastapi==0.139.2",
     "pydantic-settings==2.14.2",
     "uvicorn==0.51.0",
+    "openai==3.33.0",
 ]
 
 [project.optional-dependencies]
+chatgpt = ["PyJWT[crypto]==2.15.1"]
 dev = [
-    "httpx2==2.7.0",
+    "httpx2==2.13.1",
     "pytest==9.1.1",
+    "PyJWT[crypto]==2.15.1",
 ]
 
 [tool.setuptools.packages.find]

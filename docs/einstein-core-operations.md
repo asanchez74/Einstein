@@ -215,3 +215,97 @@ Conserver la date, le commit déployé, l'état healthy, les réponses HTTP loca
 LAN et VPN, les résultats depuis Internet, le contrôle des ressources et le résultat du
 redémarrage dans le suivi du Sprint 3. La validation du socle est consolidée
 dans ce suivi, avec la chronologie et les limites des contrôles.
+
+## Questions IA — implémentation locale du Sprint 5
+
+La route `POST /api/v1/maison/questions` reçoit un objet JSON avec un champ
+`question` non vide (2000 caractères maximum). Elle retourne `answer`,
+`provider` et `model`. Par défaut, elle répond 503, sans accès réseau.
+
+| Variable Python | Valeur par défaut | Usage |
+|---|---|---|
+| `EINSTEIN_AI_ENABLED` | `false` | Activation explicite |
+| `EINSTEIN_AI_PROVIDER` | `openai` | `openai` par clé API ou `chatgpt` par forfait Plus |
+| `EINSTEIN_AI_MODEL` | Non défini | Identifiant de modèle accessible au compte |
+| `EINSTEIN_AI_CHATGPT_CREDENTIALS_FILE` | Non défini | Fichier privé de session Plus, usage local documenté séparément |
+| `EINSTEIN_AI_MAX_OUTPUT_CHARS` | `8192` | Limite locale de texte Plus, maximum 65536 |
+| `EINSTEIN_AI_API_KEY_FILE` | Non défini | Chemin d'un fichier de clé UTF-8 |
+| `EINSTEIN_AI_TIMEOUT_SECONDS` | `20` | Délai total, maximum 120 secondes |
+| `EINSTEIN_AI_MAX_OUTPUT_TOKENS` | `512` | Plafond de sortie, maximum 4096 |
+| `EINSTEIN_AI_MAX_CONCURRENCY` | `1` | Appels simultanés par processus, maximum 8 |
+| `EINSTEIN_AI_MAX_CONTEXT_BYTES` | `32768` | Taille UTF-8 du catalogue, maximum 262144 |
+
+Le modèle et la clé ne sont pas fournis par défaut. Une configuration
+incomplète laisse les fonctions locales disponibles et la route IA en 503.
+La clé est lue au démarrage (16 Kio maximum), sans l'inclure dans un log.
+Un redémarrage est nécessaire après rotation du fichier.
+
+L'activation transmet question et catalogue à OpenAI. `store=false` désactive
+le stockage applicatif de la réponse mais n'équivaut pas à une absence totale
+de rétention fournisseur. Aucun historique ni outil distant n'est activé.
+Les réponses du modèle doivent être vérifiées avant toute décision technique.
+
+Codes d'erreur : 422 pour une question invalide, 429 si la capacité locale est
+occupée, 503 si configuration absente ou catalogue trop volumineux, 502 pour
+une erreur/réponse inexploitable, 504 pour le délai fournisseur. Aucune erreur
+distante brute n'est retournée. Le healthcheck ne contacte jamais OpenAI.
+
+La stack de base force `EINSTEIN_AI_ENABLED=false`. Le complément optionnel
+`compose.openai.yaml` transmet les variables IA et monte uniquement le fichier
+de clé, en lecture seule. Les paramètres ne sont pris en compte que lorsque
+le complément est sélectionné. La suite automatique utilise des fournisseurs
+et transports simulés, sans appel payant.
+
+### Préparer l'activation NAS
+
+Choisir d'abord un identifiant de modèle accessible au compte. Créer le fichier
+secret hors Git avec un éditeur ou un gestionnaire de secrets, sans coller la
+clé dans le chat, la ligne de commande ou le `.env`. Le dossier et le fichier
+doivent être lisibles par l'UID/GID `10001:10001` (par exemple dossier 0750,
+fichier 0640 avec ces propriétaires). La clé n'est pas archivée par la
+sauvegarde `DATA_DIR` : prévoir sa conservation et sa rotation séparément.
+
+Dans le `.env` NAS, sélectionner les deux fichiers (syntaxe macOS/Linux) :
+
+```dotenv
+COMPOSE_FILE=compose.yaml:compose.openai.yaml
+EINSTEIN_AI_ENABLED=false
+```
+
+Ajouter `EINSTEIN_AI_MODEL` avec le modèle choisi et, si nécessaire,
+`OPENAI_KEY_FILE` avec le chemin du fichier privé. Le modèle est obligatoire
+avec le complément. Ne pas mettre la valeur de la clé dans ce fichier.
+Valider depuis `compose/einstein-core` :
+
+```bash
+sudo docker compose --env-file .env config --quiet
+```
+
+Les scripts d'exploitation chargent ce `.env` et réutilisent la sélection.
+Le secret absent ne sera pas créé automatiquement. La validation Compose
+ne prouve pas que l'utilisateur du conteneur peut lire le fichier.
+Le premier déploiement peut garder l'IA désactivée pour vérifier le socle.
+
+Pour activer, fixer `EINSTEIN_AI_ENABLED=true`, puis utiliser
+`stack-up.sh einstein-core`. Le démarrage ne génère aucun appel fournisseur.
+Une requête POST déclenche en revanche l'envoi de données et un appel pouvant
+être facturé ; le test réel doit être explicitement déclenché et consigné.
+
+### Retour au mode sans IA
+
+Définir `COMPOSE_FILE=compose.yaml` dans le `.env`, puis redéployer avec
+`stack-up.sh einstein-core` : le fichier de clé n'est plus monté et l'IA est
+forcée à false. Les variables IA restantes du `.env` ne sont pas transmises
+par la stack de base. Les scripts status/logs/backup doivent ensuite conserver
+cette même sélection de fichiers.
+
+La sélection de fichiers repose sur
+[COMPOSE_FILE](https://docs.docker.com/compose/how-tos/environment-variables/envvars/).
+Le complément n'a pas encore été validé avec Docker sur le NAS.
+
+### Mode ChatGPT Plus local
+
+Voir le [guide Plus](chatgpt-plus-essai.md) pour la connexion, les variables et
+le premier test réussi. Ce mode utilise une session renouvelable, pas un fichier
+de clé API. Il n'envoie pas `max_output_tokens`, non pris en charge par ce flux.
+Le complément Compose par clé API ne configure pas ce mode.

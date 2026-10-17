@@ -82,6 +82,22 @@ et les limites figurent dans le
 Déployé au commit `a15e636`, accès LAN/VPN et refus externe vérifiés.
 Voir le [bilan du Sprint 4](sprints/sprint-4-inventaire-maison.md).
 
+## Sprint 5 — Questions sur l'inventaire
+
+**Statut : en cours — API de questions locale, IA désactivée par défaut**
+
+- [x] API de questions en langage naturel sur le catalogue Maison
+- [x] Interface fournisseur et adaptateur OpenAI Responses
+- [ ] Configuration, secret par fichier et limites d'appel
+- [ ] Tests sans réseau et évaluation réelle séparée
+- [x] Valider la connexion officielle Plus et le catalogue du compte
+- [x] Brancher l’adaptateur Plus et valider une première génération locale
+- [ ] Évaluer les réponses et préparer le déploiement Plus sur le NAS
+- [ ] Documentation et validation NAS
+
+Claude (Anthropic) sera intégré ensuite, sans dépendance ajoutée par anticipation.
+Voir le [cadrage du Sprint 5](sprints/sprint-5-questions-inventaire.md).
+
 ## Étapes ultérieures
 
 Les étapes suivantes seront planifiées après validation du socle applicatif :
