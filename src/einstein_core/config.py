@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     documents_cache_path: Path | None = None
     documents_index_budget_seconds: int = Field(default=300, ge=1, le=3600)
     documents_ocr_cache_path: Path | None = None
+    auth_enabled: bool = False
+    auth_password_hash_file: Path | None = None
+    auth_cookie_secure: bool = True
+    auth_session_hours: int = Field(default=12, ge=1, le=168)
     ai_enabled: bool = False
     ai_provider: Literal["openai", "chatgpt"] = "openai"
     ai_model: str | None = Field(default=None, min_length=1, pattern=r"\S")

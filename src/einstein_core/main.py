@@ -6,11 +6,14 @@ from contextlib import asynccontextmanager
 import logging
 import threading
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
 from einstein_core.ai.configuration import configure_provider
 from einstein_core.ai.provider import AnswerProvider
+from einstein_core.api.auth import router as auth_router
 from einstein_core.api.questions import router as questions_router
+from einstein_core.auth import COOKIE, FailureLimiter, SessionStore
 from einstein_core.api.documents import router as documents_router
 from einstein_core.documents.search import build_index
 from einstein_core.maison.questions import QuestionService
@@ -91,7 +94,26 @@ def create_app(settings: Settings | None = None, *, provider: AnswerProvider | N
                 await active_provider.close()
             logger.info("Einstein Core s'arrête")
 
-    app = FastAPI(title=settings.app_name, version=settings.version, lifespan=lifespan)
+    # Documentation interactive coupée quand l'authentification protège l'API.
+    docs = {"docs_url": None, "redoc_url": None, "openapi_url": None} if settings.auth_enabled else {}
+    app = FastAPI(title=settings.app_name, version=settings.version, lifespan=lifespan, **docs)
+    app.state.settings = settings
+    app.state.sessions = SessionStore(settings.auth_session_hours * 3600)
+    app.state.login_failures = FailureLimiter()
+
+    @app.middleware("http")
+    async def require_session(request: Request, call_next):
+        path = request.url.path
+        if settings.auth_enabled and path.startswith("/api/"):
+            if request.method == "POST" and request.headers.get("content-type", "").split(";")[0].strip() != "application/json":
+                # Avec SameSite=Strict, écarte les formulaires inter-sites.
+                return JSONResponse({"detail": "Contenu JSON requis"}, status_code=415)
+            public = path in {"/api/v1/auth/connexion", "/api/v1/auth/deconnexion"}
+            if not public and app.state.sessions.expiry(request.cookies.get(COOKIE)) is None:
+                return JSONResponse({"detail": "Authentification requise"}, status_code=401)
+        return await call_next(request)
+
+    app.include_router(auth_router)
     app.include_router(health_router)
     app.include_router(maison_router)
     app.include_router(questions_router)
