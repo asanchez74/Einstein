@@ -109,17 +109,16 @@ Voir le [cadrage du Sprint 5](sprints/sprint-5-questions-inventaire.md).
 
 ## Sprint 6 — Recherche documentaire
 
-**Statut : en cours — mode local déployé sur le NAS, sous-dossier réel indexé**
+**Statut : terminé — clôture le 19 octobre 2026 (sous-dossier `Lombard Odier`)**
 
 Recherche locale sur les PDF, Word `.docx` et textes du dossier choisi
 `/volume1/Documents/03_Tonio/Travail`, avec extraits et sources, sans transmission à l’IA.
 Voir le [Sprint 6](sprints/sprint-6-recherche-documentaire.md). Le dossier
 complet dépasse les plafonds ; le sous-dossier `Lombard Odier` est indexé en
-arrière-plan (30 documents, 22 scans sans texte). Accès LAN/VPN, refus
-externe et pertinence sont validés ; reste le cadrage de l’OCR local des scans.
-Le traitement OpenAI du corpus est implémenté localement, sans ingestion réelle
-ni déploiement.
-L’interface utilisateur viendra ensuite.
+arrière-plan, scans compris grâce à l’OCR local (ADR-0010) : 55 documents
+cherchables sur 57. Accès LAN/VPN, refus externe et pertinence sont validés.
+Reportés : dossier complet (index persistant), mode de transcription OpenAI.
+L’interface utilisateur avec authentification est la priorité suivante.
 
 ## Étapes ultérieures
 

@@ -2,9 +2,10 @@
 
 ## Statut
 
-En cours : mode local déployé sur le NAS et validé sur un corpus synthétique
-le 17 octobre 2026 ; corpus réel et mode OpenAI non déployés. Les validations
-restantes du Sprint 5 restent ouvertes ; le redémarrage NAS est reporté.
+**Terminé le 19 octobre 2026** pour le sous-dossier `Travail/Lombard Odier` :
+recherche locale et OCR déployés sur le NAS, 55 documents indexés sur 57.
+Le dossier `Travail` complet et le mode de transcription OpenAI ne sont pas
+déployés ; ils restent hors de ce sprint.
 
 ## Périmètre confirmé
 
@@ -25,8 +26,8 @@ Voir l'[ADR-0009](../adr/0009-recherche-documentaire-locale.md).
 - [x] Traitement documentaire OpenAI avec cache local et limites (implémenté localement, non déployé)
 - [x] Validation NAS sur corpus synthétique : montage, droits, ressources, démarrage
 - [x] Validation NAS sur un sous-dossier réel (`Lombard Odier`)
-- [ ] Couverture des PDF scannés (OCR, lot suivant)
-- [ ] Dossier `Travail` complet (index persistant, si le besoin est confirmé)
+- [x] Couverture des PDF scannés par OCR local (ADR-0010)
+- [ ] Dossier `Travail` complet (index persistant, si le besoin est confirmé) — reporté
 - [x] Accès LAN et refus externe de la nouvelle route
 - [x] Accès via VPN de la nouvelle route
 - [x] Évaluation de pertinence sur quelques recherches choisies
@@ -545,3 +546,21 @@ Correctif local, accepté par le propriétaire : plafond porté à 50 MiB pour
 les `.docx`, dont seul le XML de texte (2 MiB au plus) est lu ; le plafond
 d'espace virtuel de l'extracteur est relevé de la même différence pour ce
 format. Les PDF et textes gardent 5 MiB. 153 tests réussis.
+
+## Clôture — 19 octobre 2026
+
+Après déploiement de `fc17546`, la recherche retourne `indexed_files: 55`,
+`skipped_files: 2` : seuls la signature et la carte d'identité, sans texte
+reconnu, restent hors de l'index. Le `.docx` de 12 MiB est désormais indexé.
+
+Bilan pour `Lombard Odier` : 57 candidats, 30 lus par l'extracteur, 26 par
+le cache OCR (130 pages, environ 11,7 s par page), 55 cherchables.
+Accès LAN et VPN validés, refus externe confirmé, pertinence évaluée.
+
+Reportés hors sprint :
+
+- dossier `Travail` complet (13 219 candidats, profondeur 18) : index
+  persistant et incrémental, si le besoin est confirmé ;
+- mode de transcription OpenAI : implémenté, non déployé ;
+- authentification : la route expose des extraits de pièces personnelles à
+  tout client LAN/VPN ; priorité du sprint suivant.

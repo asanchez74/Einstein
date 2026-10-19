@@ -43,7 +43,7 @@ Premier domaine fonctionnel du projet.
 ## Statut
 
 Sprint 5 — questions sur l’inventaire avec ChatGPT Plus : terminé le 17 octobre 2026.
-Sprint 6 — recherche documentaire locale déployée sur un sous-dossier réel ; validations en cours.
+Sprint 6 — recherche documentaire locale avec OCR : terminé le 19 octobre 2026 (sous-dossier réel).
 
 Einstein Core expose les endpoints de santé et de version. Le socle est
 testé et déployé sur le NAS ; les validations et leurs limites sont

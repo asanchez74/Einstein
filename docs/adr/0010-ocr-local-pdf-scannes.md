@@ -1,6 +1,6 @@
 # ADR-0010 — OCR local des PDF scannés
 
-- **Statut :** acceptée, implémentée localement, validation NAS à effectuer
+- **Statut :** validée sur le NAS le 19 octobre 2026 (26 documents, 130 pages)
 - **Date :** 17 octobre 2026
 
 ## Contexte

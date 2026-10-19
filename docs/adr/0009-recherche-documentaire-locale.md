@@ -1,6 +1,6 @@
 # ADR-0009 — Recherche documentaire locale
 
-- **Statut :** implémentée localement, validation NAS à effectuer
+- **Statut :** validée sur le NAS le 19 octobre 2026 (sous-dossier `Lombard Odier`)
 - **Date :** 17 octobre 2026
 
 ## Besoin et décision
