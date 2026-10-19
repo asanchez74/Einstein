@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Einstein</title>
+  <link rel="stylesheet" href="/ui/app.css">
+  <script src="/ui/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <h1>Einstein</h1>
+    <button id="logout" class="link" type="button" hidden>Se déconnecter</button>
+  </header>
+
+  <main>
+    <section id="login" class="card narrow" hidden>
+      <h2>Connexion</h2>
+      <form id="login-form">
+        <label for="password">Mot de passe</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required maxlength="1024">
+        <button type="submit">Se connecter</button>
+        <p id="login-error" class="error" role="alert" hidden></p>
+      </form>
+    </section>
+
+    <section id="app" hidden>
+      <nav class="tabs" role="tablist">
+        <button role="tab" data-tab="search" aria-selected="true">Documents</button>
+        <button role="tab" data-tab="question" aria-selected="false">Question</button>
+        <button role="tab" data-tab="inventory" aria-selected="false">Inventaire</button>
+      </nav>
+
+      <div id="tab-search" class="panel" role="tabpanel">
+        <form id="search-form" class="row">
+          <input id="query" type="search" placeholder="Rechercher dans les documents…" required maxlength="300" autocomplete="off">
+          <button type="submit">Rechercher</button>
+        </form>
+        <p id="search-status" class="muted" aria-live="polite"></p>
+        <ol id="search-results" class="results"></ol>
+      </div>
+
+      <div id="tab-question" class="panel" role="tabpanel" hidden>
+        <form id="question-form">
+          <label for="question">Question sur l'inventaire Maison</label>
+          <textarea id="question" rows="3" required maxlength="2000" placeholder="Quelle est l'adresse du NAS ?"></textarea>
+          <button type="submit">Demander</button>
+        </form>
+        <p id="question-status" class="muted" aria-live="polite"></p>
+        <div id="answer" class="card" hidden></div>
+      </div>
+
+      <div id="tab-inventory" class="panel" role="tabpanel" hidden>
+        <p id="inventory-status" class="muted" aria-live="polite"></p>
+        <ul id="inventory" class="inventory"></ul>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

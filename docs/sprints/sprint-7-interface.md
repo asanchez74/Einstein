@@ -80,3 +80,25 @@ arbitraire, répertoire) répond 404 sans détail. Une source remplacée par un
 lien, ou dont un répertoire parent devient un lien, après l'indexation est
 refusée. Avec l'authentification active, la route exige une session.
 178 tests réussis, dont 12 pour cette route.
+
+## Lot 3 — Interface web, implémentation locale
+
+Page unique servie par le Core sur `/`, fichiers `/ui/app.css` et
+`/ui/app.js`, sans framework, sans étape de construction ni ressource
+externe ; installés avec le paquet (`package-data`). Contenu toujours inséré
+comme texte (aucun `innerHTML`) ; seul le gras Markdown des réponses IA est
+rendu. En-têtes : `Content-Security-Policy` limitée à `'self'` sans script en
+ligne, `frame-ancestors 'none'`, `X-Frame-Options: DENY`,
+`Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`.
+
+Fonctions : connexion et déconnexion ; recherche documentaire (20 résultats,
+termes surlignés sans tenir compte des accents, page, mention OCR, lien
+« Ouvrir », compteurs et date de l'index) ; question sur l'inventaire avec
+messages d'erreur lisibles ; liste de l'inventaire. Thème clair ou sombre
+selon le système, mise en page adaptée au téléphone.
+`GET /api/v1/auth/session` indique désormais si la connexion est requise,
+pour un usage local sans authentification.
+
+Essai du propriétaire sur le Mac, serveur local avec authentification et
+corpus synthétique : connexion, recherche, ouverture, inventaire et
+déconnexion jugés satisfaisants. 181 tests réussis, dont 3 pour l'interface.

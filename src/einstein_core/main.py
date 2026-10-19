@@ -4,10 +4,12 @@ import asyncio
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 import logging
+from pathlib import Path
 import threading
 
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from einstein_core.ai.configuration import configure_provider
 from einstein_core.ai.provider import AnswerProvider
@@ -24,6 +26,11 @@ from einstein_core.logging_config import configure_logging
 from einstein_core.maison.inventory import load_inventory
 
 logger = logging.getLogger(__name__)
+
+UI_DIR = Path(__file__).parent / "ui" / "static"
+# Page sans ressource externe ni script en ligne (ADR-0011).
+UI_POLICY = ("default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; "
+             "connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'")
 
 
 def create_app(settings: Settings | None = None, *, provider: AnswerProvider | None = None) -> FastAPI:
@@ -111,7 +118,19 @@ def create_app(settings: Settings | None = None, *, provider: AnswerProvider | N
             public = path in {"/api/v1/auth/connexion", "/api/v1/auth/deconnexion"}
             if not public and app.state.sessions.expiry(request.cookies.get(COOKIE)) is None:
                 return JSONResponse({"detail": "Authentification requise"}, status_code=401)
-        return await call_next(request)
+        response = await call_next(request)
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("Referrer-Policy", "no-referrer")
+        if path == "/" or path.startswith("/ui/"):
+            response.headers["Content-Security-Policy"] = UI_POLICY
+            response.headers["X-Frame-Options"] = "DENY"
+        return response
+
+    @app.get("/", include_in_schema=False)
+    def interface() -> FileResponse:
+        return FileResponse(UI_DIR / "index.html", headers={"Cache-Control": "no-cache"})
+
+    app.mount("/ui", StaticFiles(directory=UI_DIR), name="ui")
 
     app.include_router(auth_router)
     app.include_router(health_router)

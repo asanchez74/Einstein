@@ -17,7 +17,8 @@ class Credentials(BaseModel):
 
 class SessionInfo(BaseModel):
     authenticated: bool
-    expires_at: str
+    required: bool
+    expires_at: str | None
 
 
 @router.post("/connexion", status_code=204)
@@ -49,8 +50,10 @@ def logout(request: Request, response: Response) -> None:
 @router.get("/session", response_model=SessionInfo)
 def session(request: Request) -> SessionInfo:
     # Le middleware a déjà vérifié la session ; cette route en donne l'échéance.
+    if not request.app.state.settings.auth_enabled:
+        return SessionInfo(authenticated=True, required=False, expires_at=None)
     expiry = request.app.state.sessions.expiry(request.cookies.get(COOKIE))
     if expiry is None:
         raise HTTPException(status_code=401, detail="Authentification requise")
-    return SessionInfo(authenticated=True,
+    return SessionInfo(authenticated=True, required=True,
                        expires_at=datetime.fromtimestamp(expiry, timezone.utc).isoformat(timespec="seconds"))
