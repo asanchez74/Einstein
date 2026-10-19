@@ -64,7 +64,7 @@ conversation, téléversement de documents, application mobile.
 Variables : `EINSTEIN_AUTH_ENABLED`, `EINSTEIN_AUTH_PASSWORD_HASH_FILE`,
 `EINSTEIN_AUTH_COOKIE_SECURE` (vrai par défaut), `EINSTEIN_AUTH_SESSION_HOURS`.
 Désactivée par défaut : aucun changement en production avant le lot 4.
-166 tests réussis, dont 15 pour l'authentification.
+166 tests réussis, dont 13 pour l'authentification.
 
 ## Lot 2 — Ouverture des documents sources, implémentation locale
 
@@ -79,4 +79,4 @@ Un document absent de l'index (scan sans texte, fichier caché, chemin
 arbitraire, répertoire) répond 404 sans détail. Une source remplacée par un
 lien, ou dont un répertoire parent devient un lien, après l'indexation est
 refusée. Avec l'authentification active, la route exige une session.
-179 tests réussis, dont 13 pour cette route.
+178 tests réussis, dont 12 pour cette route.
