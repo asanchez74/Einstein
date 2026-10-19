@@ -102,3 +102,50 @@ pour un usage local sans authentification.
 Essai du propriétaire sur le Mac, serveur local avec authentification et
 corpus synthétique : connexion, recherche, ouverture, inventaire et
 déconnexion jugés satisfaisants. 181 tests réussis, dont 3 pour l'interface.
+
+## Lot 4 — Déploiement
+
+La stack de base active l'authentification et monte en lecture seule le
+dossier secret `AUTH_DIR` (par défaut
+`/volume1/docker/einstein/secrets/einstein-core/auth`) sur `/auth`.
+L'empreinte est lue dans `/auth/password_hash`. Sans ce dossier, le conteneur
+ne démarre pas ; sans empreinte valide, la connexion répond 503.
+
+### Préparation
+
+L'empreinte est générée sur le Mac, où la saisie sans écho est fiable, puis
+transférée par SSH. Elle ne contient pas le mot de passe mais permettrait une
+attaque hors ligne : la traiter comme un secret.
+
+```bash
+# Mac, depuis la racine du dépôt
+.venv/bin/python -m einstein_core.auth > ~/einstein_password_hash
+chmod 600 ~/einstein_password_hash
+scp ~/einstein_password_hash tonio@192.168.1.3:~/
+rm ~/einstein_password_hash
+```
+
+```bash
+# NAS
+sudo install -d -o 10001 -g 10001 -m 0700 /volume1/docker/einstein/secrets/einstein-core/auth
+sudo install -o 10001 -g 10001 -m 0400 ~/einstein_password_hash \
+  /volume1/docker/einstein/secrets/einstein-core/auth/password_hash
+rm ~/einstein_password_hash
+cd ~/Development/Einstein && git pull --ff-only && sudo scripts/stack-up.sh einstein-core
+```
+
+Changer de mot de passe : remplacer le fichier de la même manière ; la
+connexion suivante l'utilise sans redémarrage, les sessions ouvertes restent
+valides jusqu'à leur échéance ou un redémarrage du Core.
+
+Retour arrière : revenir au commit précédent et redéployer ; l'API redevient
+accessible sans authentification sur le LAN et le VPN.
+
+### Contrôles
+
+- `https://einstein.chantevigne.com/` affiche la connexion ;
+- sans session, `curl` sur `/api/v1/maison/equipements` retourne 401 ;
+- connexion, recherche, ouverture d'un PDF, question IA et inventaire depuis le
+  Mac (LAN) et l'iPhone (VPN) ;
+- depuis l'extérieur sans VPN, refus 403 du reverse proxy ;
+- `healthy` conservé, `/health/ready` accessible.

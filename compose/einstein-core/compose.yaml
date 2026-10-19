@@ -18,6 +18,10 @@ services:
       EINSTEIN_LOG_LEVEL: ${EINSTEIN_LOG_LEVEL:-INFO}
       EINSTEIN_MAISON_INVENTORY_PATH: /inventory/equipements.json
       EINSTEIN_AI_ENABLED: "false"
+      # Authentification obligatoire (ADR-0011) ; sans empreinte valide, connexion 503.
+      EINSTEIN_AUTH_ENABLED: "true"
+      EINSTEIN_AUTH_PASSWORD_HASH_FILE: /auth/password_hash
+      EINSTEIN_AUTH_SESSION_HOURS: ${EINSTEIN_AUTH_SESSION_HOURS:-12}
 
     ports:
       - "127.0.0.1:${HOST_PORT:-18081}:8000"
@@ -26,6 +30,12 @@ services:
       - type: bind
         source: ${DATA_DIR:-/volume1/docker/einstein/data/einstein-core}
         target: /inventory
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${AUTH_DIR:-/volume1/docker/einstein/secrets/einstein-core/auth}
+        target: /auth
         read_only: true
         bind:
           create_host_path: false
