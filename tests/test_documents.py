@@ -230,3 +230,78 @@ def test_large_docx_reads_text_only(tmp_path):
     assert (tmp_path / "rapport.docx").stat().st_size > 5 * 1024 * 1024
     assert index.indexed_files == 1 and index.skipped_files == 1
     assert index.search("rapport", 5).results[0].source == "rapport.docx"
+
+
+@pytest.fixture
+def served(tmp_path):
+    inventory = tmp_path / "inventory.json"
+    inventory.write_text("[]")
+    docs = tmp_path / "docs"
+    (docs / "Banque").mkdir(parents=True)
+    (docs / "Banque" / "contrat été.pdf").write_bytes(pdf_bytes("Contrat assurance maison"))
+    (docs / "notes.md").write_text("Facture chaudière")
+    (docs / "rapport.docx").write_bytes(b"")
+    with ZipFile(docs / "rapport.docx", "w") as archive:
+        archive.writestr("word/document.xml", '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>Rapport annuel</w:t></w:r></w:p></w:body></w:document>')
+    (docs / "scan.pdf").write_bytes(pdf_bytes(""))
+    (docs / ".cache.txt").write_text("secret")
+    (tmp_path / "dehors.txt").write_text("secret")
+    settings = Settings(maison_inventory_path=inventory, documents_enabled=True, documents_path=docs)
+    with TestClient(create_app(settings)) as client:
+        wait_for_index(client, "facture")
+        yield client, docs
+
+
+def fetch(client, source):
+    return client.get("/api/v1/documents/fichier", params={"source": source})
+
+
+def test_indexed_sources_are_served(served):
+    client, docs = served
+    response = fetch(client, "Banque/contrat été.pdf")
+    assert response.status_code == 200 and response.content == (docs / "Banque" / "contrat été.pdf").read_bytes()
+    assert response.headers["content-type"] == "application/pdf"
+    assert response.headers["content-disposition"] == "inline; filename*=UTF-8''contrat%20%C3%A9t%C3%A9.pdf"
+    assert response.headers["x-content-type-options"] == "nosniff"
+    assert response.headers["cache-control"] == "no-store"
+    word = fetch(client, "rapport.docx")
+    assert word.status_code == 200 and word.headers["content-disposition"].startswith("attachment;")
+    assert fetch(client, "notes.md").text == "Facture chaudière"
+
+
+@pytest.mark.parametrize("source", [
+    "scan.pdf", ".cache.txt", "../dehors.txt", "Banque/../notes.md", "/etc/passwd",
+    "Banque", "absent.pdf", "notes.md/", "./notes.md",
+])
+def test_unindexed_or_arbitrary_paths_refused(served, source):
+    client, _ = served
+    response = fetch(client, source)
+    assert response.status_code == 404 and "secret" not in response.text
+
+
+def test_source_replaced_by_link_after_indexing_is_refused(served, tmp_path):
+    client, docs = served
+    (docs / "notes.md").unlink()
+    (docs / "notes.md").symlink_to(tmp_path / "dehors.txt")
+    assert fetch(client, "notes.md").status_code == 404
+    (docs / "Banque" / "contrat été.pdf").unlink()
+    (docs / "Banque").rmdir()
+    (docs / "Banque").symlink_to(tmp_path, target_is_directory=True)
+    assert fetch(client, "Banque/contrat été.pdf").status_code == 404
+
+
+def test_file_route_requires_session(tmp_path):
+    from einstein_core import auth
+    inventory = tmp_path / "inventory.json"
+    inventory.write_text("[]")
+    secret = tmp_path / "hash"
+    secret.write_text(auth.hash_password("correct horse battery staple"))
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "notes.md").write_text("Facture chaudière")
+    settings = Settings(maison_inventory_path=inventory, documents_enabled=True, documents_path=tmp_path / "docs",
+                        auth_enabled=True, auth_password_hash_file=secret, auth_cookie_secure=False)
+    with TestClient(create_app(settings)) as client:
+        assert fetch(client, "notes.md").status_code == 401
+        client.post("/api/v1/auth/connexion", json={"password": "correct horse battery staple"})
+        wait_for_index(client, "facture")
+        assert fetch(client, "notes.md").status_code == 200

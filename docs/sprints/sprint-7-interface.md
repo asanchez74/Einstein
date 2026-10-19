@@ -65,3 +65,18 @@ Variables : `EINSTEIN_AUTH_ENABLED`, `EINSTEIN_AUTH_PASSWORD_HASH_FILE`,
 `EINSTEIN_AUTH_COOKIE_SECURE` (vrai par défaut), `EINSTEIN_AUTH_SESSION_HOURS`.
 Désactivée par défaut : aucun changement en production avant le lot 4.
 166 tests réussis, dont 15 pour l'authentification.
+
+## Lot 2 — Ouverture des documents sources, implémentation locale
+
+`GET /api/v1/documents/fichier?source=<référence relative>` sert un fichier
+uniquement si cette référence figure dans l'index courant. Le fichier est
+rouvert composant par composant depuis la racine montée, sans suivre aucun
+lien ; composants vides, cachés, `.` et `..` sont refusés. Taille plafonnée à
+50 MiB. PDF en `inline`, `.docx`, `.txt` et `.md` en `attachment`, nom encodé
+selon RFC 5987, `Cache-Control: no-store`, `X-Content-Type-Options: nosniff`.
+
+Un document absent de l'index (scan sans texte, fichier caché, chemin
+arbitraire, répertoire) répond 404 sans détail. Une source remplacée par un
+lien, ou dont un répertoire parent devient un lien, après l'indexation est
+refusée. Avec l'authentification active, la route exige une session.
+179 tests réussis, dont 13 pour cette route.

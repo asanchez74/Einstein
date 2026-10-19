@@ -2,6 +2,7 @@
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from functools import cached_property
 from datetime import datetime, timezone
 import json
 import os
@@ -49,6 +50,10 @@ class DocumentIndex:
     skipped_files: int
     partial: bool
 
+    @cached_property
+    def sources(self) -> frozenset[str]:
+        return frozenset(passage.source for passage in self.passages)
+
     def search(self, query: str, limit: int) -> SearchResult:
         terms = set(re.findall(r"\w+", normalize(query)))
         hits = []
@@ -69,6 +74,46 @@ class DocumentIndex:
         return SearchResult(indexed_at=self.indexed_at, indexed_files=self.indexed_files,
                             skipped_files=self.skipped_files, partial=self.partial,
                             results=best[:limit])
+
+
+MAX_SOURCE_BYTES = 50 * 1024 * 1024
+
+
+def open_root(root: Path) -> int:
+    """Descripteur de la racine ; refuse aussi un lien dans les composants du chemin configuré."""
+    absolute = root.absolute()
+    descriptor = os.open(absolute.anchor, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        for part in absolute.parts[1:]:
+            child = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=descriptor)
+            os.close(descriptor)
+            descriptor = child
+    except OSError:
+        os.close(descriptor)
+        raise
+    return descriptor
+
+
+def open_source(root: Path, source: str):
+    """Rouvre une source indexée composant par composant, sans suivre aucun lien."""
+    parts = source.split("/")
+    if any(not part or part.startswith(".") for part in parts) or len(parts) > 9:
+        raise ValueError("Source invalide")
+    descriptor = open_root(root)
+    try:
+        for part in parts[:-1]:
+            child = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=descriptor)
+            os.close(descriptor)
+            descriptor = child
+        fd = os.open(parts[-1], os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=descriptor)
+    finally:
+        os.close(descriptor)
+    file = os.fdopen(fd, "rb")
+    info = os.fstat(file.fileno())
+    if not stat.S_ISREG(info.st_mode) or info.st_size > MAX_SOURCE_BYTES:
+        file.close()
+        raise ValueError("Source non servie")
+    return file, info.st_size
 
 
 class IndexBudgetExceeded(Exception):
@@ -162,14 +207,8 @@ def build_index(root: Path, *, extractor: Callable | None = None, budget_seconds
                     skipped += 1
                     partial = True
 
-    # Refuser aussi un lien dans les composants du chemin configuré.
-    absolute = root.absolute()
-    descriptor = os.open(absolute.anchor, os.O_RDONLY | os.O_DIRECTORY)
+    descriptor = open_root(root)
     try:
-        for part in absolute.parts[1:]:
-            child = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=descriptor)
-            os.close(descriptor)
-            descriptor = child
         try:
             visit(descriptor, "", 0)
         except IndexBudgetExceeded:
