@@ -520,3 +520,23 @@ pas d'OCR et n'ont donc pas d'entrée en cache.
 Correctif local : la commande OCR met aussi en cache le texte des PDF que
 l'extracteur ordinaire refuse (plus de 5 MiB, 50 pages ou 100 000 caractères)
 même sans page à reconnaître ; compteur `texte_seul`. 151 tests réussis.
+
+### Diagnostic des trois fichiers encore écartés — 19 octobre 2026
+
+Après déploiement de `789ae25`, la commande OCR retourne `texte_seul=0`,
+`deja_en_cache=26` : l'hypothèse de PDF textuels de plus de 5 MiB est
+infirmée. Diagnostics dans le conteneur `ocr`, compteurs uniquement :
+
+- 30 fichiers lus par l'extracteur, 26 avec une entrée OCR, un `.docx` de
+  12 MiB refusé par le plafond de 5 MiB ;
+- aucune extraction au-delà de 10 s (maximum 4,3 s) : le délai n'est pas en cause ;
+- deux entrées OCR d'une seule page ne contiennent aucun caractère reconnu ;
+  l'index les écarte à juste titre faute de texte.
+
+Les 54 fichiers indexés correspondent donc aux 56 lisibles moins ces deux
+pages vides. Le propriétaire les identifie : une image de signature (aucun
+texte) et une carte d'identité recto-verso (petits caractères sur fond de
+sécurité). Aucun réglage OCR supplémentaire n'est retenu : la signature n'a
+rien à indexer et une pièce d'identité n'a pas vocation à être cherchable
+sans authentification. Reste le plafond des `.docx`, dont seul le XML de
+texte est lu.
