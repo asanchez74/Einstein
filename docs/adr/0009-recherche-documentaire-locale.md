@@ -30,7 +30,8 @@ partagée avec le Core. Sur macOS, le délai s'applique sans ce plafond virtuel.
 Les erreurs de parseur et les contenus ne sont pas journalisés.
 
 Limites : 100 fichiers candidats traités, 1000 entrées de répertoire parcourues,
-profondeur huit, 5 MiB par fichier, 50 pages par PDF, XML Word décompressé de
+profondeur huit, 5 MiB par fichier (50 MiB pour un `.docx`, dont seul le XML
+de texte est lu ; plafond mémoire de l'extracteur relevé d'autant), 50 pages par PDF, XML Word décompressé de
 2 MiB, 100 000 caractères extraits par fichier et un million de caractères de
 passages au total. Les erreurs et plafonds rendent le résultat partiel explicite.
 L'ordre du parcours dépend du système de fichiers ; ce premier lot ne garantit

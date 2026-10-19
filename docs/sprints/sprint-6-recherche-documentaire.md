@@ -540,3 +540,8 @@ sécurité). Aucun réglage OCR supplémentaire n'est retenu : la signature n'a
 rien à indexer et une pièce d'identité n'a pas vocation à être cherchable
 sans authentification. Reste le plafond des `.docx`, dont seul le XML de
 texte est lu.
+
+Correctif local, accepté par le propriétaire : plafond porté à 50 MiB pour
+les `.docx`, dont seul le XML de texte (2 MiB au plus) est lu ; le plafond
+d'espace virtuel de l'extracteur est relevé de la même différence pour ce
+format. Les PDF et textes gardent 5 MiB. 153 tests réussis.

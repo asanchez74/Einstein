@@ -16,7 +16,7 @@ import unicodedata
 
 from pydantic import BaseModel
 
-from einstein_core.documents.worker import MAX_BYTES
+from einstein_core.documents.worker import max_bytes
 
 
 class SearchHit(BaseModel):
@@ -118,10 +118,11 @@ def build_index(root: Path, *, extractor: Callable | None = None, budget_seconds
                             raise ValueError
                         sections = None
                         try:
-                            if info.st_size > MAX_BYTES:
+                            limit = max_bytes(suffix)
+                            if info.st_size > limit:
                                 raise ValueError
-                            data = file.read(MAX_BYTES + 1)
-                            if len(data) > MAX_BYTES:
+                            data = file.read(limit + 1)
+                            if len(data) > limit:
                                 raise ValueError
                             remaining = deadline - time.monotonic()
                             if remaining <= 0:

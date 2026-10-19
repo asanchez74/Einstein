@@ -9,8 +9,14 @@ from xml.etree import ElementTree
 from zipfile import ZipFile
 
 MAX_BYTES = 5 * 1024 * 1024
+# Un .docx lourd l'est par ses images : seul son XML de texte (2 MiB au plus) est lu.
+MAX_DOCX_BYTES = 50 * 1024 * 1024
 MAX_CHARS = 100_000
 MAX_PAGES = 50
+
+
+def max_bytes(suffix: str) -> int:
+    return MAX_DOCX_BYTES if suffix == ".docx" else MAX_BYTES
 
 
 def page_text(page) -> str:
@@ -64,13 +70,15 @@ def extract(data: bytes, suffix: str) -> list[dict]:
 
 def main() -> int:
     # DSM/Linux : plafond virtuel du seul extracteur, pas du serveur HTTP.
+    limit = max_bytes(sys.argv[1])
     if sys.platform.startswith("linux"):
         import resource
-        resource.setrlimit(resource.RLIMIT_AS, (128 * 1024 * 1024,) * 2)
+        # Marge identique pour tous les formats : 128 MiB pour une entrée de 5 MiB.
+        resource.setrlimit(resource.RLIMIT_AS, (128 * 1024 * 1024 + limit - MAX_BYTES,) * 2)
     logging.disable(logging.CRITICAL)
     try:
-        data = sys.stdin.buffer.read(MAX_BYTES + 1)
-        if len(data) > MAX_BYTES:
+        data = sys.stdin.buffer.read(limit + 1)
+        if len(data) > limit:
             raise ValueError
         if sys.argv[1] == "--pdf-pages":
             from pypdf import PdfReader

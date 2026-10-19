@@ -217,3 +217,16 @@ def test_glued_pdf_text_uses_layout_fallback():
     assert page_text(glued) == "Directive secret professionnel du banquier et des employés de banque"
     normal = FakePage("Le secret bancaire protège les clients.", "inutilisé")
     assert page_text(normal) == "Le secret bancaire protège les clients." and normal.modes == ["plain"]
+
+
+def test_large_docx_reads_text_only(tmp_path):
+    import os
+    from zipfile import ZIP_STORED
+    with ZipFile(tmp_path / "rapport.docx", "w", compression=ZIP_STORED) as archive:
+        archive.writestr("word/document.xml", '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>Rapport annuel</w:t></w:r></w:p></w:body></w:document>')
+        archive.writestr("word/media/image1.png", os.urandom(6 * 1024 * 1024))
+    (tmp_path / "gros.pdf").write_bytes(b"%PDF" + b"0" * (6 * 1024 * 1024))
+    index = build_index(tmp_path)
+    assert (tmp_path / "rapport.docx").stat().st_size > 5 * 1024 * 1024
+    assert index.indexed_files == 1 and index.skipped_files == 1
+    assert index.search("rapport", 5).results[0].source == "rapport.docx"
