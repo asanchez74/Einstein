@@ -86,13 +86,29 @@ Après `git pull --ff-only`, redéployer avec `sudo scripts/stack-up.sh pihole`
 (courte interruption DNS), puis vérifier :
 
 ```bash
+# NAS
 sudo /usr/local/bin/docker exec pihole pihole-FTL --config dns.upstreams
 sudo /usr/local/bin/docker exec pihole grep -x strict-order /etc/pihole/dnsmasq.conf
+```
+
+La résolution se contrôle depuis un client du LAN, pas depuis le NAS : en
+mode macvlan, l'hôte ne peut pas joindre ses propres conteneurs, et un
+`nslookup` lancé sur le NAS vers `192.168.1.56` expire toujours. Attendre
+aussi la fin du démarrage (`healthy`).
+
+```bash
+# Mac sur le LAN
 nslookup example.org 192.168.1.56
+nslookup nas.chantevigne.com 192.168.1.56
 ```
 
 Dans le journal des requêtes Pi-hole, les réponses doivent être transmises à
 `192.168.1.1#53` en fonctionnement normal.
+
+Déployé le 24 octobre 2026 au commit `7224aec` : `dns.upstreams` vaut
+`[ 192.168.1.1, 9.9.9.9 ]`, `strict-order` est présent dans
+`/etc/pihole/dnsmasq.conf`, et le Mac résout `example.org` ainsi que
+`nas.chantevigne.com` (`192.168.1.3`) via `192.168.1.56`.
 
 ### Test facultatif du basculement
 
@@ -100,11 +116,20 @@ Le cas « FRITZ!Box muette » se simule avec `192.0.2.1`, adresse réservée à
 la documentation (RFC 5737) qui ne répond jamais. Interruption DNS brève.
 
 ```bash
+# NAS : premier amont muet
 cd ~/Development/Einstein/compose/pihole
 sed -i 's|^UPSTREAM_DNS=.*$|UPSTREAM_DNS="192.0.2.1;9.9.9.9"|' .env
 cd ../.. && sudo scripts/stack-up.sh pihole
-nslookup example.org 192.168.1.56      # réponse attendue après un court délai
-cd compose/pihole
+```
+
+```bash
+# Mac, une fois Pi-hole healthy : réponse attendue après un court délai
+nslookup example.org 192.168.1.56
+```
+
+```bash
+# NAS : retour à la configuration normale
+cd ~/Development/Einstein/compose/pihole
 sed -i 's|^UPSTREAM_DNS=.*$|UPSTREAM_DNS="192.168.1.1;9.9.9.9"|' .env
 cd ../.. && sudo scripts/stack-up.sh pihole
 ```
