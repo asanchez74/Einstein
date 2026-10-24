@@ -57,6 +57,14 @@ secondes). Le basculement n'a pas été provoqué sur le réseau réel.
 En secours, les requêtes vers `9.9.9.9` ne sont pas chiffrées entre le NAS
 et Quad9. Le filtrage des domaines malveillants de Quad9 est conservé.
 
+Effet de bord attendu : un domaine réellement cassé (signature DNSSEC
+invalide, serveurs de noms du domaine en panne) obtient aussi `SERVFAIL` de
+la FRITZ!Box ; Pi-hole rejoue alors la requête en clair vers `9.9.9.9`, qui
+répond généralement `SERVFAIL` à son tour. Ces requêtes, rares, apparaissent
+vers `9.9.9.9` dans les statistiques de Pi-hole : ce n'est pas une anomalie.
+Un volume important ou durable vers `9.9.9.9` signale en revanche un
+problème côté FRITZ!Box.
+
 ### Incident du 24 octobre 2026
 
 De 09:27 à 11:20, la FRITZ!Box a répondu `SERVFAIL` à toutes les requêtes :
@@ -85,6 +93,24 @@ nslookup example.org 192.168.1.56
 
 Dans le journal des requêtes Pi-hole, les réponses doivent être transmises à
 `192.168.1.1#53` en fonctionnement normal.
+
+### Test facultatif du basculement
+
+Le cas « FRITZ!Box muette » se simule avec `192.0.2.1`, adresse réservée à
+la documentation (RFC 5737) qui ne répond jamais. Interruption DNS brève.
+
+```bash
+cd ~/Development/Einstein/compose/pihole
+sed -i 's|^UPSTREAM_DNS=.*$|UPSTREAM_DNS="192.0.2.1;9.9.9.9"|' .env
+cd ../.. && sudo scripts/stack-up.sh pihole
+nslookup example.org 192.168.1.56      # réponse attendue après un court délai
+cd compose/pihole
+sed -i 's|^UPSTREAM_DNS=.*$|UPSTREAM_DNS="192.168.1.1;9.9.9.9"|' .env
+cd ../.. && sudo scripts/stack-up.sh pihole
+```
+
+Le cas `SERVFAIL` de l'incident est plus difficile à reproduire ; il repose
+sur la lecture du code FTL ci-dessus.
 
 ## Ressources
 
