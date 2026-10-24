@@ -27,11 +27,64 @@ Les paramètres réseau de référence sont :
 | Interface parente | `ovs_bond0`, à vérifier sur le NAS |
 | Pi-hole VPN (bridge) | `172.23.0.2` |
 | Réseau bridge VPN | `172.23.0.0/24` |
-| DNS amont | FRITZ!Box `192.168.1.1` |
+| DNS amont | FRITZ!Box `192.168.1.1`, secours Quad9 `9.9.9.9` (`strict-order`) |
 
 Le fichier Compose définit les réseaux ; il ne configure pas le routage
 OpenVPN, les règles DSM ou la distribution DNS aux clients. Ces réglages
 externes doivent être conservés séparément.
+
+## DNS amont et secours
+
+Pi-hole interroge la FRITZ!Box `192.168.1.1`, qui transmet à Quad9 en
+DNS-over-TLS. Quad9 direct `9.9.9.9` est déclaré en second via
+`UPSTREAM_DNS="192.168.1.1;9.9.9.9"` dans le `.env` runtime, et l'option
+dnsmasq `strict-order` est ajoutée par `FTLCONF_misc_dnsmasq_lines`.
+
+Sans `strict-order`, dnsmasq privilégie le serveur le plus rapide et
+interroge régulièrement tous les serveurs : `9.9.9.9` recevrait une partie
+du trafic en temps normal, en clair et hors du DoT de la FRITZ!Box. Avec
+`strict-order`, chaque requête part vers la FRITZ!Box ; Quad9 direct n'est
+utilisé que si elle échoue.
+
+Comportement vérifié le 24 octobre 2026 dans le dnsmasq intégré à Pi-hole
+FTL (`src/dnsmasq/forward.c`, branche `master`) : `reply_query()` renvoie la
+requête au serveur suivant lorsque la réponse est `SERVFAIL` ou `REFUSED` et
+que `forwardall` vaut 0, ce qui est le cas en `strict-order` sans
+`all-servers`. Si la FRITZ!Box ne répond plus du tout, la bascule intervient
+à la nouvelle tentative du client, après son propre délai (une à quelques
+secondes). Le basculement n'a pas été provoqué sur le réseau réel.
+
+En secours, les requêtes vers `9.9.9.9` ne sont pas chiffrées entre le NAS
+et Quad9. Le filtrage des domaines malveillants de Quad9 est conservé.
+
+### Incident du 24 octobre 2026
+
+De 09:27 à 11:20, la FRITZ!Box a répondu `SERVFAIL` à toutes les requêtes :
+sa liaison DNS-over-TLS vers Quad9 était tombée et aucun serveur de repli
+n'était configuré. Pi-hole n'ayant qu'un amont, la résolution était
+indisponible sur le LAN et le VPN. Correctifs : second serveur DoT ajouté
+côté FRITZ!Box par le propriétaire ; côté Pi-hole, Quad9 direct en secours
+avec `strict-order`, qui aurait rejoué chaque `SERVFAIL` vers `9.9.9.9`.
+
+### Déploiement et contrôle
+
+Dans `compose/pihole/.env` sur le NAS, remplacer la ligne `UPSTREAM_DNS` :
+
+```dotenv
+UPSTREAM_DNS="192.168.1.1;9.9.9.9"
+```
+
+Après `git pull --ff-only`, redéployer avec `sudo scripts/stack-up.sh pihole`
+(courte interruption DNS), puis vérifier :
+
+```bash
+sudo /usr/local/bin/docker exec pihole pihole-FTL --config dns.upstreams
+sudo /usr/local/bin/docker exec pihole grep -x strict-order /etc/pihole/dnsmasq.conf
+nslookup example.org 192.168.1.56
+```
+
+Dans le journal des requêtes Pi-hole, les réponses doivent être transmises à
+`192.168.1.1#53` en fonctionnement normal.
 
 ## Ressources
 

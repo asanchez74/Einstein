@@ -15,7 +15,7 @@ services:
       # Pi-hole reçoit des requêtes depuis le LAN et le réseau OpenVPN.
       FTLCONF_dns_listeningMode: "ALL"
 
-      # DNS upstream actuels.
+      # DNS amont dans l'ordre de préférence : FRITZ!Box, puis secours (voir strict-order).
       FTLCONF_dns_upstreams: "${UPSTREAM_DNS}"
 
       # DNS local Einstein.
@@ -30,9 +30,12 @@ services:
         192.168.1.56 pi-hole.chantevigne.com
 
       # Configuration dnsmasq additionnelle.
+      # strict-order : le second amont ne sert qu'en secours ; dnsmasq y rejoue
+      # une requête sur SERVFAIL ou REFUSED du premier (incident du 24.10.2026).
       FTLCONF_misc_dnsmasq_lines: |-
         local=/einstein.chantevigne.com/
         addn-hosts=/etc/pihole/synology-hosts.list
+        strict-order
 
       # Pi-hole ne fournit pas le service NTP.
       FTLCONF_ntp_ipv4_active: "false"

@@ -100,9 +100,11 @@ Pi-hole : 172.23.0.2
 DNS LAN et VPN : Pi-hole.
 
 Pi-hole upstream :
-FRITZ!Box 192.168.1.1
+FRITZ!Box 192.168.1.1, puis Quad9 9.9.9.9 en secours uniquement
+(`strict-order`, bascule sur SERVFAIL/REFUSED ou absence de réponse).
 
-FRITZ!Box utilise Quad9 via DNS-over-TLS.
+FRITZ!Box utilise Quad9 via DNS-over-TLS, avec un second serveur DoT
+de repli depuis l'incident du 24.10.2026.
 
 Le Synology DHCP est la source de vérité pour les noms LAN
 `*.chantevigne.com`.
