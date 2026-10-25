@@ -1,6 +1,6 @@
 # ADR-0011 — Interface web et authentification
 
-- **Statut :** acceptée, implémentation en cours
+- **Statut :** validée sur le NAS le 25 octobre 2026
 - **Date :** 19 octobre 2026
 
 ## Contexte

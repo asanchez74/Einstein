@@ -2,7 +2,7 @@
 
 ## Statut
 
-Cadrage validé le 19 octobre 2026 ; implémentation en cours.
+**Terminé le 25 octobre 2026** : authentification et interface déployées sur le NAS.
 Décision d'architecture : [ADR-0011](../adr/0011-interface-authentification.md).
 
 ## Objectif
@@ -121,7 +121,9 @@ attaque hors ligne : la traiter comme un secret.
 # Mac, depuis la racine du dépôt
 .venv/bin/python -m einstein_core.auth > ~/einstein_password_hash
 chmod 600 ~/einstein_password_hash
-scp ~/einstein_password_hash tonio@192.168.1.3:~/
+head -c 14 ~/einstein_password_hash; echo      # scrypt$32768$8
+# SSH du NAS sur le port 22606, sans SFTP : transfert par ssh plutôt que scp.
+ssh -p 22606 tonio@192.168.1.3 'umask 077; cat > ~/einstein_password_hash' < ~/einstein_password_hash
 rm ~/einstein_password_hash
 ```
 
@@ -141,6 +143,20 @@ valides jusqu'à leur échéance ou un redémarrage du Core.
 Retour arrière : revenir au commit précédent et redéployer ; l'API redevient
 accessible sans authentification sur le LAN et le VPN.
 
+Contrôle de la connexion sans exposer le mot de passe (Mac, zsh) :
+
+```bash
+read -rs "PW?Mot de passe Einstein : "; echo
+python3 -c 'import json,sys; print(json.dumps({"password": sys.argv[1]}))' "$PW" \
+  | curl -s -o /dev/null -w "connexion %{http_code}\n" -H 'Content-Type: application/json' -d @- \
+    https://einstein.chantevigne.com/api/v1/auth/connexion
+unset PW
+```
+
+204 : connexion réussie ; 401 : mot de passe refusé ; 429 : blocage après
+cinq échecs (levé par un redémarrage du Core) ; 503 : empreinte absente ou
+illisible.
+
 ### Contrôles
 
 - `https://einstein.chantevigne.com/` affiche la connexion ;
@@ -149,3 +165,20 @@ accessible sans authentification sur le LAN et le VPN.
   Mac (LAN) et l'iPhone (VPN) ;
 - depuis l'extérieur sans VPN, refus 403 du reverse proxy ;
 - `healthy` conservé, `/health/ready` accessible.
+
+### Déploiement validé — 25 octobre 2026
+
+Premier essai infructueux : le transfert `scp` vers le port 22 échouait
+(SSH du NAS sur le port 22606, sans SFTP). Empreinte regénérée, transférée
+par `ssh`, installée en `10001:10001` 0400 dans le dossier secret 0700,
+puis stack redéployée. Contrôle en ligne de commande depuis le Mac :
+`connexion 204`.
+
+Le propriétaire confirme ensuite que tout fonctionne : connexion, recherche,
+ouverture d'un PDF, question IA, inventaire et déconnexion dans le navigateur
+du Mac ; fermeture de l'API sans session ; connexion depuis l'iPhone via le
+VPN. Le refus externe sans VPN n'a pas été recontrôlé pour la page web ; il
+repose sur la règle du reverse proxy déjà validée pour l'API.
+
+Suites possibles hors sprint : historique des questions, téléversement,
+plusieurs utilisateurs, dossier `Travail` complet.

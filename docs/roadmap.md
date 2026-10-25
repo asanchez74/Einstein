@@ -120,6 +120,18 @@ cherchables sur 57. Accès LAN/VPN, refus externe et pertinence sont validés.
 Reportés : dossier complet (index persistant), mode de transcription OpenAI.
 L’interface utilisateur avec authentification est la priorité suivante.
 
+## Sprint 7 — Interface web et authentification
+
+**Statut : terminé — clôture le 25 octobre 2026**
+
+- [x] Authentification à compte unique (empreinte scrypt, sessions, limite d'échecs)
+- [x] Ouverture des documents sources limitée à l'index
+- [x] Interface web sans framework : documents, question IA, inventaire
+- [x] Déploiement NAS, validation Mac (LAN) et iPhone (VPN)
+
+Voir le [Sprint 7](sprints/sprint-7-interface.md) et
+l'[ADR-0011](adr/0011-interface-authentification.md).
+
 ## Étapes ultérieures
 
 Les étapes suivantes seront planifiées après validation du socle applicatif :
@@ -128,7 +140,6 @@ Les étapes suivantes seront planifiées après validation du socle applicatif :
 - orchestration des agents ;
 - mémoire et recherche documentaire ;
 - workflows ;
-- interface utilisateur ;
 - observabilité ;
 - automatisation des sauvegardes ;
 - éventuelle base PostgreSQL ;
