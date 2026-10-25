@@ -137,6 +137,30 @@ cd ../.. && sudo scripts/stack-up.sh pihole
 Le cas `SERVFAIL` de l'incident est plus difficile à reproduire ; il repose
 sur la lecture du code FTL ci-dessus.
 
+## DNS secondaire des clients et noms locaux
+
+Le DHCP distribue deux serveurs DNS : Pi-hole `192.168.1.56`, puis la
+FRITZ!Box `192.168.1.1` (constaté sur le Mac avec `scutil --dns`). Le second
+maintient la résolution si le conteneur Pi-hole s'arrête, mais il ne connaît
+pas les noms locaux définis dans Pi-hole :
+
+```text
+$ nslookup pi-hole.chantevigne.com 192.168.1.1
+** server can't find pi-hole.chantevigne.com: NXDOMAIN
+```
+
+Lorsque macOS interroge le serveur secondaire, un nom local
+(`pi-hole`, `einstein`, `nas`, `router.chantevigne.com`) peut donc devenir
+introuvable quelques minutes, le temps que la réponse négative expire.
+Observé le 25 octobre 2026 : l'interface `http://pi-hole.chantevigne.com/`
+affichait « site inaccessible » alors que Pi-hole fonctionnait (conteneur
+`healthy` depuis 30 heures, aucun redémarrage, journal normal). Ces requêtes
+échappent aussi au blocage de Pi-hole.
+
+Pour l'administration, utiliser de préférence `http://192.168.1.56/admin/`.
+Retirer la FRITZ!Box du DHCP supprimerait ces échecs mais aussi le repli si
+le conteneur Pi-hole s'arrête ; ce choix n'est pas retenu à ce stade.
+
 ## Ressources
 
 Pi-hole utilise une limite mémoire de 512 Mio et `cpu_shares: 2048`.
