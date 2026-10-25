@@ -161,6 +161,20 @@ Pour l'administration, utiliser de préférence `http://192.168.1.56/admin/`.
 Retirer la FRITZ!Box du DHCP supprimerait ces échecs mais aussi le repli si
 le conteneur Pi-hole s'arrête ; ce choix n'est pas retenu à ce stade.
 
+## Mises à jour
+
+La version de l'image est fixée dans `compose/pihole/compose.yaml`. Avant une
+mise à jour : lire les notes de version, sauvegarder avec `backup-stack.sh`
+(interruption DNS brève), puis `git pull --ff-only` et `stack-up.sh pihole`.
+Vérifier ensuite `pihole version`, `dns.upstreams`, `strict-order` et la
+résolution depuis un client du LAN.
+
+Le 25 octobre 2026 : passage de 2026.09.0 à 2026.10.0 (FTL v6.8, Web v6.6.1,
+Core v6.5 ; 17 avis de sécurité corrigés, aucun changement incompatible
+annoncé), après sauvegarde. `DATA_DIR` a été ajouté au `.env` NAS, après
+contrôle du montage réel de `/etc/pihole`, pour permettre la sauvegarde.
+Le propriétaire confirme les contrôles.
+
 ## Ressources
 
 Pi-hole utilise une limite mémoire de 512 Mio et `cpu_shares: 2048`.
