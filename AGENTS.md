@@ -166,3 +166,18 @@ Ne pas introduire de dépendance inutile.
 
 Préférer une architecture simple et évolutive à une architecture
 complexe anticipant des besoins hypothétiques.
+
+## Commandes destructives
+
+Voir l'incident du 1er novembre 2026
+(`docs/incidents/2026-11-01-suppression-volume1.md`).
+
+- Ne jamais construire une suppression (`rm`, `find -delete`, `mv` vers
+  un autre volume…) à partir de `xargs`, de `$(…)` ou d'une liste de
+  chemins calculée.
+- Cibler un chemin fixe, entre guillemets ; vérifier mentalement le
+  comportement avec des chemins contenant espaces et accents.
+- Toujours fournir d'abord une commande d'aperçu (liste, `--dry-run`)
+  et attendre sa validation avant la commande destructive.
+- Pour une suppression ponctuelle sur le NAS, préférer l'interface DSM
+  (File Station).
