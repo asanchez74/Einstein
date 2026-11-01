@@ -1,6 +1,6 @@
 # ADR-0012 — Pi-hole secondaire synchronisé par nebula-sync
 
-- **Statut :** déployé et validé le 1er novembre 2026 ; distribution par le DHCP à faire
+- **Statut :** déployé, validé et distribué par le DHCP le 1er novembre 2026
 - **Date :** 1er novembre 2026
 
 ## Contexte
@@ -34,8 +34,9 @@ par le paquet DNS Server de DSM.
 - Toute modification se fait sur le principal ; le secondaire est écrasé
   chaque heure.
 - `synology-hosts.list` n'est pas synchronisé par Teleporter ; le script DHCP
-  doit écrire dans les deux volumes.
-- La distribution du secondaire par le DHCP reste une décision séparée.
+  écrit dans les deux volumes (`PIHOLE_TARGETS`).
+- Le DHCP distribue `.56` puis `.57` ; la FRITZ!Box n'est plus un repli
+  pour les clients. Arrêter les deux instances coupe la résolution du LAN.
 
 ## Réévaluation
 

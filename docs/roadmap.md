@@ -154,6 +154,6 @@ testée a reçu HTTP 403 avant redéploiement.
 
 La sauvegarde/restauration Pi-hole et la planification de synchronisation DHCP
 restent au suivi d'exploitation. Un Pi-hole secondaire synchronisé est
-déployé le 1er novembre 2026 ([ADR-0012](adr/0012-pihole-secondaire.md)) ;
-sa distribution par le DHCP reste à faire. Voir les limites consignées à la clôture du
+déployé et distribué par le DHCP le 1er novembre 2026
+([ADR-0012](adr/0012-pihole-secondaire.md)). Voir les limites consignées à la clôture du
 Sprint 3.

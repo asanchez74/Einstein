@@ -137,39 +137,101 @@ cd ../.. && sudo scripts/stack-up.sh pihole
 Le cas `SERVFAIL` de l'incident est plus difficile à reproduire ; il repose
 sur la lecture du code FTL ci-dessus.
 
-## DNS secondaire des clients et noms locaux
+## Noms locaux introuvables (corrigé le 1er novembre 2026)
 
-Le DHCP distribue deux serveurs DNS : Pi-hole `192.168.1.56`, puis la
-FRITZ!Box `192.168.1.1` (constaté sur le Mac avec `scutil --dns`). Le second
-maintient la résolution si le conteneur Pi-hole s'arrête, mais il ne connaît
-pas les noms locaux définis dans Pi-hole :
+**Cause.** Jusqu'au 1er novembre 2026, le DHCP distribuait Pi-hole
+`192.168.1.56`, puis la FRITZ!Box `192.168.1.1` comme DNS secondaire
+(constaté sur le Mac avec `scutil --dns`). La FRITZ!Box maintenait la
+résolution si le conteneur Pi-hole s'arrêtait, mais ne connaît pas les noms
+locaux définis dans Pi-hole :
 
 ```text
 $ nslookup pi-hole.chantevigne.com 192.168.1.1
 ** server can't find pi-hole.chantevigne.com: NXDOMAIN
 ```
 
-Lorsque macOS interroge le serveur secondaire, un nom local
-(`pi-hole`, `einstein`, `nas`, `router.chantevigne.com`) peut donc devenir
+Lorsque macOS interrogeait le serveur secondaire, un nom local
+(`pi-hole`, `einstein`, `nas`, `router.chantevigne.com`) pouvait devenir
 introuvable quelques minutes, le temps que la réponse négative expire.
 Observé le 25 octobre 2026 : l'interface `http://pi-hole.chantevigne.com/`
 affichait « site inaccessible » alors que Pi-hole fonctionnait (conteneur
 `healthy` depuis 30 heures, aucun redémarrage, journal normal). Ces requêtes
-échappent aussi au blocage de Pi-hole.
+échappaient aussi au blocage de Pi-hole.
 
-Pour l'administration, utiliser de préférence `http://192.168.1.56/admin/`.
-Retirer la FRITZ!Box du DHCP supprimerait ces échecs mais aussi le repli si
-le conteneur Pi-hole s'arrête ; ce choix n'est pas retenu à ce stade.
+**Correction.** Le 1er novembre 2026, le propriétaire a configuré le DHCP
+DSM avec DNS1 `192.168.1.56` et DNS2 `192.168.1.57`, le Pi-hole secondaire.
+Les deux serveurs distribués connaissent les mêmes noms locaux et filtrent
+de la même façon ; le repli en cas d'arrêt d'une instance est conservé.
 
 ## Pi-hole secondaire
 
-Un second Pi-hole, `192.168.1.57`, est déployé depuis `compose/pihole2/` et
-synchronisé depuis le principal par nebula-sync toutes les heures
-([ADR-0012](adr/0012-pihole-secondaire.md)). Déployé le 1er novembre 2026 :
-listes et enregistrements locaux identiques sur les deux instances. Il pourra remplacer la
-FRITZ!Box comme second DNS distribué, sans perdre les noms locaux ni le
-filtrage. Architecture, déploiement, reconstruction et contrôles :
-`compose/pihole2/README.md`. Le DHCP n'est pas modifié à ce stade.
+Un second Pi-hole, `192.168.1.57`, est déployé depuis `compose/pihole2/`
+([ADR-0012](adr/0012-pihole-secondaire.md)). Déployé et validé le
+1er novembre 2026 : listes et enregistrements locaux identiques sur les
+deux instances. Déploiement, reconstruction et contrôles détaillés :
+`compose/pihole2/README.md`.
+
+### Architecture à deux instances
+
+| | Principal | Secondaire |
+|---|---|---|
+| Conteneur, stack | `pihole`, `compose/pihole/` | `pihole2`, `compose/pihole2/` |
+| LAN (macvlan `pihole_pihole_lan`) | `192.168.1.56` | `192.168.1.57` |
+| Bridge `pihole_pihole_vpn` | `172.23.0.2` | `172.23.0.3` |
+| Données `/etc/pihole` | `/volume1/docker/einstein/data/pihole` | `/volume1/docker/einstein/data/pihole2` |
+| Distribution DHCP | DNS1 | DNS2 |
+
+Le secondaire étend la définition Compose du principal (même image, mêmes
+`dns.hosts`, amonts et options dnsmasq) et rejoint ses réseaux.
+`nebula-sync` (`172.23.0.4`) copie le principal vers le secondaire toutes
+les heures, par le bridge.
+
+### Qui fait autorité
+
+Chaque donnée a une seule source et un seul mécanisme de copie ; aucun ne
+touche à ce que gère l'autre.
+
+| Donnée | Source d'autorité | Copie vers les deux instances |
+|---|---|---|
+| Listes, domaines, groupes, clients (`gravity.db`) | interface du principal | nebula-sync (Teleporter), toutes les heures |
+| Réglages modifiés dans l'interface | interface du principal | nebula-sync (API), toutes les heures |
+| `dns.hosts`, amonts, options dnsmasq | `compose/pihole/compose.yaml` (`FTLCONF_`) | définition Compose partagée, au déploiement |
+| Noms DHCP (`synology-hosts.list`) | baux du DHCP Synology | `sync-synology-dhcp-to-pihole.sh`, toutes les cinq minutes |
+
+nebula-sync ne peut pas écraser les noms DHCP : `synology-hosts.list` n'est
+pas un fichier de la sauvegarde Teleporter, et la directive `addn-hosts` qui
+le charge est fixée par variable d'environnement sur les deux instances
+(les réglages `FTLCONF_` ne sont pas modifiables par l'API). Inversement, le
+script n'écrit que ce fichier. Une modification faite dans l'interface du
+secondaire est écrasée à la synchronisation suivante.
+
+Contrôle sur le NAS, avant puis après une synchronisation nebula-sync
+(heure pleine) : empreintes et dates inchangées.
+
+```bash
+for c in pihole pihole2; do
+  sudo docker exec "$c" sh -c \
+    'sha256sum /etc/pihole/synology-hosts.list; stat -c %y /etc/pihole/synology-hosts.list'
+done
+```
+
+### Ordre d'arrêt et de démarrage
+
+- Démarrer `pihole` avant `pihole2` : la stack secondaire utilise les
+  réseaux créés par la stack principale.
+- Arrêter `pihole2` **avant** `stack-down.sh pihole` : Compose ne peut pas
+  supprimer des réseaux encore utilisés par le secondaire.
+- Pour une mise à jour, redéployer une instance à la fois et contrôler entre
+  les deux : sans repli FRITZ!Box, arrêter les deux instances ensemble coupe
+  la résolution DNS du LAN.
+
+### Limite connue
+
+Les deux instances tournent sur le même DS918+ et le même moteur Docker.
+L'arrêt, la mise à jour ou la corruption d'un conteneur sont couverts ; un
+arrêt ou une panne du NAS, de Docker ou du réseau macvlan coupe les deux
+résolveurs. Pour l'administration, utiliser de préférence
+`http://192.168.1.56/admin/`, et l'adresse IP du NAS en cas de panne DNS.
 
 ## Mises à jour
 
@@ -272,12 +334,32 @@ Pi-hole n'est déclarée validée par cette documentation.
 ## Synchronisation des noms DHCP
 
 `scripts/sync-synology-dhcp-to-pihole.sh` lit les baux Synology et génère
-`/volume1/docker/einstein/data/pihole/synology-hosts.list`, puis recharge FTL
-si le conteneur existe. Son exécution nécessite root.
+`synology-hosts.list` pour chaque conteneur de `PIHOLE_TARGETS`
+(par défaut `pihole pihole2`), puis recharge FTL dans ce conteneur. Son
+exécution nécessite root.
 
-Si `DATA_DIR` est personnalisé, fournir `OUTPUT_FILE` vers le fichier
-`synology-hosts.list` de ce répertoire. Le script conserve le fichier existant
-si aucun bail exploitable n'est trouvé. Il ne crée pas de tâche planifiée :
-la fréquence et la configuration éventuelle dans DSM restent à vérifier et
-à documenter sur le NAS. Éviter une synchronisation concurrente pendant la
-sauvegarde ou la restauration.
+Le fichier est écrit dans le volume monté sur `/etc/pihole` de chaque
+conteneur, lu par `docker inspect`, et le rechargement passe par
+`docker exec` : le script n'utilise pas le réseau, donc la limite
+hôte↔macvlan ne s'applique pas. Une cible inchangée n'est pas rechargée.
+
+Une cible en échec (conteneur absent, volume introuvable, écriture ou
+rechargement impossible) n'empêche pas de traiter les autres. Le script
+termine alors avec le code 1 et un message
+`ERREUR: synchronisation DHCP vers Pi-hole en échec pour : <conteneurs>`,
+que reprend la notification DSM. Si le rechargement seul échoue, le fichier
+est déjà écrit et FTL le lira au prochain démarrage. Arrêter un Pi-hole,
+y compris pendant `backup-stack.sh`, provoque donc des notifications
+d'échec jusqu'à son redémarrage. Pour une seule cible :
+
+```bash
+sudo PIHOLE_TARGETS=pihole2 scripts/sync-synology-dhcp-to-pihole.sh
+```
+
+Si aucun bail exploitable n'est trouvé, aucun fichier n'est modifié.
+
+La tâche planifiée DSM « Einstein - Sync DHCP vers Pi-hole » (root, toutes
+les cinq minutes) exécute
+`/bin/sh /var/services/homes/tonio/Development/Einstein/scripts/sync-synology-dhcp-to-pihole.sh`
+sans variable : elle alimente les deux instances. Éviter une synchronisation
+concurrente pendant une restauration.

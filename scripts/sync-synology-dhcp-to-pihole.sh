@@ -3,9 +3,10 @@
 set -eu
 
 LEASE_FILE="${LEASE_FILE:-/etc/dhcpd/dhcpd.conf.leases}"
-OUTPUT_FILE="${OUTPUT_FILE:-/volume1/docker/einstein/data/pihole/synology-hosts.list}"
 DOMAIN="${DOMAIN:-chantevigne.com}"
-CONTAINER="${CONTAINER:-pihole}"
+# Conteneurs Pi-hole à alimenter ; le fichier est écrit dans le volume monté
+# sur /etc/pihole de chacun (aucun accès réseau, donc pas de limite macvlan).
+PIHOLE_TARGETS="${PIHOLE_TARGETS:-pihole pihole2}"
 
 if [ "$(id -u)" -ne 0 ]; then
     echo "ERREUR: ce script doit être exécuté avec sudo/root." >&2
@@ -17,13 +18,11 @@ if [ ! -r "$LEASE_FILE" ]; then
     exit 1
 fi
 
-OUTPUT_DIR=$(dirname "$OUTPUT_FILE")
-mkdir -p "$OUTPUT_DIR"
-
-TMP="${OUTPUT_FILE}.tmp.$$"
+TMP=$(mktemp)
+TARGET_TMP=
 
 cleanup() {
-    rm -f "$TMP"
+    rm -f "$TMP" ${TARGET_TMP:+"$TARGET_TMP"}
 }
 
 trap cleanup EXIT HUP INT TERM
@@ -56,26 +55,52 @@ END {
 ' "$LEASE_FILE" | sort -V > "$TMP"
 
 if [ ! -s "$TMP" ]; then
-    echo "ERREUR: aucun bail DHCP exploitable trouvé; fichier existant conservé." >&2
+    echo "ERREUR: aucun bail DHCP exploitable trouvé; fichiers existants conservés." >&2
     exit 1
 fi
 
 COUNT=$(wc -l < "$TMP" | tr -d ' ')
 
-if [ -f "$OUTPUT_FILE" ] &&
-   cmp "$TMP" "$OUTPUT_FILE" >/dev/null 2>&1; then
-    echo "Aucun changement ($COUNT hôtes)."
-    exit 0
-fi
+# Écrit la liste dans le volume d'un conteneur puis recharge FTL.
+# Retourne 1 en cas d'échec, sans interrompre les autres cibles.
+sync_target() {
+    container="$1"
 
-chmod 0644 "$TMP"
-mv -f "$TMP" "$OUTPUT_FILE"
-trap - EXIT HUP INT TERM
+    data_dir=$(docker inspect --format \
+        '{{range .Mounts}}{{if eq .Destination "/etc/pihole"}}{{.Source}}{{end}}{{end}}' \
+        "$container" 2>/dev/null) || {
+        echo "ERREUR: $container : conteneur introuvable." >&2
+        return 1
+    }
 
-echo "Synchronisation effectuée: $COUNT hôtes -> $OUTPUT_FILE"
+    if [ -z "$data_dir" ] || [ ! -d "$data_dir" ]; then
+        echo "ERREUR: $container : volume /etc/pihole introuvable." >&2
+        return 1
+    fi
 
-if docker inspect "$CONTAINER" >/dev/null 2>&1; then
-    docker exec "$CONTAINER" sh -c '
+    output_file="$data_dir/synology-hosts.list"
+
+    if [ -f "$output_file" ] &&
+       cmp "$TMP" "$output_file" >/dev/null 2>&1; then
+        echo "$container : aucun changement ($COUNT hôtes)."
+        return 0
+    fi
+
+    TARGET_TMP="${output_file}.tmp.$$"
+
+    if ! cp "$TMP" "$TARGET_TMP" ||
+       ! chmod 0644 "$TARGET_TMP" ||
+       ! mv -f "$TARGET_TMP" "$output_file"; then
+        rm -f "$TARGET_TMP"
+        TARGET_TMP=
+        echo "ERREUR: $container : écriture impossible de $output_file." >&2
+        return 1
+    fi
+
+    TARGET_TMP=
+    echo "$container : synchronisation effectuée, $COUNT hôtes -> $output_file"
+
+    if ! docker exec "$container" sh -c '
         PID="$(cat /run/pihole-FTL.pid)"
 
         # Recharge addn-hosts et vide le cache DNS.
@@ -85,7 +110,21 @@ if docker inspect "$CONTAINER" >/dev/null 2>&1; then
         # Force FTL à re-résoudre immédiatement les noms des clients.
         RTMIN="$(pihole-FTL sigrtmin)"
         kill -$((RTMIN + 4)) "$PID"
-    '
+    '; then
+        echo "ERREUR: $container : fichier écrit mais rechargement FTL impossible (conteneur arrêté ?)." >&2
+        return 1
+    fi
 
-    echo "Pi-hole FTL rechargé et noms clients rafraîchis."
+    echo "$container : Pi-hole FTL rechargé et noms clients rafraîchis."
+}
+
+FAILED=
+
+for container in $PIHOLE_TARGETS; do
+    sync_target "$container" || FAILED="${FAILED:+$FAILED }$container"
+done
+
+if [ -n "$FAILED" ]; then
+    echo "ERREUR: synchronisation DHCP vers Pi-hole en échec pour : $FAILED" >&2
+    exit 1
 fi

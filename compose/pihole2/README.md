@@ -104,12 +104,12 @@ scripts/stack-status.sh pihole2
 scripts/stack-logs.sh pihole2 --tail 50
 
 # 5. Noms DHCP Synology dans le volume du secondaire
-sudo OUTPUT_FILE=/volume1/docker/einstein/data/pihole2/synology-hosts.list \
-    CONTAINER=pihole2 scripts/sync-synology-dhcp-to-pihole.sh
+sudo PIHOLE_TARGETS=pihole2 scripts/sync-synology-dhcp-to-pihole.sh
 ```
 
-Si une tâche planifiée DSM exécute `sync-synology-dhcp-to-pihole.sh`, lui
-ajouter la commande de l'étape 5.
+La tâche planifiée DSM, toutes les cinq minutes, alimente ensuite les deux
+instances (cibles par défaut `pihole pihole2`, voir
+`docs/pihole-operations.md`).
 
 Attendre une première synchronisation dans le journal de `nebula-sync`.
 Si elle n'a pas lieu au démarrage, elle intervient à l'heure pleine suivante.
@@ -168,7 +168,8 @@ La première synchronisation a lieu au démarrage (« Sync completed »).
   ainsi que pour `dns.hosts` et `synology-hosts.list` (44 hôtes) ; 2 listes
   et 155 301 domaines dans gravity sur les deux instances.
 
-Le DHCP distribue toujours `192.168.1.56` puis la FRITZ!Box.
+Le même jour, le propriétaire a configuré le DHCP DSM : DNS1
+`192.168.1.56`, DNS2 `192.168.1.57`. La FRITZ!Box n'est plus distribuée.
 
 ## Exploitation
 
@@ -186,5 +187,5 @@ Le DHCP distribue toujours `192.168.1.56` puis la FRITZ!Box.
 - **Sauvegarde.** `sudo scripts/backup-stack.sh pihole2` fonctionne
   (`DATA_DIR` du `.env`) mais n'est pas indispensable : la reconstruction
   ci-dessus repart du principal.
-- **DHCP.** Distribuer `192.168.1.57` comme second DNS est une étape
-  séparée, réalisée par le propriétaire après validation.
+- **DHCP.** Les clients reçoivent les deux Pi-hole : arrêter les deux à la
+  fois coupe la résolution sur le LAN, sans repli FRITZ!Box.
