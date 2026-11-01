@@ -161,6 +161,15 @@ Pour l'administration, utiliser de préférence `http://192.168.1.56/admin/`.
 Retirer la FRITZ!Box du DHCP supprimerait ces échecs mais aussi le repli si
 le conteneur Pi-hole s'arrête ; ce choix n'est pas retenu à ce stade.
 
+## Pi-hole secondaire
+
+Un second Pi-hole, `192.168.1.57`, est préparé dans `compose/pihole2/` et
+synchronisé depuis le principal par nebula-sync toutes les heures
+([ADR-0012](adr/0012-pihole-secondaire.md)). Il pourra remplacer la
+FRITZ!Box comme second DNS distribué, sans perdre les noms locaux ni le
+filtrage. Architecture, déploiement, reconstruction et contrôles :
+`compose/pihole2/README.md`. Le DHCP n'est pas modifié à ce stade.
+
 ## Mises à jour
 
 La version de l'image est fixée dans `compose/pihole/compose.yaml`. Avant une

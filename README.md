@@ -113,3 +113,7 @@ git diff --check
 
 Le déploiement du service est décrit dans
 [compose/einstein-core/README.md](compose/einstein-core/README.md).
+
+Le Pi-hole secondaire (`192.168.1.57`, synchronisé depuis le principal) est
+décrit dans [compose/pihole2/README.md](compose/pihole2/README.md) :
+architecture, déploiement, reconstruction et contrôles.

@@ -1,0 +1,87 @@
+name: pihole2
+
+services:
+  # Pi-hole secondaire : reprend la définition du principal (image, DNS local,
+  # amonts, dnsmasq, ressources). Seuls le nom, les adresses et les données
+  # diffèrent ; toute modification de ../pihole/compose.yaml s'applique aux deux.
+  pihole:
+    extends:
+      file: ../pihole/compose.yaml
+      service: pihole
+
+    container_name: pihole2
+    hostname: pihole2
+
+    # Remplace le montage hérité : sans DATA_DIR, la valeur par défaut du
+    # principal monterait ses données dans le secondaire.
+    volumes:
+      - "${DATA_DIR:?Définir DATA_DIR dans le fichier .env}:/etc/pihole"
+
+  # Copie la configuration du principal vers le secondaire (Teleporter).
+  nebula-sync:
+    image: ghcr.io/lovelaze/nebula-sync:v0.11.3
+    container_name: nebula-sync
+
+    environment:
+      TZ: Europe/Zurich
+      # « URL|mot de passe », fournis par Docker Secrets.
+      PRIMARY_FILE: /run/secrets/nebula_sync_primary
+      REPLICAS_FILE: /run/secrets/nebula_sync_replicas
+      FULL_SYNC: "true"
+      RUN_GRAVITY: "true"
+      CRON: "0 * * * *"
+
+    secrets:
+      - nebula_sync_primary
+      - nebula_sync_replicas
+
+    # L'hôte ne joint pas ses conteneurs macvlan : la synchronisation passe
+    # par le bridge du principal. Adresse fixe pour ne pas prendre celle d'un
+    # Pi-hole arrêté.
+    networks:
+      pihole_vpn:
+        ipv4_address: "${NEBULA_SYNC_IP}"
+
+    depends_on:
+      pihole:
+        condition: service_healthy
+
+    mem_limit: 64m
+    cpu_shares: 256
+
+    security_opt:
+      - no-new-privileges:true
+
+    cap_drop:
+      - ALL
+
+    read_only: true
+
+    restart: unless-stopped
+
+    logging:
+      driver: local
+      options:
+        max-size: 10m
+        max-file: "3"
+
+secrets:
+  pihole_webpasswd:
+    file: /volume1/docker/einstein/secrets/pihole_webpasswd.txt
+
+  nebula_sync_primary:
+    file: /volume1/docker/einstein/secrets/nebula_sync_primary.txt
+
+  nebula_sync_replicas:
+    file: /volume1/docker/einstein/secrets/nebula_sync_replicas.txt
+
+# Réseaux créés par la stack pihole : Docker refuse un second réseau macvlan
+# sur la même interface parente.
+networks:
+  pihole_lan:
+    external: true
+    name: "${PIHOLE_LAN_NETWORK:-pihole_pihole_lan}"
+
+  pihole_vpn:
+    external: true
+    name: "${PIHOLE_VPN_NETWORK:-pihole_pihole_vpn}"

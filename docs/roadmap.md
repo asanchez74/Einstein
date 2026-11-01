@@ -153,5 +153,7 @@ autorisés ; la requête de readiness depuis la connexion Internet externe
 testée a reçu HTTP 403 avant redéploiement.
 
 La sauvegarde/restauration Pi-hole et la planification de synchronisation DHCP
-restent au suivi d'exploitation. Voir les limites consignées à la clôture du
+restent au suivi d'exploitation. Un Pi-hole secondaire synchronisé est
+préparé ([ADR-0012](adr/0012-pihole-secondaire.md)) ; son déploiement, puis
+sa distribution par le DHCP, restent à valider. Voir les limites consignées à la clôture du
 Sprint 3.
