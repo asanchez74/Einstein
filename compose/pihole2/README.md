@@ -38,15 +38,15 @@ Points de conception :
   mais deux conteneurs d'un même bridge se joignent : nebula-sync parle aux
   deux Pi-hole par `172.23.0.2` et `172.23.0.3`, sans port publié.
 - **Ce que copie nebula-sync.** La sauvegarde Teleporter du principal
-  (listes, domaines, groupes, clients, `pihole.toml`) est importée dans le
-  secondaire, puis gravity est reconstruit. Les réglages fixés par
+  (listes, domaines, groupes, clients) est importée dans le secondaire ;
+  FTL ignore le `pihole.toml` de l'archive, et la configuration est copiée
+  ensuite par l'API. Gravity est enfin reconstruit. Les réglages fixés par
   variables `FTLCONF_` restent ceux de la définition Compose.
 - **Ce qu'il ne copie pas.** `synology-hosts.list` (noms DHCP) n'est pas
   dans la sauvegarde Teleporter : le script de synchronisation DHCP doit
   écrire aussi dans le volume du secondaire (voir plus bas).
-- **Même mot de passe.** L'import Teleporter remplace le mot de passe du
-  secondaire par celui du principal ; les deux stacks utilisent donc le même
-  secret `pihole_webpasswd.txt`.
+- **Même mot de passe.** Les deux stacks utilisent le même secret
+  `pihole_webpasswd.txt`, dont sont dérivés les secrets de nebula-sync.
 
 ## Prérequis
 
@@ -151,6 +151,24 @@ for c in pihole pihole2; do
     'SELECT COUNT(*) FROM gravity;'
 done
 ```
+
+### Déploiement du 1er novembre 2026
+
+Commit `221f112`, Docker Compose v2.20.1 sur le NAS. `pihole2` et
+`nebula-sync` sont `healthy` ; `nebula-sync` fonctionne en `read_only`.
+La première synchronisation a lieu au démarrage (« Sync completed »).
+
+- Mac : `.56` et `.57` donnent les mêmes réponses pour `nas`, `einstein`,
+  `router`, `pi-hole`, deux noms DHCP et `example.org` ; `doubleclick.net`
+  est bloqué (`0.0.0.0`) sur les deux. `nas.chantevigne.com` → `192.168.1.3`.
+- MAC de `192.168.1.57` : `02:42:c0:a8:01:39`, dérivée de l'IP par Docker,
+  réservée par le propriétaire dans le DHCP DSM. Elle pourrait changer avec
+  une version de Docker qui ne dérive plus la MAC de l'IP.
+- NAS : empreintes identiques pour les listes, domaines, groupes et clients,
+  ainsi que pour `dns.hosts` et `synology-hosts.list` (44 hôtes) ; 2 listes
+  et 155 301 domaines dans gravity sur les deux instances.
+
+Le DHCP distribue toujours `192.168.1.56` puis la FRITZ!Box.
 
 ## Exploitation
 

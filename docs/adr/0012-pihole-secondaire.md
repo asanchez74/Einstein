@@ -1,6 +1,6 @@
 # ADR-0012 — Pi-hole secondaire synchronisé par nebula-sync
 
-- **Statut :** préparé ; déploiement à valider sur le NAS
+- **Statut :** déployé et validé le 1er novembre 2026 ; distribution par le DHCP à faire
 - **Date :** 1er novembre 2026
 
 ## Contexte
