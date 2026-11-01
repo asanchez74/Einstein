@@ -208,6 +208,10 @@ secondaire est écrasée à la synchronisation suivante.
 Contrôle sur le NAS, avant puis après une synchronisation nebula-sync
 (heure pleine) : empreintes et dates inchangées.
 
+Vérifié le 1er novembre 2026 : nebula-sync a réécrit `gravity.db` du
+secondaire à 20:00:06, tandis que les deux `synology-hosts.list` sont
+restés à leur version de 19:23 (même empreinte SHA-256, 44 hôtes).
+
 ```bash
 for c in pihole pihole2; do
   sudo docker exec "$c" sh -c \
@@ -224,6 +228,18 @@ done
 - Pour une mise à jour, redéployer une instance à la fois et contrôler entre
   les deux : sans repli FRITZ!Box, arrêter les deux instances ensemble coupe
   la résolution DNS du LAN.
+
+### Origine des requêtes acceptées
+
+`FTLCONF_dns_listeningMode: "ALL"` est conservé pour les deux instances.
+Le mode `LOCAL` (« Allow only local requests ») n'accepte que les réseaux
+directement reliés au conteneur (`192.168.1.0/24`, `172.23.0.0/24`) et
+risquerait de refuser les clients OpenVPN `10.8.0.0/24`, routés par le NAS.
+`ALL` reste sûr tant qu'aucun port 53 n'est exposé à Internet : aucune
+redirection vers `.56` ou `.57` n'est configurée sur la FRITZ!Box
+(confirmé par le propriétaire le 1er novembre 2026), et Docker ne publie
+aucun port. Le réglage étant fixé par variable d'environnement, il est
+grisé dans l'interface et nebula-sync ne le modifie pas.
 
 ### Limite connue
 
@@ -363,3 +379,16 @@ les cinq minutes) exécute
 `/bin/sh /var/services/homes/tonio/Development/Einstein/scripts/sync-synology-dhcp-to-pihole.sh`
 sans variable : elle alimente les deux instances. Éviter une synchronisation
 concurrente pendant une restauration.
+
+Validé le 1er novembre 2026 après `git pull` du commit `1e7376f` : exécution
+DSM de 19:40:02 en code 0, puis journaux de 19:55 et 20:00 indiquant
+« aucun changement (44 hôtes) » pour `pihole` et `pihole2`. Test d'échec
+avec `PIHOLE_TARGETS="pihole absent"` : `pihole` traité, message
+`absent : conteneur introuvable` puis `en échec pour : absent`, code 1.
+Depuis le Mac, `dig` renvoie la même adresse sur `.56` et `.57` pour les
+hôtes DHCP contrôlés (`mac-mimi`, `ps5`, `iphone-tonio`, etc.).
+
+La sortie des tâches DSM est conservée dans le dossier d'enregistrement du
+Planificateur de tâches (`/volume1/Rapports Synology/Planificateur de tâches`).
+Ces journaux recopient la commande de chaque tâche : réserver ce dossier aux
+administrateurs et ne jamais placer de secret dans la commande d'une tâche.
