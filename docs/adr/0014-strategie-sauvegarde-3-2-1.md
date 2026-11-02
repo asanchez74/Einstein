@@ -37,7 +37,7 @@ Appliquer la règle **3-2-1** : trois copies, deux supports, une copie hors site
 | homes, Documents, docker (données et secrets Einstein), web, web_packages, Scan, Backups (sauvegardes Hyper Backup locales, dont `DSM_Parametres`), toutes les applications, configuration système | **Infomaniak Swiss Backup** via Hyper Backup (Swift), ~0,4 To | disque USB, Hyper Backup |
 | PhotoBAK (toutes les photos), Video/Videos Personnelles | **Glacier Backup** (existant) ; Photos iCloud n'est qu'une synchronisation | facultatif |
 | Photo, Music | **Glacier Backup** (tâche Music à créer) | — |
-| TimeMachine, surveillance, Downloads, Backups | exclus | — |
+| TimeMachine, surveillance, Downloads | exclus | — |
 | Messagerie et contacts | chez Infomaniak après migration ([ADR-0013](0013-migration-messagerie-infomaniak.md)) | exportation périodique des contacts |
 
 **Swiss Backup est la sauvegarde hors site principale** (restauration
@@ -48,17 +48,40 @@ Backup.
 
 Règles :
 
-- **Chiffrement** côté NAS dans Hyper Backup ; clé conservée hors du NAS
-  (gestionnaire de mots de passe et copie papier).
-- **Versions** Hyper Backup avec rotation intelligente (par exemple quotidienne
-  sur 30 jours, hebdomadaire sur 3 mois, mensuelle sur 12 mois).
-- **Disque USB débranché** entre deux sauvegardes : il compense l'absence
-  d'immutabilité de Swiss Backup en Swift/S3 (immutabilité réservée aux plans
-  Acronis).
-- **Instantanés immuables** à étudier dans Snapshot Replication (DSM 7.2), contre
-  la suppression des instantanés par un compte compromis.
+- **Chiffrement** côté NAS dans Hyper Backup. Mot de passe de chiffrement,
+  identifiants Swift et contenu du fichier de clé `.pem` dans SafeInCloud
+  (coffre synchronisé par Dropbox, indépendant du NAS).
+- **Fiche papier de secours**, hors du NAS et hors ligne : mot de passe maître
+  SafeInCloud et codes de secours Dropbox. Tout le reste se retrouve dans le
+  coffre.
+- **Versions** Hyper Backup : une par heure sur 1 jour, par jour sur 1 mois, par
+  semaine sur 3 mois, puis par mois (256 au plus).
+- **Disque USB débranché** entre deux sauvegardes, **prioritaire** : seule copie
+  hors d'atteinte d'un compte administrateur compromis ou d'un rançongiciel.
+  Swiss Backup n'offre pas d'immutabilité en Swift/S3 (réservée aux plans
+  Acronis) et le DS918+ ne propose pas d'instantanés immuables (seulement
+  « Verrouiller », qui empêche la suppression automatique mais pas une
+  suppression par un administrateur).
 - **Test de restauration** trimestriel d'un dossier depuis Swiss Backup, avec
   Hyper Backup Explorer sur le Mac ; notifications d'échec activées.
+
+### Instantanés (Snapshot Replication)
+
+Première ligne de défense contre les erreurs, sur le même volume. Politique
+appliquée le 2 novembre 2026 (conservation avancée : tous les instantanés
+pendant 1 jour, derniers 5 toujours conservés, dernier de l'année pendant 1 an) :
+
+| Groupe | Dossiers | Planification | Heure / jour / semaine / mois | `#snapshot` visible |
+|---|---|---|---|---|
+| Fichiers de travail | Documents, homes | toutes les heures de 07:00 à 23:00 | 24 h / 14 j / 8 sem. / 6 mois | oui |
+| Critiques peu modifiés | PhotoBAK, docker | quotidienne à 00:00 | 24 h / 14 j / 8 sem. / 6 mois | non |
+| Autres | Backups, MailPlus, Photo, Music, Video, Scan, web, web_packages, Downloads, Rapports Synology | quotidienne à 00:00 | 24 h / 14 j / 4 sem. / 3 mois | non |
+| Sans instantanés | TimeMachine, surveillance | — | — | — |
+
+`@appstore` et `@database` ne sont pas des dossiers partagés et n'ont pas
+d'instantanés ; la sauvegarde Swiss Backup des applications et de la
+configuration système couvre ce manque. Snapshot Replication ne réplique que
+vers un autre Synology : pas de réplication tant qu'aucun second NAS n'existe.
 
 ## Alternatives évaluées
 
@@ -96,6 +119,12 @@ sur 3 mois, puis par mois ; 256 versions au plus).
 
 ## Suite
 
-- Contrôler les tâches Glacier Backup (réinstallées le 1er novembre 2026).
+- Acheter et mettre en place le disque USB (tâche Hyper Backup locale).
+- Exporter le fichier de clé `.pem` de la tâche Swiss Backup vers SafeInCloud.
+- Vérifier la première sauvegarde Swiss Backup, puis tester une restauration
+  avec Hyper Backup Explorer.
+- Contrôler les tâches Glacier Backup (réinstallées le 1er novembre 2026) et
+  créer la tâche Music.
+- Vérifier l'apparition des instantanés horaires de Documents et homes.
 - Rédiger la procédure de reconstruction du NAS (ordre DSM, Hyper Backup,
   paquets, Docker, stacks Einstein), conservée aussi hors du NAS.
