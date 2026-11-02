@@ -113,12 +113,37 @@ Commandé le 2 novembre 2026 (BK-711964-1, 1 To, 1 emplacement Swift/S3/SFTP),
 avec un essai gratuit de 90 jours jusqu'à fin janvier 2027, puis renouvellement
 annuel.
 
-Tâche Hyper Backup créée le 2 novembre 2026 : « Swiss Backup — NAS », OpenStack
-Swift (`swiss-backup02.infomaniak.com`, Keystone v3, projet et domaine renseignés
-en `name`), conteneur `nas-chantevigne`, chiffrement côté client, compression,
-quotidienne à 00:30, vérification d'intégrité le samedi à 21:30, conservation
-personnalisée (1 version par heure sur 1 jour, par jour sur 1 mois, par semaine
-sur 3 mois, puis par mois ; 256 versions au plus).
+Tâche Hyper Backup « Swiss Backup — NAS » : OpenStack Swift
+(`swiss-backup02.infomaniak.com`, Keystone v3, utilisateur `SBI-AS579568`,
+projet `sb_project_SBI-AS579568` et domaine `default` renseignés en `name`),
+conteneur `default`, chiffrement côté client, compression, quotidienne à 00:30,
+vérification d'intégrité le samedi à 21:30 limitée à 2 h (pour ne pas chevaucher
+la sauvegarde de 00:30), conservation personnalisée (1 version par heure sur
+1 jour, par jour sur 1 mois, par semaine sur 3 mois, puis par mois ; 256 versions
+au plus). Dossiers : Backups, docker, Documents, homes, Scan, web, web_packages
+(~390 Go hors instantanés et corbeilles). Applications : toutes **sauf Synology
+Drive Server**. Première sauvegarde réussie le 2 novembre 2026 à 21:23 :
+353,62 Go sur la cible.
+
+**Piège : Synology Drive Server.** Cocher cette application dans Hyper Backup
+ajoute les dossiers partagés où Drive est activé (Documents, Scan, homes et
+**Video**), même s'ils sont décochés dans l'onglet Dossiers. La première tâche,
+créée le même jour, a ainsi tenté d'envoyer 2,33 To et s'est arrêtée sur le
+quota (`413 Upload exceeds quota`) après 936 Go, sans version exploitable.
+Supprimer la tâche dans Hyper Backup n'a effacé que son cache local, pas les
+données chez Infomaniak : l'appareil Swift (`SBI-AS605250`) a été supprimé et
+recréé depuis le Manager. Avant de valider une tâche, vérifier la colonne
+« Dossier partagé » de l'onglet Application.
+
+Mesurer les tailles avec `du --exclude='#snapshot' --exclude='#recycle'` :
+lorsque `#snapshot` est visible, `du` compte chaque instantané comme une copie
+complète.
+
+Tâche Hyper Backup « DS212j local — NAS » vers le dossier `SauvegardeDS918` du
+DS212j (serveur rsync, compte `hb-ds918`) : même périmètre de dossiers et
+d'applications que Swiss Backup, sans Synology Drive Server. Music, Photo,
+PhotoBAK et Videos Personnelles en ont été retirés le 2 novembre 2026 : ils
+restent protégés par le NAS et Glacier.
 
 ## Conséquences
 
@@ -147,8 +172,8 @@ sur 3 mois, puis par mois ; 256 versions au plus).
 
 - Acheter et mettre en place le disque USB (tâche Hyper Backup locale).
 - Exporter le fichier de clé `.pem` de la tâche Swiss Backup vers SafeInCloud.
-- Vérifier la première sauvegarde Swiss Backup, puis tester une restauration
-  avec Hyper Backup Explorer.
+- Tester une restauration depuis Swiss Backup avec Hyper Backup Explorer.
+- Vérifier la première sauvegarde « DS212j local — NAS ».
 - Contrôler les tâches Glacier Backup (réinstallées le 1er novembre 2026) et
   créer la tâche Music.
 - Vérifier l'apparition des instantanés horaires de Documents et homes.
