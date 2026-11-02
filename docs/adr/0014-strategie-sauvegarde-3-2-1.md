@@ -113,9 +113,23 @@ sur 3 mois, puis par mois ; 256 versions au plus).
 - Coût récurrent d'environ CHF 6 par mois et un disque USB à acheter.
 - Premier envoi de quelques heures (fibre 1 Gb/s).
 - Rotation et contrôle du disque USB à intégrer à la routine (mensuelle).
-- Glacier Backup repose sur l'ancien service Amazon Glacier à coffres : vérifier
-  sa pérennité et ses coûts de restauration, prévoir une migration si
-  nécessaire.
+- Glacier Backup repose sur l'ancien service Amazon Glacier à coffres, fermé aux
+  nouveaux clients depuis le 15 décembre 2025 ; les clients existants gardent
+  l'accès, sans migration obligatoire. La tâche Music (créée le 2 novembre 2026)
+  est à Francfort, les autres en US East.
+- Stockage Glacier : ~0,0036 $/Go/mois en US East, ~0,004 à 0,0045 $ à
+  Francfort (non confirmé), soit 1 à 2 $/mois d'écart pour ~2 To. Durée
+  minimale de facturation de 90 jours : ne pas déplacer les archives envoyées en
+  novembre 2026 avant février 2027.
+
+## Réévaluation (fin janvier 2027)
+
+À la fin de l'essai Swiss Backup :
+
+- confirmer le renouvellement annuel Swiss Backup ;
+- décider du rôle de Glacier : passer Swiss Backup à 2 To pour y mettre PhotoBAK
+  et les vidéos personnelles (~CHF 4/mois de plus) puis retirer Glacier, ou
+  garder Glacier comme archive froide et la regrouper à Francfort.
 
 ## Suite
 
