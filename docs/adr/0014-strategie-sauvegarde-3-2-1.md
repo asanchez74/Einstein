@@ -11,7 +11,12 @@ Le NAS DS918+ (SHR, 4 × 3,6 To, 6,7 To utilisés) protège ses données par :
   suppression ou un chiffrement ;
 - des instantanés Snapshot Replication quotidiens, sur le même volume ;
 - Hyper Backup vers le dossier `Backups`, sur le même NAS ;
-- Glacier Backup (AWS) pour `PhotoBAK` et `Video`.
+- Glacier Backup (AWS, région N. Virginia), avec les tâches « Homes Glacier et
+  Docker Backup » (homes, docker), « Documents Glacier Backup » (Documents,
+  Scan), « Photo Glacier Backup », « PhotoBAK Glacier Backup » (PhotoBAK,
+  Video/Videos Personnelles) et « Backups et web_packages Glacier ». Ces tâches
+  ont été modifiées le 1er novembre 2026 ; leur réussite après l'incident reste
+  à confirmer.
 
 L'incident du [1er novembre 2026](../incidents/2026-11-01-suppression-volume1.md)
 a été réparé grâce aux instantanés. Une perte du volume ou du NAS (panne,
@@ -30,9 +35,15 @@ Appliquer la règle **3-2-1** : trois copies, deux supports, une copie hors site
 | Données | Hors site | Copie locale séparée |
 |---|---|---|
 | homes, Photo, Documents, docker (données et secrets Einstein), web, Scan, Music, configuration DSM et paquets | **Infomaniak Swiss Backup** via Hyper Backup (Swift), ~0,5 To | disque USB, Hyper Backup |
-| PhotoBAK, Video | **Glacier Backup** (existant) | facultatif |
+| PhotoBAK, Video/Videos Personnelles | **Glacier Backup** (existant) | facultatif |
 | TimeMachine, surveillance, Downloads, Backups | exclus | — |
 | Messagerie et contacts | chez Infomaniak après migration ([ADR-0013](0013-migration-messagerie-infomaniak.md)) | exportation périodique des contacts |
+
+**Swiss Backup est la sauvegarde hors site principale** (restauration
+immédiate, sans frais, versionnée, en Suisse). **Glacier Backup reste une
+archive froide** de dernier recours chez un second fournisseur : les tâches
+existantes sont conservées, y compris pour les données aussi envoyées à Swiss
+Backup.
 
 Règles :
 
@@ -62,6 +73,9 @@ Coût de stockage mensuel indicatif pour ~0,5 To (sources tierces, à confirmer)
 Tarif officiel Swiss Backup relevé le 2 novembre 2026 (paiement annuel, -10 %) :
 capacité 1 To CHF 4,18/mois et 1 appareil « Sauvegarde Cloud » CHF 1,84/mois,
 soit **CHF 6,02/mois** (environ CHF 72/an), TVA probablement en sus.
+Commandé le 2 novembre 2026 (BK-711964-1, 1 To, 1 emplacement Swift/S3/SFTP),
+avec un essai gratuit de 90 jours jusqu'à fin janvier 2027, puis renouvellement
+annuel.
 
 ## Conséquences
 
