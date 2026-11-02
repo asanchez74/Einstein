@@ -150,8 +150,9 @@ locale).
 - Pi-hole, Einstein, Homebridge, nebula-sync en service ; DNS filtrant sur `.56` et `.57`.
 - Hyper Backup, Snapshot Replication, Synology Drive et messagerie contrôlés le
   lendemain par le propriétaire.
-- Contacts : 1 488 sur le serveur et sur le Mac. **iPhone à vérifier** : il n'affichait
-  que 8 contacts en fin de soirée (synchronisation en cours ou autre carnet).
+- Contacts : 1 488 sur le serveur, le Mac et l'iPhone (l'iPhone, qui n'en
+  affichait que 8 en fin de soirée, était encore en cours de synchronisation ;
+  confirmé le 2 novembre 2026).
 
 ## Enseignements et actions
 
