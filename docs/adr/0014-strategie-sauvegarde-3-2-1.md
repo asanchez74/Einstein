@@ -34,8 +34,9 @@ Appliquer la règle **3-2-1** : trois copies, deux supports, une copie hors site
 
 | Données | Hors site | Copie locale séparée |
 |---|---|---|
-| homes, Photo, Documents, docker (données et secrets Einstein), web, Scan, Music, configuration DSM et paquets | **Infomaniak Swiss Backup** via Hyper Backup (Swift), ~0,5 To | disque USB, Hyper Backup |
-| PhotoBAK, Video/Videos Personnelles | **Glacier Backup** (existant) | facultatif |
+| homes, Documents, docker (données et secrets Einstein), web, web_packages, Scan, Backups (sauvegardes Hyper Backup locales, dont `DSM_Parametres`), toutes les applications, configuration système | **Infomaniak Swiss Backup** via Hyper Backup (Swift), ~0,4 To | disque USB, Hyper Backup |
+| PhotoBAK (toutes les photos), Video/Videos Personnelles | **Glacier Backup** (existant) ; Photos iCloud n'est qu'une synchronisation | facultatif |
+| Photo, Music | **Glacier Backup** (tâche Music à créer) | — |
 | TimeMachine, surveillance, Downloads, Backups | exclus | — |
 | Messagerie et contacts | chez Infomaniak après migration ([ADR-0013](0013-migration-messagerie-infomaniak.md)) | exportation périodique des contacts |
 
@@ -76,6 +77,13 @@ soit **CHF 6,02/mois** (environ CHF 72/an), TVA probablement en sus.
 Commandé le 2 novembre 2026 (BK-711964-1, 1 To, 1 emplacement Swift/S3/SFTP),
 avec un essai gratuit de 90 jours jusqu'à fin janvier 2027, puis renouvellement
 annuel.
+
+Tâche Hyper Backup créée le 2 novembre 2026 : « Swiss Backup — NAS », OpenStack
+Swift (`swiss-backup02.infomaniak.com`, Keystone v3, projet et domaine renseignés
+en `name`), conteneur `nas-chantevigne`, chiffrement côté client, compression,
+quotidienne à 00:30, vérification d'intégrité le samedi à 21:30, conservation
+personnalisée (1 version par heure sur 1 jour, par jour sur 1 mois, par semaine
+sur 3 mois, puis par mois ; 256 versions au plus).
 
 ## Conséquences
 
