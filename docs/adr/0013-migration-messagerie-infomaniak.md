@@ -79,9 +79,10 @@ Namecheap ; MailPlus reçoit de nouveau le courrier.
 
 ## Coûts
 
-Service Mail Infomaniak pour 5 adresses : de l'ordre de quelques CHF par mois
-(sources tierces divergentes, entre ~1,50 € et ~7,30 CHF par mois). À confirmer
-dans le Manager lors de la commande.
+Service Mail Infomaniak pour 5 adresses : **CHF 2,50 par mois** (tarif relevé
+par le propriétaire le 2 novembre 2026), soit CHF 30 par an. Avec Swiss Backup
+(CHF 6,02 par mois), l'ensemble messagerie et sauvegarde hors site coûte
+environ CHF 8,50 par mois.
 
 ## Conséquences
 
