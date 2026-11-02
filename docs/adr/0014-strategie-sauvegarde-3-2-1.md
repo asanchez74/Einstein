@@ -65,6 +65,18 @@ Règles :
 - **Test de restauration** trimestriel d'un dossier depuis Swiss Backup, avec
   Hyper Backup Explorer sur le Mac ; notifications d'échec activées.
 
+### Domotique KNX du DS212j
+
+Le DS212j (`192.168.1.4`, DSM 6.2.4 sans mises à jour) fait tourner `eibd` et
+`linknx` (interface KNX-USB) et l'application web `eib`. Sa configuration est
+copiée vers `homes/tonio/Sauvegardes/ds212j/` sur le DS918+ par
+`scripts/pull-ds212j-config.sh` (rsync sur SSH, sans suppression), où les
+instantanés de `homes`, Swiss Backup et Glacier la protègent. Clé SSH dédiée
+`~/.ssh/ds212j_backup_ed25519` du compte tonio sur le DS918+, autorisée sur le
+DS212j uniquement depuis `192.168.1.3`, sans terminal ni redirection. Tâche
+planifiée DSM quotidienne à 23:30, utilisateur tonio. Première copie manuelle
+le 2 novembre 2026 (7 149 fichiers).
+
 ### Instantanés (Snapshot Replication)
 
 Première ligne de défense contre les erreurs, sur le même volume. Politique
