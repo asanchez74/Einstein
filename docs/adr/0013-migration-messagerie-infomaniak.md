@@ -51,9 +51,8 @@ et moins bien intégré à Mail, Contacts et Calendrier d'Apple).
 ## Plan de migration
 
 1. **Préparation.** Commander le Service Mail Infomaniak (5 adresses), y
-   déclarer `chantevigne.com`, créer les boîtes. Vérifier dans MailPlus si des
-   utilisateurs relèvent des comptes POP3 externes (option activée sur le
-   serveur) et quels appareils utilisent POP3. Abaisser à 300 s le TTL des
+   déclarer `chantevigne.com`, créer les boîtes. Aucun relevé ni client POP3
+   n'est utilisé (confirmé le 2 novembre 2026) : IMAP seulement. Abaisser à 300 s le TTL des
    enregistrements MX, SPF et `mail` chez Namecheap, au moins 24 h avant la
    bascule.
 2. **Première copie.** Copier l'historique IMAP de MailPlus vers Infomaniak
@@ -98,4 +97,6 @@ dans le Manager lors de la commande.
 ## Points à confirmer
 
 - Valeurs exactes MX, SPF et DKIM dans le Manager Infomaniak.
-- Relevés POP3 externes configurés dans MailPlus, et appareils en POP3.
+
+Ordre retenu : mettre en place la sauvegarde hors site
+([ADR-0014](0014-strategie-sauvegarde-3-2-1.md)) avant la migration.

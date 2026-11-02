@@ -59,9 +59,13 @@ Coût de stockage mensuel indicatif pour ~0,5 To (sources tierces, à confirmer)
 | AWS S3 Standard / Standard-IA | ~13 $ / ~7 $ | sortie ~0,09 $/Go ; Hyper Backup n'écrit pas directement en Glacier ou Deep Archive |
 | Second NAS chez un proche | achat unique | indépendant et immuable possible, mais maintenance et dépendance à l'hôte |
 
+Tarif officiel Swiss Backup relevé le 2 novembre 2026 (paiement annuel, -10 %) :
+capacité 1 To CHF 4,18/mois et 1 appareil « Sauvegarde Cloud » CHF 1,84/mois,
+soit **CHF 6,02/mois** (environ CHF 72/an), TVA probablement en sus.
+
 ## Conséquences
 
-- Coût récurrent de quelques euros par mois et un disque USB à acheter.
+- Coût récurrent d'environ CHF 6 par mois et un disque USB à acheter.
 - Premier envoi de quelques heures (fibre 1 Gb/s).
 - Rotation et contrôle du disque USB à intégrer à la routine (mensuelle).
 - Glacier Backup repose sur l'ancien service Amazon Glacier à coffres : vérifier
@@ -70,7 +74,6 @@ Coût de stockage mensuel indicatif pour ~0,5 To (sources tierces, à confirmer)
 
 ## Suite
 
-- Vérifier le palier et le tarif officiels de Swiss Backup à la commande.
 - Contrôler les tâches Glacier Backup (réinstallées le 1er novembre 2026).
 - Rédiger la procédure de reconstruction du NAS (ordre DSM, Hyper Backup,
   paquets, Docker, stacks Einstein), conservée aussi hors du NAS.
