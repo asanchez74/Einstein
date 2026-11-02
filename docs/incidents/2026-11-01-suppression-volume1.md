@@ -126,8 +126,18 @@ pgsql` ne trouve pas `/volume1/@database/pgsql`. Recréer `/volume1/@database`
 **Docker.** Après la mise à jour de Container Manager, des `containerd-shim`
 orphelins de l'ancien démon faisaient croire à `containerd` que les tâches tournaient
 encore ; chaque conteneur était tué au démarrage (code 137, sans `OOMKilled` ni
-événement `kill`). Arrêter Container Manager, vérifier que les shims n'ont plus de
-processus enfant, les arrêter, puis relancer Container Manager.
+événement `kill`). Arrêter Container Manager, arrêter les shims restants, puis
+relancer Container Manager.
+
+Attention : sur DSM, `ps` n'affiche pas les processus des conteneurs (538 lignes
+pour 571 entrées dans `/proc`). Le contrôle « shims sans processus enfant » fait
+avec `ps` pendant l'incident n'était donc pas fiable. Pour voir les processus des
+conteneurs, lire `/proc/<pid>/comm` et `/proc/<pid>/stat`, ou utiliser
+`sudo docker top <conteneur>`.
+
+Pendant la boucle de redémarrage, Container Manager a émis 29 notifications
+« Le conteneur … s'est arrêté de manière inattendue » (pihole, einstein-core,
+Homebridge), reçues aussi par mail. Aucun arrêt n'a eu lieu après 23:06.
 
 **Contacts.** Un client CardDAV garde une copie locale complète. Avant toute
 réparation : copie de `~/Library/Application Support/AddressBook` et export vCard
