@@ -39,3 +39,5 @@ nav:
       - ADR-0010: adr/0010-ocr-local-pdf-scannes.md
       - ADR-0011: adr/0011-interface-authentification.md
       - ADR-0012: adr/0012-pihole-secondaire.md
+      - ADR-0013: adr/0013-migration-messagerie-infomaniak.md
+      - ADR-0014: adr/0014-strategie-sauvegarde-3-2-1.md
