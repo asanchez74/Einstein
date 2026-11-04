@@ -378,7 +378,12 @@ Chaque appel `docker` est limité à `DOCKER_TIMEOUT` secondes (30 par
 défaut) ; un dépassement compte comme un échec de la cible. Le 3 novembre
 2026, un `docker exec pihole` resté bloqué près de 17 heures a fait ignorer
 toutes les exécutions suivantes (notification DSM « la tâche est déjà en
-cours d'exécution »), sans effet sur le DNS.
+cours d'exécution »), sans effet sur le DNS. Le 4 novembre, même
+`docker exec pihole true` et `docker exec pihole2 true` bloquaient : le démon
+Docker ne lançait plus de commande dans les conteneurs, pendant une forte
+charge disque (sauvegardes, charge ~11 dont ~10 d'attente disque, swap
+2,9 Go). Rétabli en redémarrant Container Manager, avec une courte coupure DNS.
+Test : `sudo timeout 10 docker exec pihole true; echo $?` (124 = bloqué).
 
 La tâche planifiée DSM « Einstein - Sync DHCP vers Pi-hole » (root, toutes
 les cinq minutes) exécute
