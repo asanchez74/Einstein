@@ -25,6 +25,7 @@ nav:
       - Sprint 7 — Interface: sprints/sprint-7-interface.md
   - Incidents:
       - 01.11.2026 — Suppression de /volume1: incidents/2026-11-01-suppression-volume1.md
+      - 04.11.2026 — Saturation et perte d'écritures: incidents/2026-11-04-saturation-perte-ecritures.md
   - Roadmap: roadmap.md
   - Décisions d'architecture:
       - ADR-0001: adr/0001-architecture.md

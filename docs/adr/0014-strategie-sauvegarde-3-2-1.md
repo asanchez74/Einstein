@@ -95,6 +95,27 @@ d'instantanés ; la sauvegarde Swiss Backup des applications et de la
 configuration système couvre ce manque. Snapshot Replication ne réplique que
 vers un autre Synology : pas de réplication tant qu'aucun second NAS n'existe.
 
+### Calendrier de nuit
+
+Après l'[incident du 4 novembre 2026](../incidents/2026-11-04-saturation-perte-ecritures.md),
+les tâches lourdes ne démarrent plus en même temps :
+
+| Heure | Tâche |
+|---|---|
+| 00:00 | instantanés quotidiens |
+| 00:30 | Swiss Backup — NAS (incrémentale) |
+| 01:00 | vidage des corbeilles |
+| 02:00 | Glacier : Documents (lundi), Homes et Docker (mardi), Photo (mercredi), PhotoBAK (jeudi) |
+| 03:00 → 03:40 | Hyper Backup locales toutes les 10 min : MailServerPlus, Notes, MariaDB, WebStation, Backups |
+| 04:00 | Music Glacier (dimanche) |
+| 04:15 | DS212j local — NAS |
+| 04:30 | Backups et web_packages Glacier (dimanche) |
+| samedi 21:30 | vérification d'intégrité Swiss Backup (2 h au plus) |
+
+Mises à jour automatiques des paquets en notification seulement. Nettoyage des
+données trimestriel, le premier samedi à 09:00. Un seul premier envoi long à la
+fois.
+
 ## Alternatives évaluées
 
 Coût de stockage mensuel indicatif pour ~0,5 To (sources tierces, à confirmer) :
