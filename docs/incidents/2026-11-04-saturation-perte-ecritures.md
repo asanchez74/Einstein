@@ -108,14 +108,29 @@ installation manuelle (circuit de mise à jour, données conservées).
 ## Suivi
 
 Fait le 4 novembre 2026 : calendrier de nuit appliqué et vérifié dans
-`/etc/crontab`, tâche Notes supprimée, sauvegarde MariaDB relancée avec succès.
+`/etc/crontab`, tâche Notes supprimée, sauvegarde MariaDB relancée avec succès,
+3 messages de tonio et 2 messages de mimi rétablis.
 
 Reste à faire :
 
-- remettre les 3 messages de tonio depuis la boîte locale du Mac ;
-- faire renvoyer les 2 messages de mimi si nécessaire ;
 - vérifier la nuit du 4 au 5 novembre (sauvegardes, `docker exec`, fichiers vides) ;
+- surveillance de la saturation (voir ci-dessous) ;
 - supprimer `Development/Einstein.abime-20261104` (File Station) et l'instantané
   `web_packages` de sécurité du 4 novembre 18:13 ;
 - supprimer `~/Sauvegarde-Mails-20261104` et `~/Paquets-Synology-20261104` sur le
-  Mac une fois les messages remis.
+  Mac.
+
+### Prévention : surveillance de la saturation
+
+Le blocage a duré environ 18 heures avant l'arrêt forcé, avec des signes
+visibles dès le 3 novembre vers 14:40. Une alerte précoce aurait permis
+d'interrompre les sauvegardes et de redémarrer proprement. À mettre en place :
+
+- tâche DSM de contrôle toutes les 15 minutes, en échec (donc notifiée par
+  courriel) si `docker exec` ne répond pas en 10 s, si l'attente disque reste
+  élevée, si le swap dépasse un seuil ou si la mémoire disponible est trop basse ;
+- procédure écrite en cas d'alerte : suspendre les tâches Hyper Backup et Glacier
+  en cours, attendre la baisse de charge, redémarrer par DSM, jamais par
+  l'interrupteur ;
+- après tout arrêt non propre, recherche des fichiers vides écrits pendant les
+  heures précédentes.
