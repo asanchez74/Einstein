@@ -41,8 +41,8 @@ Le 4 novembre vers 08:44, le NAS a été arrêté par l'interrupteur. Les fichie
 | Élément | Effet | Réparation |
 |---|---|---|
 | Synology Drive Server | 2 955 fichiers sur 2 960 vides ; paquet arrêté (`stopped_by_dep_limit`, `Failed to get app portal config`) | installation manuelle du même `.spk` 4.0.4-27894 |
-| Messagerie tonio | 198 mails vides (194 corbeille, 2 envoyés, 1 réception, 1 indésirable) ; iPhone et iPad en « erreur de compte » | `doveadm expunge` par UID ; 3 messages remis depuis le Mac |
-| Messagerie mimi | 4 mails vides (2 réception, 2 corbeille) | `doveadm expunge` par UID |
+| Messagerie tonio | 198 mails vides (194 corbeille, 2 envoyés, 1 réception, 1 indésirable) ; iPhone et iPad en « erreur de compte » | `doveadm expunge` par UID ; 3 messages à remettre depuis le Mac (copie dans `~/Sauvegarde-Mails-20261104`) |
+| Messagerie mimi | 4 mails vides (2 réception reçus à 06:16 et 07:08, 2 corbeille) | `doveadm expunge` par UID ; messages à faire renvoyer s'ils ne sont sur aucun appareil |
 | WordPress (`web_packages`) | 16 113 fichiers vides | restauration de l'instantané du 4 novembre 00:00:05 |
 | Dépôt Einstein du NAS | objets git et 4 fichiers du `git pull` vides ; script DHCP vide | nouveau clone, `.env` recopiés, ancien dossier renommé `Einstein.abime-20261104` |
 | Sauvegarde Homebridge 04:00 | vide | refaite la nuit suivante |
@@ -101,3 +101,21 @@ installation manuelle (circuit de mise à jour, données conservées).
 6. **Mémoire** : MailPlus (antivirus, antispam, Redis) occupe plus de 1,5 Go sur
    8 Go ; la [migration de la messagerie](../adr/0013-migration-messagerie-infomaniak.md)
    allège le NAS.
+7. **Arrêt des bases pendant les sauvegardes** : toute tâche Hyper Backup qui
+   inclut l'application MariaDB arrête MariaDB et WordPress (lisbonne2027.ch)
+   environ 2 min 30 (00:30, 03:10, 04:15).
+
+## Suivi
+
+Fait le 4 novembre 2026 : calendrier de nuit appliqué et vérifié dans
+`/etc/crontab`, tâche Notes supprimée, sauvegarde MariaDB relancée avec succès.
+
+Reste à faire :
+
+- remettre les 3 messages de tonio depuis la boîte locale du Mac ;
+- faire renvoyer les 2 messages de mimi si nécessaire ;
+- vérifier la nuit du 4 au 5 novembre (sauvegardes, `docker exec`, fichiers vides) ;
+- supprimer `Development/Einstein.abime-20261104` (File Station) et l'instantané
+  `web_packages` de sécurité du 4 novembre 18:13 ;
+- supprimer `~/Sauvegarde-Mails-20261104` et `~/Paquets-Synology-20261104` sur le
+  Mac une fois les messages remis.

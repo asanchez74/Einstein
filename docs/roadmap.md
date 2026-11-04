@@ -157,3 +157,12 @@ restent au suivi d'exploitation. Un Pi-hole secondaire synchronisé est
 déployé et distribué par le DHCP le 1er novembre 2026
 ([ADR-0012](adr/0012-pihole-secondaire.md)). Voir les limites consignées à la clôture du
 Sprint 3.
+
+Sauvegarde du NAS selon la règle 3-2-1
+([ADR-0014](adr/0014-strategie-sauvegarde-3-2-1.md)) : Swiss Backup hors site
+et copie locale vers le DS212j en service depuis le 2 novembre 2026, Glacier
+conservé en archive froide, disque USB à acheter. Migration de la messagerie
+vers Infomaniak décidée, à faire après la sauvegarde
+([ADR-0013](adr/0013-migration-messagerie-infomaniak.md)). Incidents du
+[1er novembre](incidents/2026-11-01-suppression-volume1.md) et du
+[4 novembre 2026](incidents/2026-11-04-saturation-perte-ecritures.md).

@@ -194,9 +194,13 @@ restent protégés par le NAS et Glacier.
 - Acheter et mettre en place le disque USB (tâche Hyper Backup locale).
 - Exporter le fichier de clé `.pem` de la tâche Swiss Backup vers SafeInCloud.
 - Tester une restauration depuis Swiss Backup avec Hyper Backup Explorer.
-- Vérifier la première sauvegarde « DS212j local — NAS ».
-- Contrôler les tâches Glacier Backup (réinstallées le 1er novembre 2026) et
-  créer la tâche Music.
+- Contrôler la réussite des tâches Glacier Backup (réinstallées le 1er novembre
+  2026, tâche Music créée le 2 novembre, calendrier étalé le 4 novembre).
+- Lancer le premier nettoyage des données une fois les premiers envois Glacier
+  terminés.
+
+Fait : première sauvegarde « DS212j local — NAS » réussie (contrôlée le
+4 novembre 2026).
 - Vérifier l'apparition des instantanés horaires de Documents et homes.
 - Rédiger la procédure de reconstruction du NAS (ordre DSM, Hyper Backup,
   paquets, Docker, stacks Einstein), conservée aussi hors du NAS.
