@@ -27,8 +27,12 @@ def runtime(tmp_path):
     leases = tmp_path / "leases"
     leases.write_text(LEASES)
     (binary / "id").write_text('#!/bin/sh\nprintf "%s\\n" "${FAKE_UID:-0}"\n')
+    # timeout absent de macOS : même comportement via une alarme perl.
+    (binary / "timeout").write_text(
+        "#!/bin/sh\nexec perl -e 'alarm shift; exec @ARGV or exit 127' \"$@\"\n")
     # inspect : affiche le volume si mounts/<conteneur> existe ;
-    # exec : journalise, échoue pour les conteneurs listés dans FAIL_EXEC.
+    # exec : journalise, échoue pour les conteneurs listés dans FAIL_EXEC,
+    # reste bloqué pour ceux listés dans HANG_EXEC.
     (binary / "docker").write_text('''#!/bin/sh
 case "$1" in
   inspect)
@@ -37,7 +41,8 @@ case "$1" in
     printf '%s\\n' "$MOUNTS_DIR/$name" ;;
   exec)
     echo "reload $2" >> "$CALLS_FILE"
-    case " ${FAIL_EXEC:-} " in *" $2 "*) exit 1 ;; esac ;;
+    case " ${FAIL_EXEC:-} " in *" $2 "*) exit 1 ;; esac
+    case " ${HANG_EXEC:-} " in *" $2 "*) exec sleep 30 ;; esac ;;
   *) exit 2 ;;
 esac
 ''')
@@ -87,6 +92,16 @@ def test_reload_failure_reported_and_other_synced(runtime):
     assert result.returncode == 1
     assert hosts(mounts, "pihole") == hosts(mounts, "pihole2") == EXPECTED
     assert calls.read_text() == "reload pihole\nreload pihole2\n"
+    assert "en échec pour : pihole" in result.stderr
+
+
+def test_hung_reload_times_out_and_other_synced(runtime):
+    run, mounts, calls, _ = runtime
+    result = run(HANG_EXEC="pihole", DOCKER_TIMEOUT="1")
+    assert result.returncode == 1
+    assert hosts(mounts, "pihole2") == EXPECTED
+    assert calls.read_text() == "reload pihole\nreload pihole2\n"
+    assert "délai de 1 s dépassé" in result.stderr
     assert "en échec pour : pihole" in result.stderr
 
 

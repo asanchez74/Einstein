@@ -7,6 +7,9 @@ DOMAIN="${DOMAIN:-chantevigne.com}"
 # Conteneurs Pi-hole à alimenter ; le fichier est écrit dans le volume monté
 # sur /etc/pihole de chacun (aucun accès réseau, donc pas de limite macvlan).
 PIHOLE_TARGETS="${PIHOLE_TARGETS:-pihole pihole2}"
+# Délai maximal (s) de chaque appel docker : un client bloqué empêcherait
+# toutes les exécutions suivantes de la tâche planifiée.
+DOCKER_TIMEOUT="${DOCKER_TIMEOUT:-30}"
 
 if [ "$(id -u)" -ne 0 ]; then
     echo "ERREUR: ce script doit être exécuté avec sudo/root." >&2
@@ -66,7 +69,7 @@ COUNT=$(wc -l < "$TMP" | tr -d ' ')
 sync_target() {
     container="$1"
 
-    data_dir=$(docker inspect --format \
+    data_dir=$(timeout "$DOCKER_TIMEOUT" docker inspect --format \
         '{{range .Mounts}}{{if eq .Destination "/etc/pihole"}}{{.Source}}{{end}}{{end}}' \
         "$container" 2>/dev/null) || {
         echo "ERREUR: $container : conteneur introuvable." >&2
@@ -100,7 +103,7 @@ sync_target() {
     TARGET_TMP=
     echo "$container : synchronisation effectuée, $COUNT hôtes -> $output_file"
 
-    if ! docker exec "$container" sh -c '
+    if ! timeout "$DOCKER_TIMEOUT" docker exec "$container" sh -c '
         PID="$(cat /run/pihole-FTL.pid)"
 
         # Recharge addn-hosts et vide le cache DNS.
@@ -111,7 +114,7 @@ sync_target() {
         RTMIN="$(pihole-FTL sigrtmin)"
         kill -$((RTMIN + 4)) "$PID"
     '; then
-        echo "ERREUR: $container : fichier écrit mais rechargement FTL impossible (conteneur arrêté ?)." >&2
+        echo "ERREUR: $container : fichier écrit mais rechargement FTL impossible (conteneur arrêté ou délai de ${DOCKER_TIMEOUT} s dépassé)." >&2
         return 1
     fi
 

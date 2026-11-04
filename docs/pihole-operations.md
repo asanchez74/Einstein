@@ -374,6 +374,12 @@ sudo PIHOLE_TARGETS=pihole2 scripts/sync-synology-dhcp-to-pihole.sh
 
 Si aucun bail exploitable n'est trouvé, aucun fichier n'est modifié.
 
+Chaque appel `docker` est limité à `DOCKER_TIMEOUT` secondes (30 par
+défaut) ; un dépassement compte comme un échec de la cible. Le 3 novembre
+2026, un `docker exec pihole` resté bloqué près de 17 heures a fait ignorer
+toutes les exécutions suivantes (notification DSM « la tâche est déjà en
+cours d'exécution »), sans effet sur le DNS.
+
 La tâche planifiée DSM « Einstein - Sync DHCP vers Pi-hole » (root, toutes
 les cinq minutes) exécute
 `/bin/sh /var/services/homes/tonio/Development/Einstein/scripts/sync-synology-dhcp-to-pihole.sh`
