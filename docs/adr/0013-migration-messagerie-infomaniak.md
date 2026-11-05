@@ -26,10 +26,10 @@ limites de ce choix :
 | MX | `10 mail.chantevigne.com` → `193.164.25.214` |
 | SPF | `v=spf1 +a +mx -all` |
 | DMARC | `v=DMARC1; p=reject; pct=100` |
-| DKIM | aucun sélecteur trouvé (`default`, `mail`, `synology`, `dkim`) |
+| DKIM | sélecteur `s1` (clé MailPlus, trouvée le 5 novembre 2026 dans Namecheap) |
 | Boîtes actives | tonio (4,5 Go), mimi (8,0 Go), clara et nono (quasi vides) |
 | Volume MailPlus | 22 Go au total (`/volume1/@MailPlus-Server`) |
-| Alias, listes, groupes | aucun |
+| Alias, listes, groupes | aucun relevé le 2 novembre ; `antonio.sanchez` → tonio signalé le 5 novembre |
 | Contacts | 1 488 dans Synology Contacts (CardDAV) |
 | Agendas | iCloud (Synology Calendar non utilisé) |
 
@@ -57,11 +57,10 @@ et moins bien intégré à Mail, Contacts et Calendrier d'Apple).
    bascule.
 2. **Première copie.** Copier l'historique IMAP de MailPlus vers Infomaniak
    (outil d'import d'Infomaniak ou `imapsync`), boîte par boîte.
-3. **Bascule DNS** chez Namecheap, avec les valeurs fournies par le Manager
-   Infomaniak : MX, SPF (remplacer `+a +mx` par l'inclusion Infomaniak), DKIM
-   (nouvel enregistrement), DMARC conservé en `p=reject` une fois SPF et DKIM
-   vérifiés. Ne jamais publier un SPF sans Infomaniak tant que DMARC est en
-   `p=reject`.
+3. **Bascule DNS** chez Namecheap : remplacer le MX par `5 mta-gw.infomaniak.ch`.
+   SPF, DKIM et `autoconfig`/`autodiscover` sont publiés à l'avance (voir
+   Avancement) ; DMARC reste en `p=reject`. Ne jamais publier un SPF sans
+   Infomaniak tant que DMARC est en `p=reject`.
 4. **Seconde copie** pour rattraper les messages reçus par MailPlus pendant la
    propagation DNS.
 5. **Clients.** Reconfigurer Mail, Contacts et réglages sur Mac et iPhone
@@ -72,7 +71,8 @@ et moins bien intégré à Mail, Contacts et Calendrier d'Apple).
 8. **Démantèlement.** Sauvegarde finale de MailPlus et Contacts (Hyper Backup),
    fermeture des ports 25, 465, 587, 993 et 995 sur la FRITZ!Box, désinstallation
    des paquets, suppression de l'enregistrement `mail.chantevigne.com` s'il n'a
-   plus d'usage.
+   plus d'usage. SPF final `v=spf1 include:spf.infomaniak.ch -all`, suppression
+   de la clé DKIM `s1._domainkey` de MailPlus.
 
 Retour arrière avant l'étape 8 : remettre l'ancien MX et l'ancien SPF chez
 Namecheap ; MailPlus reçoit de nouveau le courrier.
@@ -95,9 +95,23 @@ environ CHF 8,50 par mois.
   exportation périodique des contacts et une copie IMAP locale ou Hyper Backup
   si un historique hors Infomaniak est souhaité.
 
-## Points à confirmer
+## Avancement
 
-- Valeurs exactes MX, SPF et DKIM dans le Manager Infomaniak.
+Valeurs du Manager Infomaniak (Diagnostic DNS, 5 novembre 2026) :
+
+| Enregistrement | Valeur |
+|---|---|
+| MX | `5 mta-gw.infomaniak.ch` |
+| SPF | `include:spf.infomaniak.ch` |
+| DKIM | sélecteur `20261105` (RSA 2048 bits) |
+| `autoconfig`, `autodiscover` | CNAME `infomaniak.com.` |
+
+- **5 novembre 2026.** Service Mail commandé, domaine déclaré, boîtes tonio,
+  mimi, clara et nono créées, alias `antonio.sanchez` sur tonio. TTL du MX et du
+  SPF à 5 min chez Namecheap. Publiés sans effet sur la réception (vérifiés par
+  `dig`) : DKIM `20261105._domainkey`, CNAME `autoconfig` et `autodiscover`, SPF
+  transitoire `v=spf1 +a +mx include:spf.infomaniak.ch -all` (NAS et
+  Infomaniak autorisés). MX inchangé.
 
 Ordre retenu : mettre en place la sauvegarde hors site
 ([ADR-0014](0014-strategie-sauvegarde-3-2-1.md)) avant la migration.
