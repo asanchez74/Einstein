@@ -103,7 +103,7 @@ installation manuelle (circuit de mise à jour, données conservées).
    allège le NAS.
 7. **Arrêt des bases pendant les sauvegardes** : toute tâche Hyper Backup qui
    inclut l'application MariaDB arrête MariaDB et WordPress (lisbonne2027.ch)
-   environ 2 min 30 (00:30, 03:10, 04:15).
+   environ 35 s par tâche, mesuré la nuit du 5 novembre (00:30, 03:10, 04:15).
 
 ## Suivi
 
@@ -111,9 +111,35 @@ Fait le 4 novembre 2026 : calendrier de nuit appliqué et vérifié dans
 `/etc/crontab`, tâche Notes supprimée, sauvegarde MariaDB relancée avec succès,
 3 messages de tonio et 2 messages de mimi rétablis.
 
+Nuit du 4 au 5 novembre vérifiée le 5 novembre à 07:05 :
+
+- aucun redémarrage ; `docker exec` répond pour `pihole` et `pihole2` ;
+- toutes les sauvegardes réussies : Swiss Backup 00:30 (13 min), MailServerPlus
+  03:00 (2 min), MariaDB 03:10 (78 s), WebStation 03:20 (19 s), Backups 03:30
+  (30 s), DS212j 04:15 (11 min) ; Glacier PhotoBAK terminé avant 07:00 ;
+- aucun fichier vide écrit depuis le 4 novembre 19:00 dans `web_packages`,
+  `homes/tonio`, `Documents` et `docker` (hors `dhcp.leases` de `pihole2`, vide
+  par nature) ; aucune erreur `Broken physical size` côté IMAP.
+
+Dans `hyperbackup.log`, une tâche réussie s'écrit
+`[err] … completes with result [1]` : le niveau `[err]` n'indique pas un échec.
+
+Valeurs normales relevées (référence pour les seuils de surveillance) :
+
+| Mesure | Normal (5 nov. 07:05) | Pendant l'incident |
+|---|---|---|
+| Charge (1 min) | ~3,5 | ~11 |
+| Part attente disque de la charge | 0,5 à 1 | ~10 |
+| Attente disque CPU (30 s) | ~9 % | — |
+| Mémoire disponible | ~4,2 Go | — |
+| Swap occupé | ~3 Go, stable (clamd ~0,9 Go) | 2,9 Go, actif |
+
+Le swap occupé n'est pas un bon seuil : il reste haut au repos. Mesurer plutôt
+l'activité (`pswpin`/`pswpout` de `/proc/vmstat`) et la charge d'attente disque
+affichée par `uptime` (`[IO: …]`).
+
 Reste à faire :
 
-- vérifier la nuit du 4 au 5 novembre (sauvegardes, `docker exec`, fichiers vides) ;
 - surveillance de la saturation (voir ci-dessous) ;
 - supprimer `Development/Einstein.abime-20261104` (File Station) et l'instantané
   `web_packages` de sécurité du 4 novembre 18:13 ;
