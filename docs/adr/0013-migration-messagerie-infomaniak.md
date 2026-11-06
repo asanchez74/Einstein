@@ -164,7 +164,10 @@ Démantèlement anticipé en deux temps, étape A (réversible) le 6 novembre 20
 
 - notifications DSM basculées sur `mail.infomaniak.com:587` (STARTTLS, compte
   `tonio@chantevigne.com`) ; elles passaient par MailPlus, seul expéditeur local
-  du NAS (aucun envoi `sendmail`/PHP) ; courriel de test reçu ;
+  du NAS (aucun envoi `sendmail`/PHP) ; courriel de test reçu ; l'envoi
+  parallèle par le service Synology (« Synology Notification System »), qui
+  doublait chaque alerte, a été désactivé le même jour (profil de
+  notification par défaut) ;
 - sauvegarde Hyper Backup finale de MailServerPlus réussie ;
 - redirections 25, 465, 587, 993 et 995 retirées de la FRITZ!Box ; ports
   fermés sur l'adresse publique (test depuis le LAN) ;
