@@ -38,8 +38,13 @@ limites de ce choix :
 - Héberger la messagerie chez **Infomaniak** (Suisse), sur le domaine
   `chantevigne.com` : boîtes tonio, mimi, clara, nono, puis une boîte
   famille/maison.
-- Y migrer aussi les **contacts** (CardDAV). Les agendas restent pour
-  l'instant dans l'écosystème Apple (iCloud).
+- **Contacts et agendas dans iCloud** (révisé le 6 novembre 2026, initialement
+  contacts chez Infomaniak) : mimi, clara et nono y ont déjà leurs contacts et
+  tous les agendas y sont ; seul tonio utilisait Synology Contacts. iCloud+
+  (2 To, partage familial) reste de toute façon utilisé pour les photos et les
+  sauvegardes, et iOS/macOS n'exigent alors aucun compte CardDAV ni réglage de
+  compte par défaut. Une sortie éventuelle d'Apple serait un projet distinct,
+  avec sa propre ADR.
 - Garder le domaine et le DNS chez **Namecheap** ; seuls les enregistrements
   liés au courrier changent.
 - Après rodage, fermer les ports mail sur la FRITZ!Box et désinstaller
@@ -64,7 +69,9 @@ et moins bien intégré à Mail, Contacts et Calendrier d'Apple).
 4. **Seconde copie** pour rattraper les messages reçus par MailPlus pendant la
    propagation DNS.
 5. **Clients.** Reconfigurer Mail, Contacts et réglages sur Mac et iPhone
-   (IMAP/SMTP Infomaniak). Importer les contacts (vCard) dans Infomaniak.
+   (IMAP/SMTP Infomaniak). Exporter Synology Contacts en vCard (garder le
+   fichier en sauvegarde), l'importer dans iCloud, puis retirer le compte
+   CardDAV du NAS des appareils de tonio.
 6. **Contrôles.** Envoi et réception depuis et vers Gmail et iCloud, en-têtes
    SPF, DKIM et DMARC `pass`, réception sur chaque appareil.
 7. **Rodage** d'au moins deux semaines, MailPlus laissé actif en lecture.
@@ -91,9 +98,9 @@ environ CHF 8,50 par mois.
   n'y sert plus qu'aux paquets restants.
 - La [stratégie de sauvegarde](0014-strategie-sauvegarde-3-2-1.md) n'a plus à
   couvrir la messagerie.
-- Les mails et contacts dépendent d'un prestataire externe : conserver une
-  exportation périodique des contacts et une copie IMAP locale ou Hyper Backup
-  si un historique hors Infomaniak est souhaité.
+- Les mails (Infomaniak) et les contacts (iCloud) dépendent de prestataires
+  externes : conserver une exportation périodique des contacts et une copie IMAP
+  locale ou Hyper Backup si un historique hors Infomaniak est souhaité.
 
 ## Avancement
 
