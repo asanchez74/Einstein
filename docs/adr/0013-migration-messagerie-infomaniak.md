@@ -146,6 +146,20 @@ Mac et iPhone de tonio reconfigurés (IMAP 143 et SMTP 587 avec STARTTLS,
 expéditeur par défaut `antonio.sanchez@`), ancien compte désactivé, non
 supprimé.
 
+iPad de tonio, iPhone et Mac de mimi reconfigurés le même jour ; aucun message
+livré par MailPlus après la bascule. Restent les iPhone et sessions Mac de clara
+et nono.
+
+Contacts de tonio passés dans iCloud le 6 novembre 2026. Synology Contacts n'en
+affichait plus que 757 (export `.vcf` incomplet) contre 1 488 le 1er novembre ;
+la copie locale du compte CardDAV sur le Mac en gardait 1 490. Méthode : compte
+CardDAV désactivé, puis réactivé **réseau coupé** (sinon la synchronisation
+aurait aligné la copie locale sur le serveur), export vCard, compte désactivé,
+réseau rétabli, import dans iCloud avec mise à jour des doublons. Résultat :
+1 769 fiches iCloud, les 1 490 du NAS retrouvées par comparaison des bases
+locales. Archives dans `Documents/03_Tonio/Administratif/Archives contacts -
+06112026` (archive `.abbu` complète du Mac).
+
 **Dépendance critique :** l'identifiant Apple du propriétaire est
 `antonio.sanchez@chantevigne.com`. Les codes et la récupération du compte Apple
 passent par cet alias : ne jamais le supprimer ni laisser expirer le domaine.

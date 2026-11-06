@@ -46,6 +46,7 @@ Le 4 novembre vers 08:44, le NAS a été arrêté par l'interrupteur. Les fichie
 | WordPress (`web_packages`) | 16 113 fichiers vides | restauration de l'instantané du 4 novembre 00:00:05 |
 | Dépôt Einstein du NAS | objets git et 4 fichiers du `git pull` vides ; script DHCP vide | nouveau clone, `.env` recopiés, ancien dossier renommé `Einstein.abime-20261104` |
 | Sauvegarde Homebridge 04:00 | vide | refaite la nuit suivante |
+| Synology Contacts | 757 contacts au lieu de 1 488 (constaté le 6 novembre, perte probablement liée à l'incident) | carnet complet récupéré depuis la copie locale du Mac et passé dans iCloud ([ADR-0013](../adr/0013-migration-messagerie-infomaniak.md)) |
 | Documents, homes (hors dépôt), Photo, PhotoBAK, Music, Backups | intacts | — |
 
 Le matériel est sain : quatre disques et cache SSD (RAID 1, lecture-écriture).
