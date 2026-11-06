@@ -160,6 +160,28 @@ réseau rétabli, import dans iCloud avec mise à jour des doublons. Résultat :
 locales. Archives dans `Documents/03_Tonio/Administratif/Archives contacts -
 06112026` (archive `.abbu` complète du Mac).
 
+Démantèlement anticipé en deux temps, étape A (réversible) le 6 novembre 2026 :
+
+- notifications DSM basculées sur `mail.infomaniak.com:587` (STARTTLS, compte
+  `tonio@chantevigne.com`) ; elles passaient par MailPlus, seul expéditeur local
+  du NAS (aucun envoi `sendmail`/PHP) ; courriel de test reçu ;
+- sauvegarde Hyper Backup finale de MailServerPlus réussie ;
+- redirections 25, 465, 587, 993 et 995 retirées de la FRITZ!Box ; ports
+  fermés sur l'adresse publique (test depuis le LAN) ;
+- paquets arrêtés, non désinstallés : MailPlus Server, MailPlus, Synology
+  Contacts, Synology Calendar (dépendant de Contacts, inutilisé), Note Station
+  (vide). Mémoire utilisée 3,4 → 2,0 Go, disponible 3,9 → 5,3 Go, swap occupé
+  3,1 → 1,25 Go.
+
+Retour arrière jusqu'à l'étape B : redémarrer les paquets, rétablir les
+redirections, remettre l'ancien MX.
+
+Étape B (définitive), vers le 20 novembre 2026 : désinstaller les paquets,
+supprimer la tâche Hyper Backup MailServerPlus et retirer les applications
+MailPlus des tâches Swiss Backup et DS212j, SPF final
+`v=spf1 include:spf.infomaniak.ch -all`, suppression de `s1._domainkey` et du
+CNAME `mail` chez Namecheap, mise à jour de l'ADR-0014.
+
 **Dépendance critique :** l'identifiant Apple du propriétaire est
 `antonio.sanchez@chantevigne.com`. Les codes et la récupération du compte Apple
 passent par cet alias : ne jamais le supprimer ni laisser expirer le domaine.
