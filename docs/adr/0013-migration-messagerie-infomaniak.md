@@ -173,6 +173,11 @@ Démantèlement anticipé en deux temps, étape A (réversible) le 6 novembre 20
   (vide). Mémoire utilisée 3,4 → 2,0 Go, disponible 3,9 → 5,3 Go, swap occupé
   3,1 → 1,25 Go.
 
+Hors messagerie, le même jour : redirection 6690 (Synology Drive Client) retirée
+de la FRITZ!Box. Depuis l'extérieur, la synchronisation Drive passe par le VPN
+(OpenVPN 1194) ; sur le LAN, les clients joignent `192.168.1.3` directement.
+Redirections restantes : 443, 80, 1194 (UDP).
+
 Retour arrière jusqu'à l'étape B : redémarrer les paquets, rétablir les
 redirections, remettre l'ancien MX.
 
