@@ -131,6 +131,18 @@ Alias (oubliés au relevé du 2 novembre, définis dans les comptes MailPlus) :
 | clara | `clara.sanchez` |
 | nono | `noemie`, `noemie.sanchez` |
 
+Validation le 6 novembre 2026 : envoi Infomaniak → Microsoft 365 (eduvaud.ch)
+avec `spf=pass`, `dkim=pass` (`s=20261105`), `dmarc=pass`, SCL 1 ; réponse
+reçue chez Infomaniak (MX suivi par un expéditeur extérieur). Seconde copie IMAP
+des 4 boîtes faite après la bascule (dernière livraison MailPlus 08:10:36).
+Mac et iPhone de tonio reconfigurés (IMAP 143 et SMTP 587 avec STARTTLS,
+expéditeur par défaut `antonio.sanchez@`), ancien compte désactivé, non
+supprimé.
+
+**Dépendance critique :** l'identifiant Apple du propriétaire est
+`antonio.sanchez@chantevigne.com`. Les codes et la récupération du compte Apple
+passent par cet alias : ne jamais le supprimer ni laisser expirer le domaine.
+
 Contrôle d'une adresse sans envoyer de message : session SMTP sur
 `mta-gw.infomaniak.ch:25`, `MAIL FROM:<>` puis `RCPT TO:<adresse>` ; `250` =
 acceptée, `550 5.1.1` = inconnue. Toujours tester toutes les adresses avant de
