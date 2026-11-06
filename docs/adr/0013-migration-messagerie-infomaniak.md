@@ -29,7 +29,7 @@ limites de ce choix :
 | DKIM | sélecteur `s1` (clé MailPlus, trouvée le 5 novembre 2026 dans Namecheap) |
 | Boîtes actives | tonio (4,5 Go), mimi (8,0 Go), clara et nono (quasi vides) |
 | Volume MailPlus | 22 Go au total (`/volume1/@MailPlus-Server`) |
-| Alias, listes, groupes | aucun relevé le 2 novembre ; `antonio.sanchez` → tonio signalé le 5 novembre |
+| Alias, listes, groupes | aucun relevé le 2 novembre ; 5 alias de comptes trouvés ensuite (voir Avancement) |
 | Contacts | 1 488 dans Synology Contacts (CardDAV) |
 | Agendas | iCloud (Synology Calendar non utilisé) |
 
@@ -112,6 +112,29 @@ Valeurs du Manager Infomaniak (Diagnostic DNS, 5 novembre 2026) :
   `dig`) : DKIM `20261105._domainkey`, CNAME `autoconfig` et `autodiscover`, SPF
   transitoire `v=spf1 +a +mx include:spf.infomaniak.ch -all` (NAS et
   Infomaniak autorisés). MX inchangé.
+- **6 novembre 2026.** Premier import IMAP (outil d'import Infomaniak, source
+  `mail.chantevigne.com:993`) : clara, nono, tonio, puis mimi (07:22–07:50,
+  ~6 Mo/s, attente disque du NAS < 1). MX basculé à 07:57, puis remis à
+  `mail.chantevigne.com` à ~08:05 : l'alias `antonio.sanchez` était refusé par
+  Infomaniak (`550 User unknown`) car il servait d'identifiant de connexion au
+  compte Infomaniak. Identifiant changé pour une adresse hors `chantevigne.com`
+  (évite qu'une panne de messagerie bloque la récupération du compte), alias
+  recréés, chaque adresse testée par `RCPT TO` sur `mta-gw.infomaniak.ch` sans
+  envoi. MX définitivement basculé à 08:12.
+
+Alias (oubliés au relevé du 2 novembre, définis dans les comptes MailPlus) :
+
+| Boîte | Alias |
+|---|---|
+| tonio | `antonio.sanchez` |
+| mimi | `mireille.sanchez` |
+| clara | `clara.sanchez` |
+| nono | `noemie`, `noemie.sanchez` |
+
+Contrôle d'une adresse sans envoyer de message : session SMTP sur
+`mta-gw.infomaniak.ch:25`, `MAIL FROM:<>` puis `RCPT TO:<adresse>` ; `250` =
+acceptée, `550 5.1.1` = inconnue. Toujours tester toutes les adresses avant de
+changer un MX.
 
 Ordre retenu : mettre en place la sauvegarde hors site
 ([ADR-0014](0014-strategie-sauvegarde-3-2-1.md)) avant la migration.
