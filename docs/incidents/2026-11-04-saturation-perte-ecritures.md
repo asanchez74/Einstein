@@ -161,3 +161,18 @@ d'interrompre les sauvegardes et de redémarrer proprement. À mettre en place :
   l'interrupteur ;
 - après tout arrêt non propre, recherche des fichiers vides écrits pendant les
   heures précédentes.
+
+Notifications DSM relevées le 6 novembre 2026 : un seul profil, modèle
+**All**, une seule adresse (`antonio.sanchez@chantevigne.com`, envoi par
+Infomaniak). Par courriel, All et le profil `default` envoient les mêmes
+alertes : les règles en plus n'ont que les canaux bureau et CMS
+(`/usr/syno/etc/notification/notification_filter.settings`). Aucun courriel
+n'est prévu par DSM pour la fin d'une tâche planifiée ni pour le résultat ou
+l'échec d'un nettoyage des données. En conséquence :
+
+- la tâche de surveillance doit envoyer elle-même ses détails d'exécution
+  (« uniquement si le script se termine anormalement »), à vérifier par un
+  échec provoqué ;
+- après chaque nettoyage des données, contrôler le résultat dans le
+  Gestionnaire de stockage, ou faire vérifier l'état du RAID par la tâche de
+  surveillance.
