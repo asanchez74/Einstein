@@ -263,6 +263,12 @@ annoncé), après sauvegarde. `DATA_DIR` a été ajouté au `.env` NAS, après
 contrôle du montage réel de `/etc/pihole`, pour permettre la sauvegarde.
 Le propriétaire confirme les contrôles.
 
+Le 6 novembre 2026 : passage à 2026.10.1 (image de base Alpine 3.24.3,
+correctifs de sécurité, Pi-hole inchangé), une instance après l'autre, après
+sauvegarde de chacune. Contrôlé depuis le Mac sur `.56` et `.57` : noms
+locaux, noms externes et blocage (`doubleclick.net` → `0.0.0.0`) ; les deux
+Pi-hole et nebula-sync `healthy`.
+
 ## Ressources
 
 Pi-hole utilise une limite mémoire de 512 Mio et `cpu_shares: 2048`.
