@@ -33,12 +33,37 @@ documenter.
 
 ## Services
 
-- Synology Drive
-- Synology Mail Server
+- Synology Drive (accès extérieur par OpenVPN seulement, port 6690 fermé le
+  6 novembre 2026)
 - Homebridge
 - Container Manager
 - Reverse Proxy
 - OpenVPN
+
+La messagerie est chez Infomaniak, les contacts et agendas dans iCloud depuis
+le 6 novembre 2026 ([ADR-0013](adr/0013-migration-messagerie-infomaniak.md)) ;
+MailPlus Server est arrêté en attendant sa désinstallation.
+
+## Numérisation
+
+L'imprimante HP enregistre ses scans par SMB, profil « NAS » de la fonction
+« Numérisation vers le dossier réseau » :
+
+| Élément | Valeur |
+|---|---|
+| Chemin | `\\192.168.1.3\Documents\00_A_traiter\Scans_entrant` |
+| Compte DSM | `scan`, membre de `users` seulement |
+| Droits | lecture et écriture sur le partage `Documents` |
+| Nom des fichiers | `AAAAMMJJ_scan.pdf` (PDF couleur, 600 ppp) |
+
+Avant le 7 novembre 2026, les scans allaient dans le partage `Scan`. DSM gère
+les droits de `Documents` au niveau du partage : `scan` peut donc écrire dans
+tout `Documents`, ce qu'atténuent les instantanés quotidiens et Swiss Backup.
+Un « Pas d'accès » donné à un groupe l'emporte sur les droits de
+l'utilisateur : `scan` a été retiré du groupe de comptes de services qui
+n'avait pas accès à `Documents`. Quand une imprimante HP affiche
+« Informations d'identification incorrectes », vérifier aussi les droits sur
+le partage, pas seulement le mot de passe.
 
 !!! success "Objectif"
 

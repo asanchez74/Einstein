@@ -50,10 +50,17 @@ Règles :
 
 - **Chiffrement** côté NAS dans Hyper Backup. Mot de passe de chiffrement,
   identifiants Swift et contenu du fichier de clé `.pem` dans SafeInCloud
-  (coffre synchronisé par Dropbox, indépendant du NAS).
+  (coffre synchronisé par Dropbox, indépendant du NAS ; passage à iCloud
+  Drive décidé le 7 novembre 2026, SafeInCloud n'étant utilisé que sur des
+  appareils Apple). Le coffre ne doit jamais dépendre du NAS : il sert à le
+  reconstruire.
 - **Fiche papier de secours**, hors du NAS et hors ligne : mot de passe maître
-  SafeInCloud et codes de secours Dropbox. Tout le reste se retrouve dans le
-  coffre.
+  SafeInCloud et codes de secours Dropbox (après le passage à iCloud : accès
+  au compte Apple, clé de secours ou contact de récupération). Tout le reste
+  se retrouve dans le coffre.
+- **Copie exportée du coffre** hors du cloud (disque USB), une synchronisation
+  n'étant pas une sauvegarde : une base abîmée ou effacée se propage à tous
+  les appareils.
 - **Versions** Hyper Backup : une par heure sur 1 jour, par jour sur 1 mois, par
   semaine sur 3 mois, puis par mois (256 au plus).
 - **Disque USB débranché** entre deux sauvegardes, **prioritaire** : seule copie
@@ -193,6 +200,10 @@ restent protégés par le NAS et Glacier.
 
 - Acheter et mettre en place le disque USB (tâche Hyper Backup locale).
 - Exporter le fichier de clé `.pem` de la tâche Swiss Backup vers SafeInCloud.
+- SafeInCloud : exporter une sauvegarde de la base, passer la synchronisation
+  de Dropbox à iCloud (Mac, puis iPhone et iPad), vérifier qu'une modification
+  passe d'un appareil à l'autre, mettre à jour la fiche papier, supprimer la
+  base de Dropbox après quelques jours.
 - Tester une restauration depuis Swiss Backup avec Hyper Backup Explorer.
 - Contrôler la réussite des tâches Glacier Backup (réinstallées le 1er novembre
   2026, tâche Music créée le 2 novembre, calendrier étalé le 4 novembre).
