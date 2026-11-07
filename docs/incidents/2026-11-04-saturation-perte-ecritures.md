@@ -164,11 +164,14 @@ d'interrompre les sauvegardes et de redémarrer proprement. À mettre en place :
 
 Notifications DSM relevées le 6 novembre 2026 : un seul profil, modèle
 **All**, une seule adresse (`antonio.sanchez@chantevigne.com`, envoi par
-Infomaniak). Par courriel, All et le profil `default` envoient les mêmes
-alertes : les règles en plus n'ont que les canaux bureau et CMS
-(`/usr/syno/etc/notification/notification_filter.settings`). Aucun courriel
-n'est prévu par DSM pour la fin d'une tâche planifiée ni pour le résultat ou
-l'échec d'un nettoyage des données. En conséquence :
+Infomaniak). All envoie aussi des informations par courriel, par exemple
+chaque sauvegarde réussie : la nuit du 7 novembre, `hyperbackup.log` indique
+`[BackupTaskFinished] was sent to desktop,mail`, alors que
+`/usr/syno/etc/notification/notification_filter.settings` ne prévoit pour
+cette règle que le bureau, le mobile et CMS. Ce fichier ne dit donc pas quels
+canaux DSM utilise réellement. Qu'une tâche planifiée terminée ou un
+nettoyage des données fasse l'objet d'un courriel reste à vérifier. En
+conséquence :
 
 - la tâche de surveillance doit envoyer elle-même ses détails d'exécution
   (« uniquement si le script se termine anormalement »), à vérifier par un

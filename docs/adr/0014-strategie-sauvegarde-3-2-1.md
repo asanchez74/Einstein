@@ -38,7 +38,7 @@ Appliquer la règle **3-2-1** : trois copies, deux supports, une copie hors site
 | PhotoBAK (toutes les photos), Video/Videos Personnelles | **Glacier Backup** (existant) ; Photos iCloud n'est qu'une synchronisation | facultatif |
 | Photo, Music | **Glacier Backup** (tâche Music à créer) | — |
 | TimeMachine, surveillance, Downloads | exclus | — |
-| Messagerie et contacts | chez Infomaniak après migration ([ADR-0013](0013-migration-messagerie-infomaniak.md)) | exportation périodique des contacts |
+| Messagerie, contacts, agendas | messagerie chez Infomaniak, contacts et agendas dans iCloud ([ADR-0013](0013-migration-messagerie-infomaniak.md)) ; dernière sauvegarde MailPlus conservée dans `Backups/MailServerPlus.hbk` | exportation périodique des contacts |
 
 **Swiss Backup est la sauvegarde hors site principale** (restauration
 immédiate, sans frais, versionnée, en Suisse). **Glacier Backup reste une
@@ -106,7 +106,7 @@ les tâches lourdes ne démarrent plus en même temps :
 | 00:30 | Swiss Backup — NAS (incrémentale) |
 | 01:00 | vidage des corbeilles |
 | 02:00 | Glacier : Documents (lundi), Homes et Docker (mardi), Photo (mercredi), PhotoBAK (jeudi) |
-| 03:00 → 03:30 | Hyper Backup locales toutes les 10 min : MailServerPlus, MariaDB, WebStation, Backups (tâche Notes supprimée le 4 novembre 2026 : Note Station ne contient aucune note) |
+| 03:00 → 03:30 | Hyper Backup locales toutes les 10 min : MariaDB (03:10), WebStation (03:20), Backups (03:30) ; tâche Notes supprimée le 4 novembre 2026, planning de MailServerPlus désactivé le 7 novembre 2026 (MailPlus arrêté) |
 | 04:00 | Music Glacier (dimanche) |
 | 04:15 | DS212j local — NAS |
 | 04:30 | Backups et web_packages Glacier (dimanche) |

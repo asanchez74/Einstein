@@ -181,12 +181,22 @@ de la FRITZ!Box. Depuis l'extérieur, la synchronisation Drive passe par le VPN
 (OpenVPN 1194) ; sur le LAN, les clients joignent `192.168.1.3` directement.
 Redirections restantes : 443, 80, 1194 (UDP).
 
+Nuit du 6 au 7 novembre 2026 : Swiss Backup, MailServerPlus et DS212j
+partielles (résultat `[2]`, code 3004), seule l'exportation de l'application
+MailPlus Server ayant échoué, paquet arrêté ; données sauvegardées. Le
+7 novembre, avancé de l'étape B : MailPlus Server, MailPlus, Synology Contacts
+et Synology Calendar retirés des tâches Swiss Backup et DS212j (versions
+antérieures conservées), planning de la tâche MailServerPlus désactivé (tâche
+et versions conservées). DS212j (10:36, 8 min) puis Swiss Backup (10:44,
+6 min) relancées avec succès le même jour.
+
 Retour arrière jusqu'à l'étape B : redémarrer les paquets, rétablir les
 redirections, remettre l'ancien MX.
 
 Étape B (définitive), vers le 20 novembre 2026 : désinstaller les paquets,
-supprimer la tâche Hyper Backup MailServerPlus et retirer les applications
-MailPlus des tâches Swiss Backup et DS212j, SPF final
+supprimer la tâche Hyper Backup MailServerPlus **sans supprimer ses données**
+(`Backups/MailServerPlus.hbk`, seule copie de l'historique hors Infomaniak),
+SPF final
 `v=spf1 include:spf.infomaniak.ch -all`, suppression de `s1._domainkey` et du
 CNAME `mail` chez Namecheap, mise à jour de l'ADR-0014.
 
