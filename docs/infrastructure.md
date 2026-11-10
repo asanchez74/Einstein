@@ -35,7 +35,8 @@ documenter.
 
 - Synology Drive (accès extérieur par OpenVPN seulement, port 6690 fermé le
   6 novembre 2026)
-- Homebridge
+- Homebridge (Hue, Google Smart Home, KNX via `eibd` du DS212j), stack
+  `compose/homebridge/` ([ADR-0015](adr/0015-homebridge-compose.md))
 - Container Manager
 - Reverse Proxy
 - OpenVPN

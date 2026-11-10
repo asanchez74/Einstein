@@ -1,0 +1,55 @@
+name: homebridge
+
+services:
+  homebridge:
+    # Tag « synology » : Ubuntu 22.04, maintenu pour les noyaux DSM anciens
+    # (4.4 sur le DS918+). Version datée pour un déploiement reproductible ;
+    # Node 24, la ligne supportée par homebridge-hue (voir ADR-0015).
+    image: homebridge/homebridge:synology-2026-11-02
+    container_name: homebridge
+
+    restart: unless-stopped
+    stop_grace_period: 30s
+
+    # HomeKit (mDNS) exige le réseau de l'hôte.
+    network_mode: host
+
+    environment:
+      TZ: Europe/Zurich
+
+      # Pas de délai pour l'installation des plugins au démarrage : avec la
+      # valeur par défaut (5 s), s6 abandonne quand le NAS est chargé et
+      # Homebridge ne démarre jamais (incident du 10 novembre 2026).
+      S6_CMD_WAIT_FOR_SERVICES_MAXTIME: "0"
+
+      # DSM a déjà son propre mDNS ; Homebridge annonce avec ciao.
+      ENABLE_AVAHI: "0"
+
+    volumes:
+      - type: bind
+        source: ${DATA_DIR:?Définir DATA_DIR dans le fichier .env}
+        target: /homebridge
+        bind:
+          create_host_path: false
+
+    mem_limit: 1536m
+    cpu_shares: 1024
+
+    # Pas de read_only ni de cap_drop : s6-overlay s'exécute en root et
+    # npm installe les plugins dans l'image au démarrage.
+    security_opt:
+      - no-new-privileges:true
+
+    # Interface Homebridge, port fixé dans config.json (plateforme « config »).
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--output", "/dev/null", "http://127.0.0.1:${UI_PORT:-8080}"]
+      interval: 60s
+      timeout: 5s
+      retries: 5
+      start_period: 300s
+
+    logging:
+      driver: local
+      options:
+        max-size: 10m
+        max-file: "3"
