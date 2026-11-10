@@ -167,9 +167,10 @@ vers Infomaniak décidée, à faire après la sauvegarde
 [1er novembre](incidents/2026-11-01-suppression-volume1.md) et du
 [4 novembre 2026](incidents/2026-11-04-saturation-perte-ecritures.md).
 
-Homebridge passe du conteneur DSM `oznu/homebridge` à une stack Compose
-`homebridge/homebridge` (démarrages bloqués par le délai de s6) ; KNX, hors
-service depuis le passage à Homebridge 2, sera rétabli par `homebridge-knx`
-0.6.0 ; `eibd` du DS212j relancé, avec adresse fixe et surveillance
+Homebridge est passé le 10 novembre 2026 du conteneur DSM `oznu/homebridge`
+à une stack Compose `homebridge/homebridge` (démarrages bloqués par le délai
+de s6) ; KNX, hors service depuis le passage à Homebridge 2, est rétabli par
+`homebridge-knx` 0.6.0 ; `eibd` du DS212j relancé, avec adresse fixe et
+surveillance
 ([ADR-0015](adr/0015-homebridge-compose.md),
 [incident du 10 novembre 2026](incidents/2026-11-10-coupure-courant-domotique.md)).

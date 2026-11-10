@@ -1,6 +1,6 @@
 # ADR-0015 — Homebridge géré par Docker Compose
 
-- **Statut :** accepté, migration à faire
+- **Statut :** déployé et validé le 10 novembre 2026
 - **Date :** 10 novembre 2026
 
 ## Contexte
@@ -63,6 +63,18 @@ Constats du 10 novembre 2026 :
 - Le healthcheck ne couvre que l'interface ; Docker ne redémarre pas un
   conteneur `unhealthy`.
 - KNX dépend toujours d'`eibd` sur le DS212j (DSM 6.2.4 sans mises à jour).
+
+## Déploiement du 10 novembre 2026
+
+- 18:39 : ancien conteneur arrêté (`restart=no`), sauvegarde
+  `homebridge-20261110-183956.tar.gz` (42 Mo), stack démarrée ; `healthy`.
+- 18:42 : Homebridge 2.5.0, Node 24.22.2, interface 5.30.0 ; démarrage en
+  quelques secondes, identité HomeKit inchangée.
+- 18:58 : `homebridge-knx` 0.6.0 ; pont enfant `Homebridge Knx`
+  (port 43517) avec les 7 accessoires, connexion TCP établie vers `eibd`.
+- 19:04 : pont KNX appairé dans Maison (jamais appairé depuis son passage en
+  pont enfant le 10 juin) ; commandes `knxWrite` reçues depuis l'iPhone.
+  Accessoires recréés : pièces, scènes et automatisations KNX à refaire.
 
 ## Réévaluation
 

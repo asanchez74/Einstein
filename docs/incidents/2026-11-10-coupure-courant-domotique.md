@@ -5,8 +5,8 @@
 - **Cause :** au redémarrage simultané des deux NAS, Homebridge bloqué par le
   délai de s6 sur le DS918+, et `eibd` lancé sans réseau sur le DS212j
 - **Perte :** aucune
-- **Statut :** volet `eibd` (DS212j) clos le 10 novembre 2026 ; volet Homebridge
-  suivi par l'[ADR-0015](../adr/0015-homebridge-compose.md)
+- **Statut :** clos le 10 novembre 2026 (`eibd` relancé et surveillé ; Homebridge
+  migré, voir l'[ADR-0015](../adr/0015-homebridge-compose.md))
 
 ## Résumé
 
@@ -57,8 +57,8 @@ processus d'`/opt`.
 |---|---|---|
 | DS212j | Adresse fixe `192.168.1.4/24`, passerelle `192.168.1.1`, DNS `.56` puis `.57` (réservation DHCP conservée) | fait le 10 novembre |
 | DS212j | Tâche DSM « Eibd restart », root, toutes les 5 min : `pidof eibd >/dev/null \|\| { /usr/bin/logger -t eibd "eibd absent, redémarrage"; /opt/etc/init.d/S98eibd restart; }` | fait le 10 novembre |
-| DS918+ | Stack `compose/homebridge/` ([ADR-0015](../adr/0015-homebridge-compose.md)) | à déployer |
-| DS918+ | Homebridge 2.5.0 et `homebridge-knx` 0.6.0 | après la migration |
+| DS918+ | Stack `compose/homebridge/` ([ADR-0015](../adr/0015-homebridge-compose.md)) | fait le 10 novembre |
+| DS918+ | Homebridge 2.5.0 et `homebridge-knx` 0.6.0, pont KNX appairé | fait le 10 novembre |
 
 Un redémarrage relancé par la tâche laisse une ligne `eibd` dans
 `/var/log/messages` du DS212j.
