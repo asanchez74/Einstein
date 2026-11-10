@@ -5,6 +5,8 @@
 - **Cause :** au redémarrage simultané des deux NAS, Homebridge bloqué par le
   délai de s6 sur le DS918+, et `eibd` lancé sans réseau sur le DS212j
 - **Perte :** aucune
+- **Statut :** volet `eibd` (DS212j) clos le 10 novembre 2026 ; volet Homebridge
+  suivi par l'[ADR-0015](../adr/0015-homebridge-compose.md)
 
 ## Résumé
 
