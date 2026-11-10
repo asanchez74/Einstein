@@ -27,8 +27,10 @@ Constats du 10 novembre 2026 :
   `homebridge-knx` 0.6.0 (27 octobre 2026) corrige la compatibilité.
 - **Versions.** `homebridge-hue` 0.15.10 demande Homebridge ≥ 2.4.0 et
   Node 22 ou 24.
-- **`eibd`.** Le port TCP 6720 du DS212j refuse les connexions : `eibd`
-  ne tourne pas, alors que Homebridge le joignait encore au printemps.
+- **`eibd`.** Le port TCP 6720 du DS212j refusait les connexions : `eibd`
+  n'avait pas survécu au boot sans réseau qui a suivi la coupure de courant.
+  Relancé, adresse fixe et surveillance ajoutées
+  ([incident du 10 novembre 2026](../incidents/2026-11-10-coupure-courant-domotique.md)).
 - Ni limite mémoire réelle (8 Go), ni rotation des logs Docker, avahi du
   conteneur en concurrence avec celui de DSM.
 

@@ -170,5 +170,6 @@ vers Infomaniak décidée, à faire après la sauvegarde
 Homebridge passe du conteneur DSM `oznu/homebridge` à une stack Compose
 `homebridge/homebridge` (démarrages bloqués par le délai de s6) ; KNX, hors
 service depuis le passage à Homebridge 2, sera rétabli par `homebridge-knx`
-0.6.0 et le redémarrage d'`eibd` sur le DS212j
-([ADR-0015](adr/0015-homebridge-compose.md)).
+0.6.0 ; `eibd` du DS212j relancé, avec adresse fixe et surveillance
+([ADR-0015](adr/0015-homebridge-compose.md),
+[incident du 10 novembre 2026](incidents/2026-11-10-coupure-courant-domotique.md)).

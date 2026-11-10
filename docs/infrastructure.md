@@ -23,6 +23,7 @@
 | Routeur Synology | RT2600ac — `192.168.1.2` |
 | LAN | 192.168.1.0/24 |
 | NAS | 192.168.1.3 |
+| DS212j (KNX `eibd`/`linknx`, copie de sauvegarde) | 192.168.1.4, adresse fixe depuis le 10 novembre 2026 |
 | Domaine | nas.chantevigne.com |
 
 Les noms DNS `router` et `router.chantevigne.com` désignent le Synology
