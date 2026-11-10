@@ -38,8 +38,9 @@ Constats du 10 novembre 2026 :
 
 - Stack `compose/homebridge/`, image `homebridge/homebridge`, ligne
   `synology` (Ubuntu 22.04, prévue pour les noyaux DSM anciens), tag daté
-  `synology-2026-11-02` (Node 24.22). Le tag `synology-2026-11-10` passe à
-  Node 26, non déclaré par `homebridge-hue`.
+  `synology-2026-11-02` (Node 24.22) au déploiement, Node 26 n'étant pas
+  déclaré par `homebridge-hue`. Passé ensuite à `synology-2026-11-10`
+  (Node 26.13), voir le déploiement.
 - Données conservées à `/volume1/docker/Homebridge`, montées sur
   `/homebridge` comme avant : configuration, plugins et identité HomeKit
   inchangés, pas de nouvel appairage.
@@ -75,6 +76,12 @@ Constats du 10 novembre 2026 :
 - 19:04 : pont KNX appairé dans Maison (jamais appairé depuis son passage en
   pont enfant le 10 juin) ; commandes `knxWrite` reçues depuis l'iPhone.
   Accessoires recréés : pièces, scènes et automatisations KNX à refaire.
+- 19:08 : Node 26.13.0 installé depuis l'interface (`hb-service update-node`).
+  Les quatre ponts démarrent ; `homebridge-hue` avertit seulement (engines
+  Node 22 et 24) et son flux d'événements fonctionne ; Google Smart Home
+  voit les 7 accessoires KNX. Le compose passe à `synology-2026-11-10`, qui
+  contient le même Node, pour qu'une recréation du conteneur ne revienne pas
+  à Node 24.
 
 ## Réévaluation
 

@@ -7,7 +7,7 @@ le DS212j `192.168.1.4`). Décision et limites :
 | Élément | Valeur |
 |---|---|
 | Conteneur | `homebridge`, réseau `host` |
-| Image | `homebridge/homebridge:synology-2026-11-02` (Ubuntu 22.04, Node 24) |
+| Image | `homebridge/homebridge:synology-2026-11-10` (Ubuntu 22.04, Node 26) |
 | Données | `/volume1/docker/Homebridge` (inchangé depuis l'ancien conteneur) |
 | Interface | `http://192.168.1.3:8080` (port de la plateforme `config`) |
 | Pont principal | `Homebridge 9045`, port 52891 ; ponts enfants KNX, Hue, Google |
@@ -79,8 +79,13 @@ Sauvegarde avant chaque mise à jour : `sudo scripts/backup-stack.sh homebridge`
 
 ## Exploitation
 
-- **Image.** Changer le tag daté dans `compose.yaml`, committer, puis
+- **Image et Node.** Changer le tag daté dans `compose.yaml`, committer, puis
   `sudo scripts/stack-up.sh homebridge`. Rester sur la ligne `synology`.
+  Node et l'interface vivent dans `/opt/homebridge`, dans le conteneur :
+  une mise à jour faite depuis l'interface (`hb-service update-node`) est
+  perdue à la recréation du conteneur. Reporter alors dans `compose.yaml`
+  le tag de l'image qui contient la même version.
+- **Plugins et Homebridge.** Depuis l'interface : ils sont dans le volume.
 - **Santé.** Le healthcheck interroge l'interface ; Docker ne redémarre pas
   un conteneur `unhealthy`, il le signale seulement.
 - **Sauvegardes.** Homebridge fait sa propre sauvegarde à 04:00 dans
