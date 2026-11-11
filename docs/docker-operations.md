@@ -113,8 +113,31 @@ sudo docker volume prune
 sudo docker network prune
 ```
 
-Elles pourraient supprimer des ressources appartenant à Homebridge, LDAP ou à
-d'autres applications du NAS.
+Elles pourraient supprimer des ressources appartenant à des paquets DSM ou à
+d'autres applications du NAS. Un nettoyage se fait par inventaire, puis
+suppression de noms fixes écrits en toutes lettres (voir
+[l'incident du 1er novembre 2026](incidents/2026-11-01-suppression-volume1.md)).
+
+### Nettoyage du 11 novembre 2026
+
+Inventaire (`docker system df -v`, contenu de chaque volume), puis
+suppression par `docker rm`, `docker rmi` et `docker volume rm` nommés :
+
+- conteneurs `Homebridge` (oznu, remplacé par la stack `homebridge`,
+  [ADR-0015](adr/0015-homebridge-compose.md)) et `ldap-agent` (resté
+  orphelin après la désinstallation de C2 Identity LDAP Agent le
+  1er novembre : `project_id` illisible), avec réseau et images ;
+- images inutilisées : `homebridge/homebridge:synology-2026-11-02`,
+  `pihole/pihole` 2026.10.0 et 2026.09.0, `speedtest-ookla`, 14 anciennes
+  constructions `einstein-core` sans nom ;
+- 28 volumes sans conteneur, d'anciennes applications : openHAB, Plex,
+  xTeVe, knxd (2020–2022), OwnTone (2024–2025), un MySQL 8 d'essai
+  (28 avril 2026) et des volumes vides.
+
+Les volumes sont archivés avant suppression dans
+`/volume1/docker/einstein/backups/docker-volumes-orphelins-20261111.tar.gz`
+(194 Mo, 2 764 entrées, archive vérifiée). Restent les images et conteneurs
+des stacks du dépôt, `busybox:1.37.0` pour `smoke-test`, et aucun volume.
 
 ## Diagnostic
 
