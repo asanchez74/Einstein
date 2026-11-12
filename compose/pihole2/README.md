@@ -22,7 +22,7 @@ Second résolveur DNS du LAN, à côté du Pi-hole principal `192.168.1.56`
 | Adresse LAN (macvlan) | `192.168.1.57` |
 | Adresse bridge | `172.23.0.3` |
 | Données | `/volume1/docker/einstein/data/pihole2` |
-| Image | celle du principal (`extends`), actuellement `pihole/pihole:2026.10.1` |
+| Image | celle du principal (`extends`), actuellement `pihole/pihole:2026.11.0` |
 | Synchronisation | `nebula-sync` `v0.11.3`, `FULL_SYNC=true`, `RUN_GRAVITY=true`, `CRON=0 * * * *` |
 
 Points de conception :

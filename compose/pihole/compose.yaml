@@ -2,7 +2,7 @@ name: pihole
 
 services:
   pihole:
-    image: pihole/pihole:2026.10.1
+    image: pihole/pihole:2026.11.0
     container_name: pihole
     hostname: pihole
 
