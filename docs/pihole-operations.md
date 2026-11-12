@@ -269,6 +269,14 @@ sauvegarde de chacune. Contrôlé depuis le Mac sur `.56` et `.57` : noms
 locaux, noms externes et blocage (`doubleclick.net` → `0.0.0.0`) ; les deux
 Pi-hole et nebula-sync `healthy`.
 
+Le 12 novembre 2026 : passage à 2026.11.0 (FTL v6.9, Web v6.6.1, Core v6.6 ;
+11 avis de sécurité corrigés, dont une exécution de code par un compte
+administrateur ; aucun changement incompatible annoncé), secondaire puis
+principal, après sauvegarde de chacun. Sur les deux instances : `healthy`,
+`strict-order` présent, `dns.upstreams` à `[ 192.168.1.1, 9.9.9.9 ]`.
+Contrôlé depuis le Mac sur `.56` et `.57` : noms locaux, noms externes et
+blocage (`doubleclick.net` → `0.0.0.0`).
+
 ## Ressources
 
 Pi-hole utilise une limite mémoire de 512 Mio et `cpu_shares: 2048`.
