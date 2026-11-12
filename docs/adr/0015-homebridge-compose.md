@@ -75,7 +75,8 @@ Constats du 10 novembre 2026 :
   (port 43517) avec les 7 accessoires, connexion TCP établie vers `eibd`.
 - 19:04 : pont KNX appairé dans Maison (jamais appairé depuis son passage en
   pont enfant le 10 juin) ; commandes `knxWrite` reçues depuis l'iPhone.
-  Accessoires recréés : pièces, scènes et automatisations KNX à refaire.
+  Accessoires recréés : pièces, scènes et automatisations KNX à refaire
+  (refaites par le propriétaire le 12 novembre 2026).
 - 19:08 : Node 26.13.0 installé depuis l'interface (`hb-service update-node`).
   Les quatre ponts démarrent ; `homebridge-hue` avertit seulement (engines
   Node 22 et 24) et son flux d'événements fonctionne ; Google Smart Home

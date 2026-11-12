@@ -70,4 +70,5 @@ Un redémarrage relancé par la tâche laisse une ligne `eibd` dans
 - Un conteneur « Up » n'est pas un service qui marche : healthcheck à prévoir
   pour chaque conteneur, y compris ceux créés hors du dépôt.
 - L'envoi de mail du DS212j échoue (`mail.chantevigne.com` non résolu depuis
-  la migration vers Infomaniak) : ses notifications ne partent pas.
+  la migration vers Infomaniak) : ses notifications ne partaient pas.
+  Serveur de mail corrigé par le propriétaire le 12 novembre 2026.
