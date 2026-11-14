@@ -20,17 +20,37 @@
 | Élément | Valeur |
 |----------|---------|
 | FRITZ!Box | 5530 Fiber — `192.168.1.1` |
-| Routeur Synology | RT2600ac — `192.168.1.2` |
+| Wi-Fi Synology | RT2600ac — `192.168.1.2`, mode point d'accès, + 2 MR2200ac (mesh) |
 | LAN | 192.168.1.0/24 |
 | NAS | 192.168.1.3 |
 | DS212j (KNX `eibd`/`linknx`, copie de sauvegarde) | 192.168.1.4, adresse fixe depuis le 10 novembre 2026 |
 | Domaine | nas.chantevigne.com |
 
-Les noms DNS `router` et `router.chantevigne.com` désignent le Synology
-RT2600ac, distinct du NAS. Son adresse a été confirmée par le propriétaire
-le 16 octobre 2026. La capture de son panneau de configuration indique
-SRM 1.2.5-8227 Update 11. Son rôle précis dans la topologie réseau reste à
-documenter.
+### Topologie
+
+```text
+Internet (fibre)
+  └─ FRITZ!Box 5530 192.168.1.1   routeur, passerelle, NAT, redirections
+       └─ switch Netgear (1 Gbit/s)
+            ├─ NAS DS918+ 192.168.1.3   DHCP du LAN, DNS (Pi-hole .56/.57), OpenVPN
+            ├─ RT2600ac 192.168.1.2 (port WAN)   point d'accès Wi-Fi, rez-de-chaussée
+            │    ├─ MR2200ac, étage          (mesh Wi-Fi)
+            │    └─ MR2200ac, sous-sol       (mesh Wi-Fi)
+            └─ autres appareils filaires
+```
+
+Le Synology RT2600ac (SRM 1.2.5-8227 Update 11) fonctionne en **point
+d'accès sans fil** : il ne route pas, ne fait ni DHCP ni DNS, et place les
+clients Wi-Fi dans le LAN `192.168.1.0/24` (passerelle FRITZ!Box). Il est
+relié au switch par son port WAN, en 1 Gbit/s, et pilote deux satellites
+MR2200ac en mesh (étage et sous-sol). Constaté le 14 novembre 2026 : premier
+saut vers Internet `192.168.1.1`, port 53 fermé sur `.2`, interface SRM sur
+8000/8001, exposée en `https://router.chantevigne.com` par le proxy inverse
+du NAS. Les noms `router` et `router.chantevigne.com` le désignent (adresse
+confirmée le 16 octobre 2026).
+
+Le NAS et le RT2600ac partagent le même switch : une panne du switch coupe à
+la fois le Wi-Fi, le DNS et le DHCP du LAN.
 
 ## Services
 
