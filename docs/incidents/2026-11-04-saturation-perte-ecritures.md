@@ -142,10 +142,11 @@ affichée par `uptime` (`[IO: …]`).
 Reste à faire :
 
 - surveillance de la saturation (voir ci-dessous) ;
-- supprimer `Development/Einstein.abime-20261104` (File Station) et l'instantané
-  `web_packages` de sécurité du 4 novembre 18:13 ;
-- supprimer `~/Sauvegarde-Mails-20261104` et `~/Paquets-Synology-20261104` sur le
-  Mac.
+- ~~supprimer `Development/Einstein.abime-20261104` (File Station) et l'instantané
+  `web_packages` de sécurité du 4 novembre 18:13~~ : fait le 14 novembre 2026,
+  après contrôle (aucun fichier propre au dossier, `.env` identiques au clone) ;
+- ~~supprimer `~/Sauvegarde-Mails-20261104` et `~/Paquets-Synology-20261104` sur
+  le Mac~~ : déjà fait, constaté le 14 novembre 2026.
 
 ### Prévention : surveillance de la saturation
 
