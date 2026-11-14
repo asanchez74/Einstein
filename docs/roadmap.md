@@ -161,8 +161,8 @@ Sprint 3.
 Sauvegarde du NAS selon la règle 3-2-1
 ([ADR-0014](adr/0014-strategie-sauvegarde-3-2-1.md)) : Swiss Backup hors site
 et copie locale vers le DS212j en service depuis le 2 novembre 2026, Glacier
-conservé en archive froide, disque USB à acheter. Migration de la messagerie
-vers Infomaniak décidée, à faire après la sauvegarde
+conservé en archive froide, disque USB à acheter. Messagerie migrée
+vers Infomaniak, contacts et agendas vers iCloud, le 6 novembre 2026
 ([ADR-0013](adr/0013-migration-messagerie-infomaniak.md)). Incidents du
 [1er novembre](incidents/2026-11-01-suppression-volume1.md) et du
 [4 novembre 2026](incidents/2026-11-04-saturation-perte-ecritures.md).

@@ -112,7 +112,7 @@ les tâches lourdes ne démarrent plus en même temps :
 | 00:30 | Swiss Backup — NAS (incrémentale) |
 | 01:00 | vidage des corbeilles |
 | 02:00 | Glacier : Documents (lundi), Homes et Docker (mardi), Photo (mercredi), PhotoBAK (jeudi) |
-| 03:00 → 03:30 | Hyper Backup locales toutes les 10 min : MariaDB (03:10), WebStation (03:20), Backups (03:30) ; tâche Notes supprimée le 4 novembre 2026, planning de MailServerPlus désactivé le 7 novembre 2026 (MailPlus arrêté) |
+| 03:00 → 03:30 | Hyper Backup locales toutes les 10 min : MariaDB (03:10), WebStation (03:20), Backups (03:30) ; tâche Notes supprimée le 4 novembre 2026, planning de MailServerPlus désactivé le 7 novembre 2026 (MailPlus arrêté), tâche supprimée le 11 novembre 2026 |
 | 04:00 | Music Glacier (dimanche) |
 | 04:15 | DS212j local — NAS |
 | 04:30 | Backups et web_packages Glacier (dimanche) |
