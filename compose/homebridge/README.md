@@ -7,7 +7,7 @@ le DS212j `192.168.1.4`). Décision et limites :
 | Élément | Valeur |
 |---|---|
 | Conteneur | `homebridge`, réseau `host` |
-| Image | `homebridge/homebridge:synology-2026-11-10` (Ubuntu 22.04, Node 26) |
+| Image | `homebridge/homebridge:synology-2026-11-13` (Ubuntu 22.04, Node 26) |
 | Données | `/volume1/docker/Homebridge` (inchangé depuis l'ancien conteneur) |
 | Interface | `http://192.168.1.3:8080` (port de la plateforme `config`) |
 | Pont principal | `Homebridge 9045`, port 52891 ; ponts enfants KNX, Hue, Google |

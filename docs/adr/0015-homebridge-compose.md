@@ -83,6 +83,9 @@ Constats du 10 novembre 2026 :
   voit les 7 accessoires KNX. Le compose passe à `synology-2026-11-10`, qui
   contient le même Node, pour qu'une recréation du conteneur ne revienne pas
   à Node 24.
+- 12 novembre 2026 : Node 26.13.1 installé depuis l'interface, option Hue
+  obsolète `effects` retirée de `config.json`. Le compose passe le
+  14 novembre à `synology-2026-11-13`, première image contenant Node 26.13.1.
 
 ## Réévaluation
 

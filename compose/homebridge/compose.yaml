@@ -4,8 +4,8 @@ services:
   homebridge:
     # Tag « synology » : Ubuntu 22.04, maintenu pour les noyaux DSM anciens
     # (4.4 sur le DS918+). Version datée pour un déploiement reproductible ;
-    # Node 26.13, celui installé depuis l'interface le 10 novembre 2026 (ADR-0015).
-    image: homebridge/homebridge:synology-2026-11-10
+    # Node 26.13.1, celui installé depuis l'interface le 12 novembre 2026 (ADR-0015).
+    image: homebridge/homebridge:synology-2026-11-13
     container_name: homebridge
 
     restart: unless-stopped
