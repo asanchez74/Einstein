@@ -41,6 +41,34 @@ documenter.
 - Container Manager
 - Reverse Proxy
 - OpenVPN
+- WordPress `lisbonne2027.ch` (paquet DSM, Web Station, voir ci-dessous)
+
+## WordPress lisbonne2027.ch
+
+| Élément | Valeur |
+|---|---|
+| Code | `/volume1/web_packages/wordpress`, propriétaire `WordPress:http` |
+| PHP | profil Web Station PHP 8.2, pool PHP-FPM exécuté en `WordPress` |
+| WP-Cron | tâche DSM « WP-Cron lisbonne2027.ch », root, toutes les 5 minutes |
+| Sauvegarde | UpdraftPlus : base chaque jour à 07:14, fichiers le lundi, envoi FTP vers le DS212j (`SauvegardeDS918/lisbonne2027`) |
+
+La tâche WP-Cron exécute :
+
+```sh
+su -s /bin/sh WordPress -c "/usr/local/bin/php82 /volume1/web_packages/wordpress/wp-cron.php"
+```
+
+Elle doit tourner sous `WordPress`, l'utilisateur du pool PHP-FPM. Créée le
+1er novembre 2026 sous `http`, qui ne peut pas écrire dans
+`wp-content/updraft` (`755`) : les sauvegardes planifiées échouaient
+(« Impossible de créer des fichiers dans le répertoire de sauvegarde »), sans
+journal, tandis que les sauvegardes manuelles, exécutées par PHP-FPM,
+réussissaient. Corrigé le 12 novembre 2026 ; sauvegarde planifiée réussie et
+envoyée au DS212j le 14 novembre.
+
+`DISABLE_WP_CRON` n'est pas défini, contrairement à ce qu'indique le
+commentaire du script : le cron déclenché par les visites reste actif, sous
+le même utilisateur.
 
 La messagerie est chez Infomaniak, les contacts et agendas dans iCloud depuis
 le 6 novembre 2026 ([ADR-0013](adr/0013-migration-messagerie-infomaniak.md)) ;
