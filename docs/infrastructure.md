@@ -51,6 +51,15 @@ documenter.
 | PHP | profil Web Station PHP 8.2, pool PHP-FPM exécuté en `WordPress` |
 | WP-Cron | tâche DSM « WP-Cron lisbonne2027.ch », root, toutes les 5 minutes |
 | Sauvegarde | UpdraftPlus : base chaque jour à 07:14, fichiers le lundi, envoi FTP vers le DS212j (`SauvegardeDS918/lisbonne2027`) |
+| DNS | zone chez **QUIC.cloud** (`jon.quicns.com`, `kevin.quicns.com`, extension LiteSpeed Cache, CDN activé), domaine enregistré chez Infomaniak |
+| Messagerie | Infomaniak (MX `mta-gw.infomaniak.ch`, SPF Infomaniak, DMARC `p=reject`, DKIM `20260219`) |
+
+La zone DNS active est celle de QUIC.cloud (my.quic.cloud), importée le
+6 mars 2026 : la zone visible dans le Manager Infomaniak n'est pas publiée
+et ses modifications restent sans effet. La clé DKIM Infomaniak
+`20260219._domainkey`, absente de l'import, a été ajoutée chez QUIC.cloud le
+14 novembre 2026 (les mails du site échouaient en `dkim=fail`, acceptés
+seulement grâce au SPF).
 
 La tâche WP-Cron exécute :
 
