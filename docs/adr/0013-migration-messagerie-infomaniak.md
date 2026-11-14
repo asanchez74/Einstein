@@ -212,8 +212,11 @@ CNAME `mail` chez Namecheap, mise à jour de l'ADR-0014.
   du paquet. Paquet arrêté, signalé au support Synology. MailPlus Server,
   Calendar et Contacts, dont il dépend, restent installés et arrêtés en
   attendant ;
-- enregistrements DNS (SPF, `s1._domainkey`, CNAME `mail`) traités
-  indépendamment des paquets.
+- DNS chez Namecheap, le 14 novembre : SPF `v=spf1 include:spf.infomaniak.ch -all`,
+  `s1._domainkey` et CNAME `mail` supprimés (aucun expéditeur restant : les
+  deux NAS envoient par `mail.infomaniak.com:587`). Contrôlé sur les serveurs
+  faisant autorité, puis par un envoi vers Microsoft 365 : `spf=pass`,
+  `dkim=pass` (sélecteur Infomaniak `20261105`), `dmarc=pass`.
 
 **Dépendance critique :** l'identifiant Apple du propriétaire est
 `antonio.sanchez@chantevigne.com`. Les codes et la récupération du compte Apple
