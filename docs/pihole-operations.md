@@ -300,7 +300,11 @@ nslookup router.chantevigne.com 192.168.1.56
 
 La réponse attendue est `192.168.1.2`. Depuis le VPN, utiliser l'adresse DNS
 Pi-hole effectivement distribuée au client si elle diffère de l'adresse LAN.
-Ce contrôle reste à effectuer sur le réseau réel.
+
+Contrôlé le 14 novembre 2026 depuis le Mac, en partage de connexion 4G et
+OpenVPN : DNS distribué `172.23.0.2` (Pi-hole principal, bridge VPN),
+`router.chantevigne.com` → `192.168.1.2`, `nas.chantevigne.com` →
+`192.168.1.3`, `doubleclick.net` → `0.0.0.0`.
 
 ## Sauvegarder les données
 
