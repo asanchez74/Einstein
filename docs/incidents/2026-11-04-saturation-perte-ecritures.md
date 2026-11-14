@@ -141,7 +141,8 @@ affichée par `uptime` (`[IO: …]`).
 
 Reste à faire :
 
-- surveillance de la saturation (voir ci-dessous) ;
+- ~~surveillance de la saturation (voir ci-dessous)~~ : en service le
+  14 novembre 2026 ;
 - ~~supprimer `Development/Einstein.abime-20261104` (File Station) et l'instantané
   `web_packages` de sécurité du 4 novembre 18:13~~ : fait le 14 novembre 2026,
   après contrôle (aucun fichier propre au dossier, `.env` identiques au clone) ;
@@ -152,7 +153,12 @@ Reste à faire :
 
 Le blocage a duré environ 18 heures avant l'arrêt forcé, avec des signes
 visibles dès le 3 novembre vers 14:40. Une alerte précoce aurait permis
-d'interrompre les sauvegardes et de redémarrer proprement. À mettre en place :
+d'interrompre les sauvegardes et de redémarrer proprement. Mis en place le
+14 novembre 2026 : `scripts/nas-health-check.sh`, tâche DSM « Einstein -
+Surveillance saturation » (root, toutes les 15 minutes), seuils et procédure
+dans [l'exploitation Docker](../docker-operations.md#surveillance-de-la-saturation).
+Échec provoqué (`SWAP_USED_MAX_MB=1`) : courriel DSM reçu à 10:52 avec l'alerte
+et la ligne d'état. Plan initial :
 
 - tâche DSM de contrôle toutes les 15 minutes, en échec (donc notifiée par
   courriel) si `docker exec` ne répond pas en 10 s, si l'attente disque reste
