@@ -350,7 +350,7 @@ restrictives. Ne pas les ajouter au dépôt. Une copie sur le même NAS ne couvr
 pas la perte de l'hôte ; prévoir une copie externe privée selon la politique
 de sauvegarde retenue.
 
-## Restauration à valider sur le NAS
+## Restauration
 
 1. Vérifier le manifeste, l'empreinte et le contenu de l'archive.
 2. Arrêter la stack et préserver les données actuelles avant remplacement.
@@ -361,9 +361,32 @@ de sauvegarde retenue.
 6. Contrôler les logs, l'interface d'administration et les réponses DNS depuis
    un client LAN puis VPN, notamment les noms locaux et un domaine externe.
 
-Le script de sauvegarde ne fournit pas de restauration automatisée. Cette
-procédure reste à exécuter et à consigner sur le NAS ; aucune restauration
-Pi-hole n'est déclarée validée par cette documentation.
+Le script de sauvegarde ne fournit pas de restauration automatisée. Les
+archives contiennent le dossier `DATA_DIR` lui-même (`pihole/` ou
+`pihole2/`), extrait avec `tar -xzpf` pour conserver propriétaires (`1000`,
+`root` pour `synology-hosts.list`) et permissions.
+
+Validée le 14 novembre 2026 sur le secondaire (le principal servant le DNS
+pendant le test), depuis `pihole2-20261112-153146.tar.gz` :
+
+```bash
+ARCHIVE=/volume1/docker/einstein/backups/pihole2/pihole2-20261112-153146.tar.gz
+PREP=/volume1/docker/einstein/tmp/restauration-pihole2-20261114
+sudo sha256sum "$ARCHIVE"; sudo cat "${ARCHIVE}.txt"   # empreintes identiques
+sudo install -d -m 0700 "$PREP"
+sudo tar -xzpf "$ARCHIVE" -C "$PREP"
+sudo ls -ln "$PREP/pihole2"
+sudo scripts/stack-down.sh pihole2
+sudo mv /volume1/docker/einstein/data/pihole2 /volume1/docker/einstein/data/pihole2.avant-restauration-20261114
+sudo mv "$PREP/pihole2" /volume1/docker/einstein/data/pihole2
+sudo scripts/stack-up.sh pihole2
+```
+
+Résultat : `healthy` en 32 s, versions et `dns.upstreams` inchangés,
+`strict-order` présent, 167 582 domaines dans `gravity` comme le principal,
+réponses correctes depuis le Mac (nom local, nom externe, blocage). Pour le
+principal, la même procédure coupe le DNS du LAN si le secondaire n'est pas
+actif : vérifier `.57` avant.
 
 ## Synchronisation des noms DHCP
 
