@@ -139,6 +139,53 @@ Les volumes sont archivés avant suppression dans
 (194 Mo, 2 764 entrées, archive vérifiée). Restent les images et conteneurs
 des stacks du dépôt, `busybox:1.37.0` pour `smoke-test`, et aucun volume.
 
+## Surveillance de la saturation
+
+Prévention de l'[incident du 4 novembre 2026](incidents/2026-11-04-saturation-perte-ecritures.md) :
+`scripts/nas-health-check.sh` affiche une ligne d'état et termine en erreur
+(code 1, alertes sur la sortie d'erreur) si l'un de ces seuils est atteint :
+
+| Contrôle | Seuil par défaut | Variable |
+|---|---|---|
+| `docker exec pihole true` | pas de réponse en 10 s | `DOCKER_PROBE`, `DOCKER_TIMEOUT` |
+| attente disque (échantillon de 10 s) | ≥ 40 %, deux exécutions de suite | `IOWAIT_MAX`, `IOWAIT_RUNS`, `SAMPLE_SECONDS` |
+| swap occupé | ≥ 2 048 Mo | `SWAP_USED_MAX_MB` |
+| mémoire disponible | < 500 Mo | `MEM_AVAILABLE_MIN_MB` |
+| RAID (`/proc/mdstat`) | grappe dégradée (`_` dans `[UU…]`) | — |
+
+Un conteneur sonde arrêté (sauvegarde, maintenance) n'est pas une alerte ;
+un démon Docker qui ne répond plus en est une. Le compteur d'attente disque
+est conservé dans `/volume1/docker/einstein/tmp/nas-health-check.state`.
+Valeurs de référence le 14 novembre 2026 : attente disque 0 %, swap 618 Mo,
+mémoire disponible 5,3 Go ; pendant l'incident : charge ~11 dont ~10
+d'attente disque, swap 2,9 Go, `docker exec` bloqué.
+
+Tâche DSM (Planificateur de tâches, script défini par l'utilisateur) :
+
+- nom « Einstein - Surveillance saturation », utilisateur root ;
+- toutes les 15 minutes, toute la journée ;
+- script :
+  `/bin/sh /var/services/homes/tonio/Development/Einstein/scripts/nas-health-check.sh`
+- paramètres : envoyer les détails par courriel **uniquement si le script
+  se termine anormalement**.
+
+### En cas d'alerte
+
+1. Lire le courriel : la ligne d'état et les alertes indiquent la cause.
+2. Ne **jamais** couper le NAS par l'interrupteur : des écritures non
+   enregistrées seraient perdues, comme le 4 novembre.
+3. Suspendre les tâches lourdes en cours : Hyper Backup (Swiss Backup,
+   DS212j, locales), Glacier, nettoyage des données.
+4. Attendre la baisse de l'attente disque et du swap (relancer la tâche
+   depuis le Planificateur pour suivre l'état).
+5. Si Docker reste bloqué : redémarrer Container Manager (courte coupure DNS),
+   puis, en dernier recours, redémarrer le NAS **depuis DSM**.
+6. Après tout arrêt non propre : chercher les fichiers vides écrits dans les
+   heures précédentes, par exemple
+   `sudo find /volume1/<dossier> -xdev -type f -size 0 -newermt "AAAA-MM-JJ HH:MM"`,
+   et comparer avec les instantanés avant toute restauration.
+7. Consigner l'événement dans `docs/incidents/`.
+
 ## Diagnostic
 
 ```bash
