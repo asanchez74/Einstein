@@ -200,6 +200,21 @@ SPF final
 `v=spf1 include:spf.infomaniak.ch -all`, suppression de `s1._domainkey` et du
 CNAME `mail` chez Namecheap, mise à jour de l'ADR-0014.
 
+Étape B avancée au 14 novembre 2026 :
+
+- tâche Hyper Backup MailServerPlus supprimée le 11 novembre, données
+  conservées (`Backups/MailServerPlus.hbk`, 41 Go, dernière version du
+  7 novembre 03:02, copiée par Swiss Backup avec le dossier `Backups`) ;
+- Note Station désinstallé ;
+- désinstallation de Synology MailPlus (`MailClient`) impossible : le
+  processus DSM plante (`segfault` dans `libdsm_proxy.so`, `synoscgi` comme
+  `synopkg`) à l'étape `Release web-config`, avant et après une réparation
+  du paquet. Paquet arrêté, signalé au support Synology. MailPlus Server,
+  Calendar et Contacts, dont il dépend, restent installés et arrêtés en
+  attendant ;
+- enregistrements DNS (SPF, `s1._domainkey`, CNAME `mail`) traités
+  indépendamment des paquets.
+
 **Dépendance critique :** l'identifiant Apple du propriétaire est
 `antonio.sanchez@chantevigne.com`. Les codes et la récupération du compte Apple
 passent par cet alias : ne jamais le supprimer ni laisser expirer le domaine.
