@@ -4,8 +4,8 @@
 - **Durée :** 3 novembre ~14:40 (premiers symptômes) → 4 novembre 18:15 (dernières réparations)
 - **Cause :** NAS saturé (disque et mémoire) pendant les premiers envois de sauvegarde,
   puis arrêt par l'interrupteur alors que les écritures n'étaient pas sur disque
-- **Perte définitive :** aucune donnée utile connue ; deux mails de Mimi (06:16 et
-  07:08) à faire renvoyer s'ils ne sont sur aucun appareil
+- **Perte définitive :** aucune ; les deux mails de Mimi (06:16 et 07:08) ont
+  été récupérés (confirmé le 14 novembre 2026)
 
 ## Résumé
 
@@ -42,7 +42,7 @@ Le 4 novembre vers 08:44, le NAS a été arrêté par l'interrupteur. Les fichie
 |---|---|---|
 | Synology Drive Server | 2 955 fichiers sur 2 960 vides ; paquet arrêté (`stopped_by_dep_limit`, `Failed to get app portal config`) | installation manuelle du même `.spk` 4.0.4-27894 |
 | Messagerie tonio | 198 mails vides (194 corbeille, 2 envoyés, 1 réception, 1 indésirable) ; iPhone et iPad en « erreur de compte » | `doveadm expunge` par UID ; 3 messages à remettre depuis le Mac (copie dans `~/Sauvegarde-Mails-20261104`) |
-| Messagerie mimi | 4 mails vides (2 réception reçus à 06:16 et 07:08, 2 corbeille) | `doveadm expunge` par UID ; messages à faire renvoyer s'ils ne sont sur aucun appareil |
+| Messagerie mimi | 4 mails vides (2 réception reçus à 06:16 et 07:08, 2 corbeille) | `doveadm expunge` par UID ; messages récupérés (confirmé le 14 novembre 2026) |
 | WordPress (`web_packages`) | 16 113 fichiers vides | restauration de l'instantané du 4 novembre 00:00:05 |
 | Dépôt Einstein du NAS | objets git et 4 fichiers du `git pull` vides ; script DHCP vide | nouveau clone, `.env` recopiés, ancien dossier renommé `Einstein.abime-20261104` |
 | Sauvegarde Homebridge 04:00 | vide | refaite la nuit suivante |
