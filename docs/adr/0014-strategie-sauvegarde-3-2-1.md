@@ -34,7 +34,7 @@ Appliquer la règle **3-2-1** : trois copies, deux supports, une copie hors site
 
 | Données | Hors site | Copie locale séparée |
 |---|---|---|
-| homes, Documents, docker (données et secrets Einstein), web, web_packages, Scan, Backups (sauvegardes Hyper Backup locales, dont `DSM_Parametres`), toutes les applications, configuration système | **Infomaniak Swiss Backup** via Hyper Backup (Swift), ~0,4 To | disque USB, Hyper Backup |
+| homes, Documents, docker (données et secrets Einstein), web, web_packages, Scan, Backups (sauvegardes Hyper Backup locales, dont `DSM_Parametres`), toutes les applications, configuration système | **Infomaniak Swiss Backup** via Hyper Backup (Swift), ~0,4 To | DS212j (Hyper Backup), recopié sur le disque USB débranché |
 | PhotoBAK (toutes les photos), Video/Videos Personnelles | **Glacier Backup** (existant) ; Photos iCloud n'est qu'une synchronisation | facultatif |
 | Photo, Music | **Glacier Backup** (tâche Music à créer) | — |
 | TimeMachine, surveillance, Downloads | exclus | — |
@@ -70,6 +70,39 @@ Règles :
   suppression par un administrateur).
 - **Test de restauration** trimestriel d'un dossier depuis Swiss Backup, avec
   Hyper Backup Explorer sur le Mac ; notifications d'échec activées.
+
+### Disque USB débranché
+
+Disque WD My Passport Pro (deux disques de 1 To) reformaté le
+14 novembre 2026 en miroir Apple RAID 1 « Einstein-USB » (JHFS+, 931 Go),
+branché sur le **Mac** et non sur le NAS : un administrateur du NAS compromis
+ne peut pas l'atteindre, et le disque n'est branché que le temps de la copie.
+
+`scripts/mac-usb-backup.sh` recopie depuis le partage `SauvegardeDS918` du
+DS212j le dépôt Hyper Backup `DS918.hbk` (déjà chiffré et versionné, même
+périmètre que Swiss Backup) et les sauvegardes UpdraftPlus `lisbonne2027`,
+en miroir (`rsync --delete`), dans `DS212j/` sur le disque. Le script refuse
+d'écrire si `/Volumes/Einstein-USB` n'est pas un volume monté, et de copier
+entre 4 h et 5 h ou si le dépôt a été modifié depuis moins de 30 minutes
+(sauvegarde nocturne en cours). Il termine en erreur si le dépôt a changé
+pendant la copie (copie incohérente, à relancer) ou si `rsync` a échoué, et
+n'écrit `DS212j/DERNIERE-COPIE.txt` qu'après une copie complète. La première
+copie (364 Go) a pris plus de six heures et a croisé la sauvegarde de 4 h 15 :
+lancer une copie complète le matin ; les copies mensuelles suivantes ne
+transfèrent que les changements.
+
+Routine **mensuelle** :
+
+```sh
+scripts/mac-usb-backup.sh --dry-run
+scripts/mac-usb-backup.sh
+```
+
+puis contrôle avec Hyper Backup Explorer (ouvrir
+`/Volumes/Einstein-USB/DS212j/DS918.hbk`, mot de passe de chiffrement dans
+SafeInCloud, restaurer un fichier), éjection, rangement du disque hors du
+bureau. Le miroir est en reconstruction manuelle : si `diskutil appleRAID list`
+montre un membre dégradé, le remplacer avant la copie suivante.
 
 ### Domotique KNX du DS212j
 
@@ -197,7 +230,6 @@ restent protégés par le NAS et Glacier.
 
 ## Suite
 
-- Acheter et mettre en place le disque USB (tâche Hyper Backup locale).
 - Exporter le fichier de clé `.pem` de la tâche Swiss Backup vers SafeInCloud.
 - SafeInCloud (synchronisation passée à iCloud le 7 novembre 2026) : mettre à
   jour la fiche papier, supprimer la base de Dropbox vers le 14 novembre,
@@ -210,6 +242,11 @@ restent protégés par le NAS et Glacier.
 
 Fait : première sauvegarde « DS212j local — NAS » réussie (contrôlée le
 4 novembre 2026).
+
+Fait : disque USB « Einstein-USB », première copie complète le
+15 novembre 2026 (363 Go, aucune différence avec la source), restauration
+d'un fichier contrôlée avec Hyper Backup Explorer le 16 novembre 2026.
+
 - Vérifier l'apparition des instantanés horaires de Documents et homes.
 - Rédiger la procédure de reconstruction du NAS (ordre DSM, Hyper Backup,
   paquets, Docker, stacks Einstein), conservée aussi hors du NAS.
