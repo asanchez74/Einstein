@@ -209,14 +209,20 @@ CNAME `mail` chez Namecheap, mise à jour de l'ADR-0014.
 - désinstallation de Synology MailPlus (`MailClient`) impossible : le
   processus DSM plante (`segfault` dans `libdsm_proxy.so`, `synoscgi` comme
   `synopkg`) à l'étape `Release web-config`, avant et après une réparation
-  du paquet. Paquet arrêté, signalé au support Synology. MailPlus Server,
-  Calendar et Contacts, dont il dépend, restent installés et arrêtés en
-  attendant ;
+  du paquet. Paquet arrêté, signalé au support Synology ;
 - DNS chez Namecheap, le 14 novembre : SPF `v=spf1 include:spf.infomaniak.ch -all`,
   `s1._domainkey` et CNAME `mail` supprimés (aucun expéditeur restant : les
   deux NAS envoient par `mail.infomaniak.com:587`). Contrôlé sur les serveurs
   faisant autorité, puis par un envoi vers Microsoft 365 : `spf=pass`,
   `dkim=pass` (sélecteur Infomaniak `20261105`), `dmarc=pass`.
+
+Étape B terminée le 16 novembre 2026. Le support Synology a reconnu un bug
+connu de Web Station (correction prévue dans une version ultérieure) :
+**Web Station arrêté**, Synology MailPlus puis MailPlus Server, Calendar et
+Contacts se désinstallent normalement ; Web Station et WordPress
+(lisbonne2027.ch) relancés ensuite, site contrôlé. `/volume1/@MailPlus-Server`
+(22 Go) a disparu avec le paquet ; l'historique reste dans
+`Backups/MailServerPlus.hbk` et chez Infomaniak.
 
 **Dépendance critique :** l'identifiant Apple du propriétaire est
 `antonio.sanchez@chantevigne.com`. Les codes et la récupération du compte Apple

@@ -101,7 +101,17 @@ le même utilisateur.
 
 La messagerie est chez Infomaniak, les contacts et agendas dans iCloud depuis
 le 6 novembre 2026 ([ADR-0013](adr/0013-migration-messagerie-infomaniak.md)) ;
-MailPlus Server est arrêté en attendant sa désinstallation.
+MailPlus Server, MailPlus, Calendar et Contacts sont désinstallés depuis le
+16 novembre 2026.
+
+Paquets inutilisés désinstallés le 16 novembre 2026 : Synology AI Console,
+Antivirus Essential, Central Management System, Cloud Sync, Hybrid Share,
+WebDAV Server, Node.js v14, v16 et v18, PHP 8.0, 8.1 et 8.3. Conservés :
+PHP 7.4 (requis par Hyper Backup et Glacier Backup), PHP 8.2 (WordPress,
+phpMyAdmin), PHP 8.4 (cible de WordPress à la fin du support de PHP 8.2),
+Node.js v20 (Synology Drive) et v22 (Service d'application), Git (déploiement
+du dépôt), Serveur multimédia (DLNA). Python2 refuse la désinstallation (dépendance
+système). phpMyAdmin reste arrêté et n'est lancé qu'au besoin.
 
 ## Numérisation
 
