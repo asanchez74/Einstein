@@ -63,6 +63,39 @@ la fois le Wi-Fi, le DNS et le DHCP du LAN.
 - OpenVPN
 - WordPress `lisbonne2027.ch` (paquet DSM, Web Station, voir ci-dessous)
 
+## Exposition HTTPS et certificats
+
+La FRITZ!Box redirige 80 et 443 vers le NAS. Contrôlé le 19 novembre 2026
+par l'IP publique :
+
+| Nom | Service | Accès |
+|---|---|---|
+| `lisbonne2027.ch`, `www.lisbonne2027.ch` | WordPress (Web Station) | public |
+| `nas.chantevigne.com` | DSM (proxy inverse vers 5000) | profil « Réseau Local ou VPN » |
+| `router.chantevigne.com` | SRM du RT2600ac | profil « Réseau Local ou VPN » |
+| `eib.chantevigne.com` | `eib` du DS212j (`192.168.1.4:81`) | profil « Réseau Local ou VPN » |
+| `einstein.chantevigne.com` | Einstein Core (18081) | profil « Einstein — VPN uniquement » |
+| `chantevigne.com`, `www.chantevigne.com`, tout autre nom | serveur par défaut de Web Station | 403 |
+
+Les profils de contrôle d'accès (Portail de connexion > Avancé) autorisent
+`192.168.1.0/24`, `10.8.0.0/24` et, pour le premier, l'IP publique (accès
+depuis le LAN par la FRITZ!Box), puis refusent tout le reste. Le domaine
+personnalisé DSM `chantevigne.com`, qui publiait la page de connexion DSM
+sans contrôle d'accès, est retiré depuis le 19 novembre 2026.
+
+Certificats Let's Encrypt renouvelés automatiquement (validation HTTP par
+le port 80) : les noms doivent rester publics chez Namecheap, sinon le
+renouvellement échoue. Refaits le 19 novembre 2026 :
+
+- `chantevigne.com` avec `www`, `nas`, `router`, `eib` (sans `mail`, dont le
+  CNAME a été supprimé le 14 novembre) : services système, VPN Server,
+  Synology Drive, proxys ;
+- `lisbonne2027.ch` avec `www.lisbonne2027.ch` (le portail `www` présentait
+  jusque-là le certificat auto-signé `synology`) ;
+- `einstein.chantevigne.com`, certificat séparé.
+
+Le certificat `lisbonne2027.chantevigne.com`, inutilisé, est supprimé.
+
 ## WordPress lisbonne2027.ch
 
 | Élément | Valeur |
