@@ -230,10 +230,9 @@ restent protégés par le NAS et Glacier.
 
 ## Suite
 
-- Exporter le fichier de clé `.pem` de la tâche Swiss Backup vers SafeInCloud.
 - SafeInCloud (synchronisation passée à iCloud le 7 novembre 2026) : mettre à
-  jour la fiche papier, supprimer la base de Dropbox vers le 14 novembre,
-  placer une copie exportée sur le disque USB.
+  jour la fiche papier, supprimer la base de Dropbox vers le 14 novembre ;
+  renouveler l'export chiffré sur le disque USB à chaque copie mensuelle.
 - Tester une restauration depuis Swiss Backup avec Hyper Backup Explorer.
 - Contrôler la réussite des tâches Glacier Backup (réinstallées le 1er novembre
   2026, tâche Music créée le 2 novembre, calendrier étalé le 4 novembre).
@@ -246,6 +245,12 @@ Fait : première sauvegarde « DS212j local — NAS » réussie (contrôlée le
 Fait : disque USB « Einstein-USB », première copie complète le
 15 novembre 2026 (363 Go, aucune différence avec la source), restauration
 d'un fichier contrôlée avec Hyper Backup Explorer le 16 novembre 2026.
+
+Fait le 19 novembre 2026 : copie incrémentale vers « Einstein-USB » (2 min,
+miroir RAID sain) ; export chiffré du coffre SafeInCloud
+(`SafeInCloud_2026-11-19.db`, contient le fichier de clé `.pem` de Swiss
+Backup) placé à la racine du disque. Les exports XML ou CSV, en clair, ne
+doivent jamais y être copiés.
 
 - Vérifier l'apparition des instantanés horaires de Documents et homes.
 - Rédiger la procédure de reconstruction du NAS (ordre DSM, Hyper Backup,
