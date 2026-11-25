@@ -128,6 +128,19 @@ journal, tandis que les sauvegardes manuelles, exécutées par PHP-FPM,
 réussissaient. Corrigé le 12 novembre 2026 ; sauvegarde planifiée réussie et
 envoyée au DS212j le 14 novembre.
 
+L'extension « TWINT Payment for WooCommerce » lance `php` par `shell_exec()`.
+Le `/usr/bin/php` livré par DSM n'a pas `mysqli` et ne peut pas charger
+WordPress : il est remplacé depuis le 16 mai 2026 par un wrapper
+(`exec /usr/local/bin/php82 "$@"`, d'origine sauvegardée dans
+`/usr/bin/php.orig.20260516`). Une mise à jour DSM peut l'écraser : la tâche
+DSM « Wrapper PHP - Verification au demarrage » (déclenchée au démarrage)
+exécute `/volume1/homes/tonio/admin-nas/check-php-wrapper.sh`, qui le
+réinstalle s'il ne vise plus `php82` ou n'expose plus `mysqli` ; procédure
+manuelle dans `README-php-twint-wrapper.md`, même dossier (root seulement).
+Le wrapper visait PHP 8.1 jusqu'au 25 novembre 2026 : la désinstallation de
+PHP 8.1 le 16 novembre l'avait cassé sans symptôme visible, jusqu'à l'échec
+de la tâche au redémarrage suivant.
+
 `DISABLE_WP_CRON` n'est pas défini, contrairement à ce qu'indique le
 commentaire du script : le cron déclenché par les visites reste actif, sous
 le même utilisateur.
@@ -141,7 +154,7 @@ Paquets inutilisés désinstallés le 16 novembre 2026 : Synology AI Console,
 Antivirus Essential, Central Management System, Cloud Sync, Hybrid Share,
 WebDAV Server, Node.js v14, v16 et v18, PHP 8.0, 8.1 et 8.3. Conservés :
 PHP 7.4 (requis par Hyper Backup et Glacier Backup), PHP 8.2 (WordPress,
-phpMyAdmin), PHP 8.4 (cible de WordPress à la fin du support de PHP 8.2),
+phpMyAdmin, wrapper `/usr/bin/php` de TWINT), PHP 8.4 (cible de WordPress à la fin du support de PHP 8.2),
 Node.js v20 (Synology Drive) et v22 (Service d'application), Git (déploiement
 du dépôt), Serveur multimédia (DLNA). Python2 refuse la désinstallation (dépendance
 système). phpMyAdmin reste arrêté et n'est lancé qu'au besoin.
