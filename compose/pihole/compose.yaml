@@ -18,7 +18,8 @@ services:
       # DNS amont dans l'ordre de préférence : FRITZ!Box, puis secours (voir strict-order).
       FTLCONF_dns_upstreams: "${UPSTREAM_DNS}"
 
-      # DNS local Einstein.
+      # DNS local Einstein. Les noms en chantevigne.com visent le proxy inverse
+      # du NAS (certificat Let's Encrypt) ; les noms courts, l'appareil lui-même.
       FTLCONF_dns_hosts: |-
         192.168.1.3 einstein.chantevigne.com
         192.168.1.3 nas
@@ -26,7 +27,7 @@ services:
         192.168.1.2 router
         192.168.1.3 nas.chantevigne.com
         192.168.1.3 eib.chantevigne.com
-        192.168.1.2 router.chantevigne.com
+        192.168.1.3 router.chantevigne.com
         192.168.1.56 pi-hole.chantevigne.com
 
       # Configuration dnsmasq additionnelle.

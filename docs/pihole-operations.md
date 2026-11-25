@@ -288,9 +288,16 @@ Voir l'[ADR-0004](adr/0004-gestion-ressources-cpu-dsm.md).
 
 ## Noms DNS locaux
 
-`router` et `router.chantevigne.com` pointent vers `192.168.1.2`, adresse du
-routeur Synology RT2600ac confirmée par le propriétaire. Le NAS conserve
-l'adresse `192.168.1.3` et la FRITZ!Box `192.168.1.1`.
+`router` pointe vers `192.168.1.2`, adresse du routeur Synology RT2600ac
+confirmée par le propriétaire. Le NAS conserve l'adresse `192.168.1.3` et la
+FRITZ!Box `192.168.1.1`.
+
+Les noms en `chantevigne.com` (`nas`, `eib`, `router`, `einstein`) pointent
+vers le NAS : son proxy inverse présente le certificat Let's Encrypt et
+applique les profils de contrôle d'accès. Jusqu'au 25 novembre 2026,
+`router.chantevigne.com` visait directement `192.168.1.2` : depuis le LAN et
+le VPN, le navigateur recevait alors le certificat du routeur et signalait
+une erreur. Le nom court `router` reste l'accès direct au RT2600ac.
 
 Après déploiement, vérifier depuis un client LAN puis VPN :
 
@@ -298,13 +305,14 @@ Après déploiement, vérifier depuis un client LAN puis VPN :
 nslookup router.chantevigne.com 192.168.1.56
 ```
 
-La réponse attendue est `192.168.1.2`. Depuis le VPN, utiliser l'adresse DNS
+La réponse attendue est `192.168.1.3`. Depuis le VPN, utiliser l'adresse DNS
 Pi-hole effectivement distribuée au client si elle diffère de l'adresse LAN.
 
 Contrôlé le 14 novembre 2026 depuis le Mac, en partage de connexion 4G et
 OpenVPN : DNS distribué `172.23.0.2` (Pi-hole principal, bridge VPN),
-`router.chantevigne.com` → `192.168.1.2`, `nas.chantevigne.com` →
-`192.168.1.3`, `doubleclick.net` → `0.0.0.0`.
+`router.chantevigne.com` → `192.168.1.2` (avant la correction du
+25 novembre), `nas.chantevigne.com` → `192.168.1.3`, `doubleclick.net` →
+`0.0.0.0`.
 
 ## Sauvegarder les données
 
