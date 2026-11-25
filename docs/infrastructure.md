@@ -157,7 +157,10 @@ PHP 7.4 (requis par Hyper Backup et Glacier Backup), PHP 8.2 (WordPress,
 phpMyAdmin, wrapper `/usr/bin/php` de TWINT), PHP 8.4 (cible de WordPress à la fin du support de PHP 8.2),
 Node.js v20 (Synology Drive) et v22 (Service d'application), Git (déploiement
 du dépôt), Serveur multimédia (DLNA). Python2 refuse la désinstallation (dépendance
-système). phpMyAdmin reste arrêté et n'est lancé qu'au besoin.
+système). phpMyAdmin reste arrêté et n'est lancé qu'au besoin. Désinstallés
+le 25 novembre 2026 : PHP 8.1 (le wrapper TWINT vise désormais PHP 8.2),
+Active Insight (environ 220 Mo de mémoire rendus) et Python 3.11
+(SynoCommunity, aucun paquet ni processus ne l'utilisait).
 
 ## Numérisation
 
